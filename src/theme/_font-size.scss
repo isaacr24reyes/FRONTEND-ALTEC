@@ -1,0 +1,12 @@
+// example font300-16
+
+.font300 { // Light
+  font-weight: 300;
+  $font-sizes: 12, 16;
+  @each $font-size in $font-sizes {
+    &-#{$font-size} {
+      @extend .font300;
+      font-size: $font-size + px;
+    }
+  }
+}

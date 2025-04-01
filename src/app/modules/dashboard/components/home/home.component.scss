@@ -1,0 +1,41 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #18181C;
+}
+.login-form {
+  background: #18181C;
+  h1{
+    color: white;
+    font-family: 'Acephimere', sans-serif;
+    font-weight: 1000;
+    font-size: 50px;
+    padding-top: 50px;
+  }
+  h2{
+    color: white;
+    font-family: 'Acephimere', sans-serif;
+    font-weight: 1000;
+    font-size: 15px;
+  }
+  .hover-border:hover {
+    border: 20px solid #007bff;
+    border-radius: 50px;
+    transition: border 0.6s ease;
+  }
+  .rounded-image img {
+    transition: all 0.3s ease;
+    border-radius: 25px;
+  }
+  .rounded-image:hover img {
+    box-shadow: 0 0 0 10px #F60D0B;
+    border-radius: 15px;
+  }
+  .styled-line {
+    height: 7px;
+    background-color: #8B50FB;
+    margin: 20px auto;
+    width: 80%;
+  }
+
+}

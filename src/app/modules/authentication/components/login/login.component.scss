@@ -1,0 +1,45 @@
+.login-form {
+  background: #18181C;
+  margin-top: 70px;
+  &-fields {
+    @extend .login-form;
+    width: 100%;
+    margin-top: 20px;
+  }
+  h1{
+    color: white;
+  }
+}
+.login-form-fields {
+  width: 100%;
+}
+.small-text {
+  font-size: 0.75rem;
+}
+button[mat-raised-button] {
+  background-color: #08274F;
+  color: white;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 15px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+
+  &:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+  }
+
+  &:active {
+    background-color: #004494;
+    transform: scale(0.95);
+  }
+
+  &:disabled {
+    background-color: #6c757d !important;
+    color: #d6d6d6 !important;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+

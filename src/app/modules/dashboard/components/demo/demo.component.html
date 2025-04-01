@@ -1,0 +1,36 @@
+<p>demo works!</p>
+
+<div>
+  <button mat-raised-button class="btn btn-primary" (click)="this.invokeSpinner()">Invokar spinner</button>
+</div>
+<div>
+  <button mat-raised-button class="btn btn-primary" (click)="this.openDemoDialog()">Abrir dialogo</button>
+</div>
+<div>
+  <button mat-raised-button class="btn btn-primary" (click)="this.invokeToaster()">Invokar Toaster</button>
+</div>
+<div>
+  <button mat-raised-button class="btn btn-primary" (click)="this.invokeAlert()">Invokar Alerta</button>
+</div>
+<div>
+  <button mat-raised-button class="btn btn-primary" (click)="this.invokeConfirm()">Invokar Confirmacion</button>
+</div>
+
+<div>
+  <button mat-raised-button class="btn btn-primary" (click)="this.logout()">Logout</button>
+</div>
+ejemplo traduccion html
+<div>
+ {{'actionButtons.cancel' | translate}}
+</div>
+<div>
+  {{'actionButtons.save' | translate}}
+</div>
+<button class="btn btn-primary" (click)="changeLanguageEN()">
+  Cambiar idioma EN
+</button>
+ejemplo traduccion TS
+<pre>
+  {{this.messages | json}}
+</pre>
+

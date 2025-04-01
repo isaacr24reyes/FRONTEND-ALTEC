@@ -1,0 +1,47 @@
+<nav class="navbar navbar-expand-lg navbar-light custom-navbar border-5">
+  <div class="container-fluid">
+    <!-- Reemplaza el texto ALTEC por la imagen -->
+    <a class="navbar-brand" href="#">
+      <img src="assets/images/LOGIN.png"  alt="ALTEC Logo" style="height: 40px;">
+    </a>
+    <button class="navbar-toggler bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active text-white" aria-current="page" href="#">Inicio</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Inventario
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="#">Consultar Bodega</a></li>
+            <li><a class="dropdown-item" href="#">Cargar Productos</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Ventas
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="#">Realizar Venta</a></li>
+            <li><a class="dropdown-item" href="#">Ver Ventas</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active text-white" aria-current="page" href="#">Cotizador</a>
+        </li>
+      </ul>
+      <form class="d-flex">
+        <li class="nav-item">
+          <a class="nav-link text-white" (click)="this.logout()" href="#">
+            <i class="bx bx-power-off"></i> Salir
+          </a>
+        </li>
+
+      </form>
+    </div>
+  </div>
+</nav>

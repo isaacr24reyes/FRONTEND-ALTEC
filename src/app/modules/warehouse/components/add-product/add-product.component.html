@@ -1,0 +1,96 @@
+<form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="login-form">
+  <div class="text-center">
+    <h1>Ingresar Productos</h1>
+  </div>
+
+  <!-- Contenedor centrado con máximo ancho -->
+  <div class="container" style="max-width: 800px;">
+    <div class="row">
+      <!-- ComboBox para Categoría, 25% del ancho -->
+      <div class="col-12">
+        <h2 class="text-left">Categoría:</h2>
+      </div>
+      <div class="col-12">
+        <select id="productCategory" formControlName="productCategory" class="form-control gray-input-select">
+          <option value="" disabled selected>Selecciona una categoría</option>
+          <option value="estudiantes">Estudiantes</option>
+          <option value="motores">Motores</option>
+          <option value="modulos">Módulos</option>
+          <option value="electronica">Electrónica</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <!-- Input de Código, 25% del ancho -->
+      <div class="col-12">
+        <h2 class="text-left">Código:</h2>
+      </div>
+      <div class="col-12">
+        <input type="text" id="productCode" formControlName="productCode" class="form-control gray-input" placeholder="Código..">
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <!-- Columnas para Stock, PVP, Precio de Venta y Precio al por Mayor -->
+      <div class="col-6">
+        <h2 class="text-left">Stock:</h2>
+        <input type="text" id="productStock" formControlName="productStock" class="form-control gray-input" placeholder="Stock.." appOnlyNumbers>
+      </div>
+      <div class="col-6">
+        <h2 class="text-left">PVP:</h2>
+        <input type="text" id="productPvp" formControlName="productPvp" class="form-control gray-input" placeholder="PVP.." appOnlyNumbers>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <!-- Columnas para Precio Mayorista y Precio de Importación -->
+      <div class="col-6">
+        <h2 class="text-left">Precio Mayorista:</h2>
+        <input type="text" id="productMp" formControlName="productMp" class="form-control gray-input" placeholder="Precio Mayorista.." appOnlyNumbers>
+      </div>
+      <div class="col-6">
+        <h2 class="text-left">Precio de Importación:</h2>
+        <input type="text" id="productPi" formControlName="productPi" class="form-control gray-input" placeholder="Precio Importación.." appOnlyNumbers>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <!-- Input de Descripción -->
+      <div class="col-12">
+        <h2 class="text-left">Descripción:</h2>
+      </div>
+      <div class="col-12">
+        <input type="text" id="productDescription" formControlName="productDescription" class="form-control gray-input" placeholder="Ingresa la descripción del producto">
+      </div>
+    </div>
+
+    <!-- Botón para subir una foto -->
+    <div class="row mt-3">
+      <div class="col-12">
+        <h2 class="text-left">Subir Foto:</h2>
+      </div>
+      <div class="col-6">
+        <input type="file" id="productImage" formControlName="productImage" class="form-control" accept="image/*" (change)="onFileSelected($event)">
+      </div>
+    </div>
+
+    <!-- Previsualización de la imagen -->
+    <div *ngIf="imagePreview" class="row mt-3">
+      <div class="col-12">
+        <h2 class="text-left">Previsualización:</h2>
+        <img [src]="imagePreview" alt="Vista previa" class="img-fluid" style="max-width: 300px; max-height: 300px;">
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-3">
+    <button type="submit" class="btn btn-primary">Subir</button>
+  </div>
+
+  <div class="text-center mt-5">
+    <span class="text-white small-text">
+        Developed by <strong style="color: #8B50FB;">SwiFt©</strong> (2025).
+    </span>
+  </div>
+</form>

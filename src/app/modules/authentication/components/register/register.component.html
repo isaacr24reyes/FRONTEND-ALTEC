@@ -1,0 +1,43 @@
+<mat-card>
+  <mat-card-content>
+    <form [formGroup]="formGroup">
+      <div class="text-center">
+        <h4>{{'forms.register.title' | translate}}</h4>
+      </div>
+      <div class="container mt-4">
+        <div>
+          <mat-form-field class="w-100">
+            <input matInput placeholder="{{'forms.register.email' | translate}}" type="email" [formControl]="$any(formGroup).controls['email']">
+          </mat-form-field>
+          <small *ngIf="formGroup.controls['email'].hasError('required') && formGroup.controls['email'].touched"
+                 class="text-danger support-text">You must include an email address.</small>
+        </div>
+
+        <div>
+          <mat-form-field class="w-100">
+            <input matInput type="password" placeholder="{{'forms.register.password' | translate}}" [formControl]="$any(formGroup).controls['password']">
+          </mat-form-field>
+          <small *ngIf="formGroup.controls['password'].hasError('required') && formGroup.controls['password'].touched"
+                 class="text-danger support-text">You must include password.</small>
+        </div>
+
+        <div>
+          <mat-form-field class="w-100">
+            <input matInput placeholder="{{'forms.register.confirmPassword' | translate}}" [formControl]="$any(formGroup).controls['confirmPassword']"
+                   type="password">
+          </mat-form-field>
+          <small
+            *ngIf="formGroup.controls['confirmPassword'].hasError('required') && formGroup.controls['confirmPassword'].touched"
+            class="text-danger support-text">You must include confirm password.</small>
+        </div>
+
+        <div class="text-center">
+              <span>{{'forms.register.textLogin' | translate}}
+                <a [routerLink]="['/authentication/login']" class="link text-info">{{'forms.register.loginButton' | translate}}</a>
+              </span>
+        </div>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
+
