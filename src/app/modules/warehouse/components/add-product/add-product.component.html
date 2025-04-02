@@ -71,8 +71,8 @@
         <h2 class="text-left">Subir Foto:</h2>
       </div>
       <div class="col-6">
-        <input type="file" id="productImage" formControlName="productImage" class="form-control" accept="image/*" (change)="onFileSelected($event)">
-      </div>
+        <input type="file" id="productImage" formControlName="productImage" class="form-control"
+               accept=".jpg, .jpeg, .png" (change)="onFileSelected($event)">      </div>
     </div>
 
     <!-- Previsualización de la imagen -->
