@@ -36,7 +36,9 @@
             "styles": [
               "src/styles.scss",
               "./node_modules/alertifyjs/build/css/alertify.css",
-              "./node_modules/alertifyjs/build/css/themes/default.rtl.css"
+              "./node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "./node_modules/alertifyjs/build/css/themes/default.rtl.css",
+              "./node_modules/bootstrap-icons/font/bootstrap-icons.css"
             ],
             "scripts": [
               "./node_modules/alertifyjs/build/alertify.js",
@@ -152,7 +154,9 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "./node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "./node_modules/bootstrap-icons/font/bootstrap-icons.css"
             ],
             "scripts": []
           }

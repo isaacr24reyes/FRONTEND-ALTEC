@@ -4,8 +4,8 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { ApplicationBase } from '../../../utils/base/application.base';
 import { R_DASHBOARD } from '../../../../constants/route.constants';
 import Notiflix from 'notiflix';
-import {AccountService} from "../../services/account.service";
-
+import { AccountService } from '../../services/account.service';
+import { UserSessionService } from '../../services/user-session.service'; // Importa el servicio
 
 @Component({
   selector: 'app-login',
@@ -19,7 +19,8 @@ export class LoginComponent extends ApplicationBase implements OnInit {
   constructor(
     private _fb: UntypedFormBuilder,
     private _router: Router,
-    private _accountService: AccountService
+    private _accountService: AccountService,
+    private _userSessionService: UserSessionService
   ) {
     super();
   }
@@ -45,6 +46,16 @@ export class LoginComponent extends ApplicationBase implements OnInit {
       next: (response: { token: string; }) => {
         sessionStorage.setItem('token', response.token);
         Notiflix.Notify.success('Inicio de sesión exitoso.');
+        this._accountService.getUserInfo(username).subscribe({
+          next: (userInfo) => {
+            console.log('Información del usuario:', userInfo);
+            this._userSessionService.setUserInfo(userInfo);
+          },
+          error: (err) => {
+            console.error('Error obteniendo info del usuario:', err);
+          }
+        });
+
         this._router.navigate([`${R_DASHBOARD}`]);
       },
       error: (error: any) => {
@@ -55,7 +66,7 @@ export class LoginComponent extends ApplicationBase implements OnInit {
       complete: () => Notiflix.Loading.remove()
     });
   }
-  onSubmit() {
 
+  onSubmit() {
   }
 }

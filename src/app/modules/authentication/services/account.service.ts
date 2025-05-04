@@ -16,4 +16,9 @@ export class AccountService extends ApplicationBaseService {
     const body = { username, password };
     return this.genericSend('post', 'api/auth/login', body);
   }
+
+  public getUserInfo(username: string): Observable<any> {
+    return this.genericSend('get', `api/auth/by-username?username=${username}`);
+  }
+
 }

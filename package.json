@@ -30,6 +30,7 @@
     "alertifyjs": "^1.14.0",
     "autoprefixer": "^10.4.20",
     "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.11.3",
     "boxicons": "^2.1.4",
     "ng-block-ui": "^4.0.1",
     "notiflix": "^3.2.8",

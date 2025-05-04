@@ -1,23 +1,26 @@
 import { Component, OnInit } from '@angular/core';
-import { UntypedFormGroup, UntypedFormBuilder } from '@angular/forms';
-import { ProductService } from '../../services/warehouse.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { UntypedFormBuilder, UntypedFormGroup } from "@angular/forms";
+import { debounceTime, distinctUntilChanged } from "rxjs/operators";
+import { ProductService } from "../../warehouse/services/warehouse.service";
 declare var bootstrap: any;
 
 @Component({
-  selector: 'app-inventario',
-  templateUrl: './inventario.component.html',
-  styleUrls: ['./inventario.component.scss']
+  selector: 'app-product-quote',
+  templateUrl: './product-quote.component.html',
+  styleUrls: ['./product-quote.component.scss']
 })
-export class InventarioComponent implements OnInit {
+
+export class ProductQuoteComponent implements OnInit {
   public formGroup!: UntypedFormGroup;
   products: any[] = [];
+  selectedProduct: any;
   totalCount: number = 0;
   currentPage: number = 1;
   totalPages: number = 0;
   private pageSize: number = 5;
-  selectedProduct: any;
-  showPopup: boolean = false;
+
+  cotizacion: any[] = [];
+
   constructor(
     private productService: ProductService,
     private fb: UntypedFormBuilder
@@ -42,6 +45,9 @@ export class InventarioComponent implements OnInit {
         this.getProducts(this.currentPage, this.pageSize, term);
       });
   }
+
+  onSubmit() {}
+
   openProductModal(product: any): void {
     this.selectedProduct = product;
     const modalElement = document.getElementById('productModal');
@@ -61,7 +67,6 @@ export class InventarioComponent implements OnInit {
     this.productService.getProducts(pageNumber, pageSize, filter, sortBy, sortOrder).subscribe(
       (data: any) => {
         this.products = data.items;
-        console.log(data.items);
         this.totalCount = data.totalCount;
         this.totalPages = Math.ceil(this.totalCount / pageSize);
       },
@@ -86,5 +91,26 @@ export class InventarioComponent implements OnInit {
       this.getProducts(this.currentPage, this.pageSize, term);
     }
   }
-  onSubmit() {}
+
+  agregarACotizacion(item: any) {
+    this.cotizacion.push(item);
+    this.close();
+  }
+
+  close(): void {
+    const modalElement = document.getElementById('productModal');
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement); // Obtener la instancia del modal
+      modal.hide();
+    }
+  }
+
+
+  eliminarDeCotizacion(index: number): void {
+    this.cotizacion.splice(index, 1);
+  }
+
+  get totalCotizacion(): number {
+    return this.cotizacion.reduce((acc, item) => acc + item.total, 0);
+  }
 }

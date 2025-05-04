@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import {AppBlankComponent} from "./layouts/blank/blank.component";
 import {FullComponent} from "./layouts/full/full.component";
-import {R_404, R_AUTHENTICATION, R_DASHBOARD, R_WAREHOUSE} from "./constants/route.constants";
+import {R_404, R_AUTHENTICATION, R_DASHBOARD, R_PRODUCT_QUOTE, R_WAREHOUSE} from "./constants/route.constants";
 
 const routes: Routes = [
   {
@@ -22,6 +22,12 @@ const routes: Routes = [
   },
   { path: '', redirectTo: `${R_DASHBOARD}`, pathMatch: 'full' },
   { path: '**', redirectTo: `${R_AUTHENTICATION}/${R_404}` }
+  ,
+  {
+    path: R_PRODUCT_QUOTE,
+    component: FullComponent,
+    loadChildren: () => import('./modules/product-quote/product-quote.module').then(mod => mod.ProductQuoteModule)
+  },
 ];
 
 @NgModule({

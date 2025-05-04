@@ -1,6 +1,6 @@
 <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="login-form">
   <div class="text-center">
-    <h1>Bienvenido, Administrador </h1>
+    <h1>Bienvenido, {{ name }} </h1>
     <h2>¿Qué deseas hacer hoy?</h2>
   </div>
   <hr class="styled-line">
@@ -8,58 +8,41 @@
     <div class="row text-center">
       <!-- Cuadro 1 -->
       <div class="col-4 mb-3">
-        <a [routerLink]="['/ruta-destino']" class="btn rounded-image">
+        <a [routerLink]="['/product-quote']" class="btn rounded-image">
           <img src="assets/images/Cotizador.png" alt="Imagen 1" class="img-fluid mt-3">
         </a>
       </div>
 
       <!-- Cuadro 2 -->
       <div class="col-4 mb-3">
-          <div class="card">
-            <div class="card-body">
               <a [routerLink]="['/warehouse/add-product']" class="btn rounded-image">
               <img src="assets/images/Agregar.png" alt="Imagen 1" class="img-fluid mt-3">
               </a>
-            </div>
-          </div>
       </div>
-
-      <!-- Cuadro 3 -->
+      
       <div class="col-4 mb-3">
-          <div class="card">
-            <div class="card-body">
               <a [routerLink]="['/ruta-destino']" class="btn rounded-image">
                 <img src="assets/images/Historial.png" alt="Imagen 1" class="img-fluid mt-3">
               </a>
-            </div>
-          </div>
       </div>
     </div>
 
     <div class="row text-center">
       <!-- Cuadro 4 -->
       <div class="col-4 mb-3">
-          <div class="card">
-            <div class="card-body">
               <a [routerLink]="['/warehouse/inventario']" class="btn rounded-image">
                 <img src="assets/images/Bodega.png" alt="Imagen 1" class="img-fluid mt-3">
               </a>
-            </div>
-          </div>
       </div>
 
       <!-- Cuadro 5 -->
       <div class="col-4 mb-3">
-          <div class="card">
-            <div class="card-body">
               <a [routerLink]="['/ruta-destino']" class="btn rounded-image">
                 <img src="assets/images/Vender.png" alt="Imagen 1" class="img-fluid mt-3">
               </a>
-            </div>
-          </div>
       </div>
-
     </div>
+
   </div>
   <hr class="styled-line">
   <div class="text-center mt-5">

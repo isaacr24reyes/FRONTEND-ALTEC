@@ -1,0 +1,39 @@
+<div *ngIf="product">
+  <div class="text-center mb-4">
+    <h4 class="fw-bold">{{ product.descripcion }}</h4>
+  </div>
+
+  <div class="row">
+    <!-- Imagen -->
+    <div class="col-md-6 text-center">
+      <ng-container *ngIf="product.foto && product.foto !== 'NOT-IMAGE'; else noImage">
+        <img [src]="'https://localhost:44381' + product.foto" alt="Imagen del producto"
+             class="img-fluid rounded shadow" style="max-height: 250px;" />
+      </ng-container>
+      <ng-template #noImage>
+        <div class="text-muted">Este producto no tiene imagen.</div>
+      </ng-template>
+    </div>
+
+    <!-- Info extra -->
+    <div class="col-md-6">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+          <i class="bi bi-person-fill me-2" style="color: #0d6efd;"></i>
+          <strong>Creado por:</strong> {{ product.createdBy }}
+        </li>
+        <li class="list-group-item"><strong>Categoría:</strong> {{ product.categoria }}</li>
+        <li class="list-group-item"><strong>Código:</strong> {{ product.codigo }}</li>
+        <li class="list-group-item"><strong>PVP:</strong> {{ product.pvp | currency }}</li>
+        <li class="list-group-item"><strong>Precio mayorista:</strong> {{ product.precioMayorista | currency }}</li>
+        <li class="list-group-item"><strong>Precio importación:</strong> {{ product.precioImportacion | currency }}</li>
+        <li class="list-group-item">
+          <strong [ngClass]="{ 'text-danger text-decoration-underline': product.stock <= 5 }">Stock:</strong> {{ product.stock }}
+        </li>
+
+
+        <!-- Agrega más campos si tienes más -->
+      </ul>
+    </div>
+  </div>
+</div>

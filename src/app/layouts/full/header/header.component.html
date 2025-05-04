@@ -1,8 +1,9 @@
+<!-- navbar.component.html -->
 <nav class="navbar navbar-expand-lg navbar-light custom-navbar border-5">
   <div class="container-fluid">
     <!-- Reemplaza el texto ALTEC por la imagen -->
     <a class="navbar-brand" href="#">
-      <img src="assets/images/LOGIN.png"  alt="ALTEC Logo" style="height: 40px;">
+      <img src="assets/images/LOGIN.png" alt="ALTEC Logo" style="height: 40px;">
     </a>
     <button class="navbar-toggler bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -34,14 +35,19 @@
           <a class="nav-link active text-white" aria-current="page" href="#">Cotizador</a>
         </li>
       </ul>
-      <form class="d-flex">
-        <li class="nav-item">
-          <a class="nav-link text-white" (click)="this.logout()" href="#">
+      <div class="d-flex align-items-center">
+        <!-- Mostramos el role aquí, al lado del botón Salir -->
+        <span class="text-white me-3">
+          <i class="bi bi-person-fill me-1"></i>
+          {{ role }}
+        </span>
+
+
+          <a class="nav-link text-white" (click)="logout()" href="#">
             <i class="bx bx-power-off"></i> Salir
           </a>
-        </li>
 
-      </form>
+      </div>
     </div>
   </div>
 </nav>
