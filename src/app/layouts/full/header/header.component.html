@@ -32,11 +32,12 @@
           </ul>
         </li>
         <li class="nav-item">
-          <a class="nav-link active text-white" aria-current="page" href="#">Cotizador</a>
+          <a class="nav-link active text-white" aria-current="page" (click)="navigateToCotizador()" style="cursor: pointer;">
+            Cotizador
+          </a>
         </li>
       </ul>
       <div class="d-flex align-items-center">
-        <!-- Mostramos el role aquí, al lado del botón Salir -->
         <span class="text-white me-3">
           <i class="bi bi-person-fill me-1"></i>
           {{ role }}

@@ -55,39 +55,49 @@
     </div>
   </div>
   <div *ngIf="cotizacion.length > 0" class="mt-5">
-    <h5 class="fw-bold mb-3">Resumen de cotización</h5>
-    <table class="table table-bordered table-hover">
-      <thead class="table-light">
-      <tr>
-        <th>Producto</th>
-        <th>Cantidad</th>
-        <th>Precio unitario</th>
-        <th>Total</th>
-        <th>Eliminar</th> <!-- Nueva columna -->
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let item of cotizacion; let i = index">
-        <td>{{ item.descripcion }}</td>
-        <td>{{ item.cantidad }}</td>
-        <td>{{ item.precio | currency }}</td>
-        <td>{{ item.total | currency }}</td>
-        <td class="text-center">
-          <button class="btn btn-danger btn-sm" (click)="eliminarDeCotizacion(i)">
-            X
-          </button>
-        </td>
-      </tr>
-      </tbody>
-      <tfoot>
-      <tr>
-        <th colspan="4" class="text-end">Total general:</th>
-        <th>{{ totalCotizacion | currency }}</th>
-      </tr>
-      </tfoot>
-    </table>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold">Resumen de cotización</h5>
+      <button class="btn btn-outline-primary me-2" (click)="incluirEnvio()">
+        <i class="fas fa-truck"></i> Incluir Envío
+      </button>
+      <button class="btn btn-outline-success" (click)="descargarPDF()">Descargar PDF</button>
 
+    </div>
+
+    <div #pdfCotizacion>
+      <table class="table table-bordered table-hover">
+        <thead class="table-light">
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Precio unitario</th>
+          <th>Total</th>
+          <th>Eliminar</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let item of cotizacion; let i = index">
+          <td>{{ item.descripcion }}</td>
+          <td>{{ item.cantidad }}</td>
+          <td>{{ item.precio | currency }}</td>
+          <td>{{ item.total | currency }}</td>
+          <td class="text-center">
+            <button class="btn btn-danger btn-sm" (click)="eliminarDeCotizacion(i)">
+              X
+            </button>
+          </td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr>
+          <th colspan="4" class="text-end">Total general:</th>
+          <th>{{ totalCotizacion | currency }}</th>
+        </tr>
+        </tfoot>
+      </table>
+    </div>
   </div>
+
 
   <div class="text-center mt-5">
     <span class="text-white small-text">
@@ -113,3 +123,4 @@
     </div>
   </div>
 </div>
+

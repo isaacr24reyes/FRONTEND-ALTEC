@@ -32,6 +32,7 @@
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
     "boxicons": "^2.1.4",
+    "html2pdf.js": "^0.10.3",
     "ng-block-ui": "^4.0.1",
     "notiflix": "^3.2.8",
     "rxjs": "~7.8.1",

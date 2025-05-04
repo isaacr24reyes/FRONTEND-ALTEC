@@ -24,9 +24,22 @@
         <li class="list-group-item"><strong>Precio mayorista:</strong> {{ product.precioMayorista | currency }}</li>
       </ul>
 
+      <!-- Checkbox para usar precio mayorista -->
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="usarMayorista" [(ngModel)]="usarPrecioMayorista">
+        <label class="form-check-label" for="usarMayorista">
+          Usar precio mayorista
+        </label>
+      </div>
+
       <div class="mb-3">
         <label for="quantity" class="form-label"><strong>Cantidad a cotizar:</strong></label>
         <input type="number" min="1" [(ngModel)]="cantidad" class="form-control" id="quantity" placeholder="Ej. 10">
+      </div>
+
+      <!-- Total dinámico -->
+      <div class="mb-3">
+        <strong>Total:</strong> {{ cantidad * (usarPrecioMayorista ? product.precioMayorista : product.pvp) | currency }}
       </div>
 
       <div class="text-end">

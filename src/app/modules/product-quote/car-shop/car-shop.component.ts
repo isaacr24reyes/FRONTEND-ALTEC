@@ -24,6 +24,7 @@ export class CarShopComponent {
   set product(value: any) {
     this._product = value;
     this.cantidad = 1;
+    this.usarPrecioMayorista = false;
   }
 
   get product() {
