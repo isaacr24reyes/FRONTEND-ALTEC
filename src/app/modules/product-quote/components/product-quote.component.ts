@@ -234,11 +234,9 @@ export class ProductQuoteComponent implements OnInit {
     html2pdf().from(container).set(opciones).save();
   }
   incluirEnvio() {
-    // Verificar si ya existe un item de envío
     const envioExistente = this.cotizacion.find(item => item.descripcion === 'Envío');
 
     if (envioExistente) {
-      // Si ya existe, preguntar si desea editarlo
       const nuevoValor = prompt('El envío ya está incluido. Ingrese el nuevo valor:', envioExistente.precio.toString());
 
       if (nuevoValor !== null) {
@@ -246,13 +244,12 @@ export class ProductQuoteComponent implements OnInit {
         if (!isNaN(valorNumerico)) {
           envioExistente.precio = valorNumerico;
           envioExistente.total = valorNumerico;
-          this.actualizarTotales();
+          this.updateTotal();
         } else {
           alert('Por favor ingrese un valor numérico válido');
         }
       }
     } else {
-      // Si no existe, pedir el valor del envío
       const valorEnvio = prompt('Ingrese el costo de envío:', '0');
 
       if (valorEnvio !== null) {
@@ -264,7 +261,7 @@ export class ProductQuoteComponent implements OnInit {
             precio: "",
             total: valorNumerico
           });
-          this.actualizarTotales();
+          this.updateTotal();
         } else {
           alert('Por favor ingrese un valor numérico válido');
         }
@@ -272,8 +269,7 @@ export class ProductQuoteComponent implements OnInit {
     }
   }
 
-  actualizarTotales() {
-    // Forzar la actualización de la vista
+  updateTotal() {
     this.cotizacion = [...this.cotizacion];
   }
 }

@@ -23,12 +23,13 @@ export class AddProductComponent {
       productCategory: ['', Validators.required],
       productCode: ['', Validators.required],
       productStock: ['', [Validators.required, Validators.pattern('^[0-9]*$')]],
-      productPvp: ['', [Validators.required, Validators.pattern('^[0-9.]*$')]],
-      productMp: ['', [Validators.required, Validators.pattern('^[0-9.]*$')]],
-      productPi: ['', [Validators.required, Validators.pattern('^[0-9.]*$')]],
+      productPvp: ['', [Validators.required, Validators.pattern('^[0-9]+([.,][0-9]{1,2})?$')]],
+      productMp: ['', [Validators.required, Validators.pattern('^[0-9]+([.,][0-9]{1,2})?$')]],
+      productPi: ['', [Validators.required, Validators.pattern('^[0-9]+([.,][0-9]{1,2})?$')]],
       productDescription: ['', Validators.required],
       productImage: [null]
     });
+
     this.userSessionService.getUserInfo().subscribe(userInfo => {
       if (userInfo) {
         this.userName = userInfo.name;
@@ -59,21 +60,22 @@ export class AddProductComponent {
         if (fileToSend) {
           formDataToSend.append('Foto', fileToSend, fileToSend.name);
         } else {
-          // Si no se selecciona archivo, agregar "NOT-IMAGE"
           formDataToSend.append('Foto', 'NOT-IMAGE');
         }
 
-        // Agregar el resto de los datos del producto
-        formDataToSend.append('Pvp', formData.productPvp);
+        const normalizedPvp = formData.productPvp.replace('.', ',');
+        const normalizedMp = formData.productMp.replace('.', ',');
+        const normalizedPi = formData.productPi.replace('.', ',');
+
+        formDataToSend.append('Pvp', normalizedPvp);
         formDataToSend.append('Descripcion', formData.productDescription);
         formDataToSend.append('Categoria', formData.productCategory);
         formDataToSend.append('Stock', formData.productStock);
-        formDataToSend.append('PrecioMayorista', formData.productMp);
+        formDataToSend.append('PrecioMayorista', normalizedMp);
         formDataToSend.append('Codigo', formData.productCode);
-        formDataToSend.append('PrecioImportacion', formData.productPi);
+        formDataToSend.append('PrecioImportacion', normalizedPi);
         formDataToSend.append('CreatedBy', this.userName);
 
-        // Llamada al servicio
         this.productService.createProduct(formDataToSend).subscribe(response => {
           console.log('Producto creado:', response);
           setTimeout(() => {
