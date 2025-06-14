@@ -1,0 +1,56 @@
+.product-quote-form {
+  background: #18181C;
+  h1{
+    color: white;
+    font-family: 'Acephimere', sans-serif;
+    font-weight: 1000;
+    font-size: 30px;
+    padding-top: 20px;
+  }
+  h2{
+    color: white;
+    font-family: 'Acephimere', sans-serif;
+    font-weight: 1000;
+    font-size: 15px;
+  }
+  h4 {
+    color: white;
+    font-family: 'Acephimere', sans-serif;
+    font-weight: 1000;
+    font-size: 18px;
+    margin-right: 10px;
+  }
+  h5 {
+    color: white;
+    font-family: 'Acephimere', sans-serif;
+    font-weight: 1000;
+    font-size: 18px;
+    margin-right: 10px;
+  }
+
+  .small-text {
+    font-size: 0.75rem;
+  }
+  .styled-line {
+    height: 7px;
+    background-color: #8B50FB;
+    margin: 20px auto;
+    width: 70%;
+  }
+  .eliminar-columna {
+    display: none;
+  }
+}
+.card-img-top {
+  height: 140px;
+  object-fit: cover;
+  border-bottom: 1px solid #444;
+}
+
+
+:host {
+  display: block;
+  background-color: #18181C;
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}

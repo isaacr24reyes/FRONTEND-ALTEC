@@ -8,6 +8,7 @@ import {WAREHOUSE_ROUTES} from "./warehouse.routing";
 import {InventarioComponent} from "./components/inventario/inventario.component";
 import {AddProductComponent} from "./components/add-product/add-product.component";
 import {ExtraProductInfoComponent} from "./components/extra-product-info/extra-product-info.component";
+import {EditProductComponent} from "./components/edit-product/edit-product.component";
 
 @NgModule({
   declarations: [
@@ -15,13 +16,14 @@ import {ExtraProductInfoComponent} from "./components/extra-product-info/extra-p
     InventarioComponent,
     ExtraProductInfoComponent
   ],
-    imports: [
-        CommonModule,
-        AppMaterialModule,
-        AppTranslationLanguageModule,
-        RouterModule.forChild(WAREHOUSE_ROUTES),
-        ReactiveFormsModule,
-        FormsModule,
-    ]
+  imports: [
+    CommonModule,
+    AppMaterialModule,
+    AppTranslationLanguageModule,
+    RouterModule.forChild(WAREHOUSE_ROUTES),
+    ReactiveFormsModule,
+    FormsModule,
+    EditProductComponent,
+  ]
 })
 export class WarehouseModule {}
