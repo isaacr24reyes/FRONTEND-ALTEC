@@ -20,7 +20,8 @@
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
     <div class="col" *ngFor="let producto of products">
       <div class="card h-100 text-white bg-dark border-light">
-        <img [src]="'https://localhost:44381' + producto.foto" class="card-img-top" alt="Imagen">
+        <img [src]="producto.foto" class="card-img-top" alt="Imagen" />
+
         <div class="card-body text-center">
           <h6 class="card-title">{{ producto.descripcion }}</h6>
           <button class="btn btn-primary btn-sm w-100" (click)="openModal(producto)">Editar</button>

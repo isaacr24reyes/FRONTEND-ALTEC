@@ -7,8 +7,8 @@
     <!-- Imagen -->
     <div class="col-md-6 text-center">
       <ng-container *ngIf="product.foto && product.foto !== 'NOT-IMAGE'; else noImage">
-        <img [src]="'https://localhost:44381' + product.foto" alt="Imagen del producto"
-             class="img-fluid rounded shadow" style="max-height: 250px;" />
+        <img [src]="product.foto" alt="Producto" style="max-width: 100%; height: auto;" />
+
       </ng-container>
       <ng-template #noImage>
         <div class="text-muted">Este producto no tiene imagen.</div>

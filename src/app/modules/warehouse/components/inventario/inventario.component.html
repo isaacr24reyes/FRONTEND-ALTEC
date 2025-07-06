@@ -33,7 +33,8 @@
         <td class="text-center" style="width: 80px; vertical-align: middle;">{{ product.pvp | currency }}</td>
         <td class="d-flex justify-content-center align-items-center" style="width: 200px; padding: 0;">
           <ng-container *ngIf="product.foto !== 'NOT-IMAGE'; else noImage">
-            <img [src]="'https://localhost:44381' + product.foto" alt="Producto" style="max-width: 100%; height: auto;" />
+            <img [src]="product.foto" alt="Producto" style="max-width: 100%; height: auto;" />
+
           </ng-container>
           <ng-template #noImage>
             <span>Producto no contiene imagen</span>
