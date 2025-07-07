@@ -1,0 +1,29 @@
+{
+  "forms": {
+    "login": {
+      "title": "Sessión",
+      "username": "User",
+      "password": "Password",
+      "textRegister": "Don't have an account?",
+      "registerButton": "Register",
+      "loginButton": "Login"
+    },
+    "register": {
+      "tile": "Register",
+      "email": "Email address",
+      "password": "Password *",
+      "confirmPassword": "Confirm Password",
+      "textLogin": "Already have an account?",
+      "loginButton": "Login"
+    }
+  },
+  "actionButtons": {
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "messages404": {
+    "title": "Page Not Found!",
+    "body": "Sorry this page does not exist",
+    "backButton": "Back to home"
+  }
+}

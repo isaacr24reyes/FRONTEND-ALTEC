@@ -1,0 +1,29 @@
+{
+  "forms": {
+    "login": {
+      "title": "Inicio",
+      "username": "Usuario",
+      "password": "Contraseña",
+      "textRegister": "¿No tienes una cuenta?",
+      "registerButton": "Registrarse",
+      "loginButton": "Acceder"
+    },
+    "register": {
+      "title": "Registro",
+      "email": "Correo electronico",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "textLogin": "¿Ya tienes una cuenta?",
+      "loginButton": "Iniciar sessión"
+    }
+  },
+  "actionButtons": {
+    "cancel": "Cancelar",
+    "save": "Guardar"
+  },
+  "messages404": {
+    "title": "Página no encontrada!",
+    "body": "Lo sentimos no existe esta página",
+    "backButton": "Regresar al menú"
+  }
+}
