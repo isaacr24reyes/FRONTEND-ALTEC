@@ -26,6 +26,8 @@ export class EditProductComponent implements OnInit {
   pageSize = 25;
   totalCount: number = 0;
   totalPages: number = 0;
+  isFirstLoad: boolean = true;
+  isLoading: boolean = true;
 
   constructor(
     private productService: ProductService,
@@ -48,10 +50,33 @@ export class EditProductComponent implements OnInit {
 
   getProducts(): void {
     const term = this.formGroup.get('searchControl')?.value ?? '';
-    this.productService.getProducts(this.currentPage, this.pageSize, term).subscribe((response: any) => {
-      this.products = response.items;
-      this.totalCount = response.totalCount ?? 0;
-      this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+
+    if (this.isFirstLoad) {
+      Notiflix.Loading.standard('Cargando productos...');
+      this.isLoading = true;
+    }
+
+    this.productService.getProducts(this.currentPage, this.pageSize, term).subscribe({
+      next: (response: any) => {
+        this.products = response.items;
+        this.totalCount = response.totalCount ?? 0;
+        this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+
+        if (this.isFirstLoad) {
+          Notiflix.Loading.remove();
+          this.isLoading = false;
+          this.isFirstLoad = false;
+        }
+      },
+      error: (error) => {
+        console.error('Error al obtener productos:', error);
+
+        if (this.isFirstLoad) {
+          Notiflix.Loading.remove();
+          this.isLoading = false;
+          this.isFirstLoad = false;
+        }
+      }
     });
   }
 

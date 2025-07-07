@@ -1,12 +1,12 @@
 import { HttpClient } from '@angular/common/http';
-import {environmentQa} from "../../../../environments/environment.qa";
+import {environment} from "../../../../environments/environment.prod";
 
 
 export class ApplicationBaseService {
   protected apiUrl: string;
 
   constructor(protected http: HttpClient) {
-    this.apiUrl = environmentQa.apiALTEC;
+    this.apiUrl = environment.apiALTEC;
   }
 
   public genericSend(method: string, endpoint: string = '', body: any = null): any {

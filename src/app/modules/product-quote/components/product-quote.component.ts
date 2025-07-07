@@ -4,6 +4,7 @@ import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 import { ProductService } from "../../warehouse/services/warehouse.service";
 import html2pdf from 'html2pdf.js';
 import { ViewChild, ElementRef } from '@angular/core';
+import Notiflix from "notiflix";
 declare var bootstrap: any;
 
 
@@ -22,7 +23,8 @@ export class ProductQuoteComponent implements OnInit {
   currentPage: number = 1;
   totalPages: number = 0;
   private pageSize: number = 5;
-
+  isFirstLoad: boolean = true;
+  isLoading: boolean = true;
   cotizacion: any[] = [];
   @ViewChild('pdfCotizacion', { static: false }) pdfCotizacion!: ElementRef;
 
@@ -69,16 +71,33 @@ export class ProductQuoteComponent implements OnInit {
     sortBy: string = 'descripcion',
     sortOrder: string = 'asc'
   ): void {
-    this.productService.getProducts(pageNumber, pageSize, filter, sortBy, sortOrder).subscribe(
-      (data: any) => {
+    if (this.isFirstLoad) {
+      Notiflix.Loading.standard('Cargando productos...');
+      this.isLoading = true;
+    }
+
+    this.productService.getProducts(pageNumber, pageSize, filter, sortBy, sortOrder).subscribe({
+      next: (data: any) => {
         this.products = data.items;
         this.totalCount = data.totalCount;
         this.totalPages = Math.ceil(this.totalCount / pageSize);
+
+        if (this.isFirstLoad) {
+          Notiflix.Loading.remove();
+          this.isLoading = false;
+          this.isFirstLoad = false;
+        }
       },
-      (error: any) => {
+      error: (error: any) => {
         console.error('Error al obtener los productos', error);
+
+        if (this.isFirstLoad) {
+          Notiflix.Loading.remove();
+          this.isLoading = false;
+          this.isFirstLoad = false;
+        }
       }
-    );
+    });
   }
 
   onPreviousPage(): void {

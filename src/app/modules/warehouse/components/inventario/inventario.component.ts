@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder } from '@angular/forms';
 import { ProductService } from '../../services/warehouse.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import Notiflix from "notiflix";
 declare var bootstrap: any;
 
 @Component({
@@ -17,7 +18,8 @@ export class InventarioComponent implements OnInit {
   totalPages: number = 0;
   private pageSize: number = 5;
   selectedProduct: any;
-  showPopup: boolean = false;
+  isFirstLoad: boolean = true;
+  isLoading: boolean = true;
   constructor(
     private productService: ProductService,
     private fb: UntypedFormBuilder
@@ -58,17 +60,34 @@ export class InventarioComponent implements OnInit {
     sortBy: string = 'descripcion',
     sortOrder: string = 'asc'
   ): void {
-    this.productService.getProducts(pageNumber, pageSize, filter, sortBy, sortOrder).subscribe(
-      (data: any) => {
+    if (this.isFirstLoad) {
+      Notiflix.Loading.standard('Cargando productos...');
+      this.isLoading = true;
+    }
+
+    this.productService.getProducts(pageNumber, pageSize, filter, sortBy, sortOrder).subscribe({
+      next: (data: any) => {
         this.products = data.items;
         console.log(data.items);
         this.totalCount = data.totalCount;
         this.totalPages = Math.ceil(this.totalCount / pageSize);
+
+        if (this.isFirstLoad) {
+          Notiflix.Loading.remove();
+          this.isLoading = false;
+          this.isFirstLoad = false;
+        }
       },
-      (error: any) => {
+      error: (error: any) => {
         console.error('Error al obtener los productos', error);
+
+        if (this.isFirstLoad) {
+          Notiflix.Loading.remove();
+          this.isLoading = false;
+          this.isFirstLoad = false;
+        }
       }
-    );
+    });
   }
 
   onPreviousPage(): void {
