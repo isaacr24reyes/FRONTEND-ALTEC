@@ -20,9 +20,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": {
-              "base": "dist/base_angular"
-            },
+            "outputPath": "dist/FRONTEND-ALTEC",
             "index": "src/index.html",
             "polyfills": [
               "src/polyfills.ts"
@@ -44,8 +42,10 @@
               "./node_modules/alertifyjs/build/alertify.js",
               "./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ],
-            "browser": "src/main.ts"
+            "browser": "src/main.ts",
+            "baseHref": "https://isaacr24reyes.github.io/FRONTEND-ALTEC/"
           },
+
           "configurations": {
             "production": {
               "budgets": [
