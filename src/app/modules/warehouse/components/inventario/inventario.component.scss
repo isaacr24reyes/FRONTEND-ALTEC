@@ -31,3 +31,23 @@
     width: 70%;
   }
 }
+@media (max-width: 576px) {
+  .login-form {
+    padding: 0 10px;
+  }
+
+  table th,
+  table td {
+    font-size: 0.85rem;
+  }
+
+  .btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .img-thumbnail {
+    width: 100px;
+  }
+}
+

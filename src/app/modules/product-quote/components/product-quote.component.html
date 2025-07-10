@@ -1,128 +1,144 @@
 <div *ngIf="!isLoading">
-<form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="product-quote-form">
-  <div class="text-center">
-    <h1>Realizar una Cotización</h1>
-  </div>
-  <div class="container d-flex justify-content-center mt-3">
-    <div class="d-flex" style="width: 70%; justify-content: center;">
-      <form [formGroup]="formGroup" class="w-100">
-        <input
-          type="search"
-          class="form-control me-2"
-          placeholder="Buscar producto o código..."
-          aria-label="Search"
-          formControlName="searchControl">
-      </form>
-    </div>
-  </div>
-
-  <div class="container mt-5 d-flex justify-content-center">
-    <table class="table table-bordered" style="width: 80%;">
-      <thead>
-      <tr>
-        <th style="width: 20%; background-color: #08274F; color: white; font-weight: bold; border: 1px solid #08274F;">Código</th>
-        <th style="width: 40%; background-color: #08274F; color: white; font-weight: bold; border: 1px solid #08274F;">Descripción</th>
-        <th class="text-center" style="width: 0%; background-color: #08274F; color: white; font-weight: bold; border: 1px solid #08274F;">Foto</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let product of products" (click)="openProductModal(product)" style="cursor: pointer;">
-        <td class="text-center" style="width: 80px; vertical-align: middle;">{{ product.codigo }}</td>
-        <td class="text-center" style="vertical-align: middle;">{{ product.descripcion }}</td>
-        <td class="d-flex justify-content-center align-items-center" style="width: 200px; padding: 0;">
-          <ng-container *ngIf="product.foto !== 'NOT-IMAGE'; else noImage">
-            <img [src]="product.foto" alt="Producto" style="max-width: 100%; height: auto;" />
-
-          </ng-container>
-          <ng-template #noImage>
-            <span>Producto no contiene imagen</span>
-          </ng-template>
-        </td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <hr class="styled-line">
-  <div class="container mt-5 d-flex justify-content-between gap-5" style="width: 70%;">
-
-    <div class="text-left">
-      <h4>Total de productos: {{ totalCount }}</h4>
+  <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="product-quote-form">
+    <div class="text-center">
+      <h1>Realizar una Cotización</h1>
     </div>
 
-    <div class="d-flex align-items-center">
-      <!-- Botones de paginación -->
-      <button class="btn btn-primary me-2" (click)="onPreviousPage()" [disabled]="currentPage === 1">Anterior</button>
-      <button class="btn btn-primary" (click)="onNextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
-    </div>
-  </div>
-  <div *ngIf="cotizacion.length > 0" class="mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="fw-bold">Resumen de cotización</h5>
-      <button class="btn btn-outline-primary me-2" (click)="incluirEnvio()">
-        <i class="fas fa-truck"></i> Incluir Envío
-      </button>
-      <button class="btn btn-outline-success" (click)="descargarPDF()">Descargar PDF</button>
-
-    </div>
-
-    <div #pdfCotizacion>
-      <table class="table table-bordered table-hover">
-        <thead class="table-light">
-        <tr>
-          <th>Producto</th>
-          <th>Cantidad</th>
-          <th>Precio unitario</th>
-          <th>Total</th>
-          <th>Eliminar</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let item of cotizacion; let i = index">
-          <td>{{ item.descripcion }}</td>
-          <td>{{ item.cantidad }}</td>
-          <td>{{ item.precio | currency }}</td>
-          <td>{{ item.total | currency }}</td>
-          <td class="text-center">
-            <button class="btn btn-danger btn-sm" (click)="eliminarDeCotizacion(i)">
-              X
-            </button>
-          </td>
-        </tr>
-        </tbody>
-        <tfoot>
-        <tr>
-          <th colspan="4" class="text-end">Total general:</th>
-          <th>{{ totalCotizacion | currency }}</th>
-        </tr>
-        </tfoot>
-      </table>
-    </div>
-  </div>
-
-
-  <div class="text-center mt-5">
-    <span class="text-white small-text">
-      Developed by <strong style="color: #8B50FB;">SwiFt©</strong> (2025).
-    </span>
-  </div>
-</form>
-
-<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="productModalLabel">Cotizador</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <app-car-shop
-          [product]="selectedProduct"
-          (agregarCotizacion)="agregarACotizacion($event)">
-        </app-car-shop>
-
+    <div class="container mt-3">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8">
+          <input
+            type="search"
+            class="form-control"
+            placeholder="Buscar producto o código..."
+            aria-label="Search"
+            formControlName="searchControl">
+        </div>
       </div>
     </div>
+
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-12">
+          <div class="table-responsive">
+            <table class="table table-bordered text-center">
+              <thead>
+              <tr>
+                <th style="background-color: #08274F; color: white; font-weight: bold;">Código</th>
+                <th style="background-color: #08274F; color: white; font-weight: bold;">Descripción</th>
+                <th style="background-color: #08274F; color: white; font-weight: bold;">Foto</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let product of products" (click)="openProductModal(product)" style="cursor: pointer;">
+                <td style="vertical-align: middle;">{{ product.codigo }}</td>
+                <td class="text-break" style="vertical-align: middle;">{{ product.descripcion }}</td>
+                <td style="padding: 0;">
+                  <ng-container *ngIf="product.foto !== 'NOT-IMAGE'; else noImage">
+                    <img [src]="product.foto" alt="Producto" class="img-thumbnail" style="max-width: 200px;" />
+                  </ng-container>
+                  <ng-template #noImage>
+                    <span>Producto no contiene imagen</span>
+                  </ng-template>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="styled-line">
+
+    <div class="container mt-5">
+      <div class="row justify-content-between align-items-center">
+        <div class="col-12 col-md-auto mb-2 mb-md-0">
+          <h4>Total de productos: {{ totalCount }}</h4>
+        </div>
+        <div class="col-12 col-md-auto">
+          <button class="btn btn-primary me-2" (click)="onPreviousPage()" [disabled]="currentPage === 1">Anterior</button>
+          <button class="btn btn-primary" (click)="onNextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
+        </div>
+      </div>
+    </div>
+
+    <hr class="styled-line">
+
+    <div *ngIf="cotizacion.length > 0" class="mt-5">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3 gap-3">
+        <h5 class="fw-bold m-0">Resumen de cotización</h5>
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-outline-primary" (click)="incluirEnvio()">
+            <i class="fas fa-truck"></i> Incluir Envío
+          </button>
+          <button class="btn btn-outline-success" (click)="descargarPDF()">Descargar PDF</button>
+        </div>
+      </div>
+
+      <div class="table-responsive" #pdfCotizacion>
+        <table class="table table-bordered table-hover text-center">
+          <thead class="bg-success text-white">
+          <tr>
+            <th>Producto</th>
+            <th>Imagen</th>
+            <th>Cantidad</th>
+            <th>Precio unitario</th>
+            <th>Total</th>
+            <th>Eliminar</th>
+          </tr>
+          </thead>
+
+
+
+          <tbody>
+          <tr *ngFor="let item of cotizacion; let i = index">
+            <td class="text-break">{{ item.descripcion }}</td>
+            <td>
+              <img *ngIf="item.fotoBase64" [src]="item.fotoBase64" alt="Producto" style="max-height: 60px;">
+              <span *ngIf="!item.fotoBase64">—</span>
+            </td>
+            <td>{{ item.cantidad }}</td>
+            <td>{{ item.precio | currency }}</td>
+            <td>{{ item.total | currency }}</td>
+            <td>
+              <button class="btn btn-danger btn-sm" (click)="eliminarDeCotizacion(i)">X</button>
+            </td>
+          </tr>
+
+
+          </tbody>
+          <tfoot>
+          <tr>
+            <th colspan="4" class="text-end">Total general:</th>
+            <th>{{ totalCotizacion | currency }}</th>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="text-center mt-5">
+      <span class="text-white small-text">
+        Developed by <strong style="color: #8B50FB;">SwiFt©</strong> (2025).
+      </span>
+    </div>
+  </form>
+
+  <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="productModalLabel">Cotizador</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <app-car-shop
+            [product]="selectedProduct"
+            (agregarCotizacion)="agregarACotizacion($event)">
+          </app-car-shop>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 </div>

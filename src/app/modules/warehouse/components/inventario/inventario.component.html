@@ -1,84 +1,90 @@
 <div *ngIf="!isLoading">
-<form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="login-form">
-  <div class="text-center">
-    <h1>Consultar en bodega</h1>
-  </div>
-  <div class="container d-flex justify-content-center mt-3">
-    <div class="d-flex" style="width: 70%; justify-content: center;">
-      <form [formGroup]="formGroup" class="w-100">
-        <input
-          type="search"
-          class="form-control me-2"
-          placeholder="Buscar producto o código..."
-          aria-label="Search"
-          formControlName="searchControl">
-      </form>
-    </div>
-  </div>
-
-
-  <div class="container mt-5 d-flex justify-content-center">
-    <table class="table table-bordered" style="width: 80%;">
-      <thead>
-      <tr>
-        <th style="width: 20%; background-color: #08274F; color: white; font-weight: bold; border: 1px solid #08274F;">Código</th>
-        <th style="width: 40%; background-color: #08274F; color: white; font-weight: bold; border: 1px solid #08274F;">Descripción</th>
-        <th style="width: 10%; background-color: #08274F; color: white; font-weight: bold; border: 1px solid #08274F;">PVP</th>
-        <th class="text-center" style="width: 0%; background-color: #08274F; color: white; font-weight: bold; border: 1px solid #08274F;">Foto</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let product of products" (click)="openProductModal(product)" style="cursor: pointer;">
-        <td class="text-center" style="width: 80px; vertical-align: middle;">{{ product.codigo }}</td>
-        <td class="text-center" style="vertical-align: middle;">{{ product.descripcion }}</td>
-        <td class="text-center" style="width: 80px; vertical-align: middle;">{{ product.pvp | currency }}</td>
-        <td class="d-flex justify-content-center align-items-center" style="width: 200px; padding: 0;">
-          <ng-container *ngIf="product.foto !== 'NOT-IMAGE'; else noImage">
-            <img [src]="product.foto" alt="Producto" style="max-width: 100%; height: auto;" />
-
-          </ng-container>
-          <ng-template #noImage>
-            <span>Producto no contiene imagen</span>
-          </ng-template>
-        </td>
-      </tr>
-      </tbody>
-    </table>
-
-  </div>
-  <hr class="styled-line">
-  <div class="container mt-5 d-flex justify-content-between gap-5" style="width: 70%;">
-
-    <div class="text-left">
-      <h4>Total de productos: {{ totalCount }}</h4>
+  <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="login-form">
+    <div class="text-center">
+      <h1>Consultar en bodega</h1>
     </div>
 
-    <div class="d-flex align-items-center">
-      <!-- Botones de paginación -->
-      <button class="btn btn-primary me-2" (click)="onPreviousPage()" [disabled]="currentPage === 1">Anterior</button>
-      <button class="btn btn-primary" (click)="onNextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
-    </div>
-  </div>
-
-  <hr class="styled-line">
-  <div class="text-center mt-5">
-    <span class="text-white small-text">
-      Developed by <strong style="color: #8B50FB;">SwiFt©</strong> (2025).
-    </span>
-  </div>
-</form>
-
-<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="productModalLabel">Información detallada del producto</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <app-extra-product-info [product]="selectedProduct"></app-extra-product-info>
+    <div class="container mt-3">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8">
+          <input
+            type="search"
+            class="form-control"
+            placeholder="Buscar producto o código..."
+            aria-label="Search"
+            formControlName="searchControl">
+        </div>
       </div>
     </div>
+
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-12">
+          <div class="table-responsive">
+            <table class="table table-bordered text-center">
+              <thead>
+              <tr>
+                <th style="width: 10%; background-color: #08274F; color: white; font-weight: bold;">Código</th>
+                <th style="width: 40%; background-color: #08274F; color: white; font-weight: bold;">Descripción</th>
+                <th style="width: 10%; background-color: #08274F; color: white; font-weight: bold;">PVP</th>
+                <th style="width: 10%; background-color: #08274F; color: white; font-weight: bold;">Foto</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let product of products" (click)="openProductModal(product)" style="cursor: pointer;">
+                <td style="vertical-align: middle;">{{ product.codigo }}</td>
+                <td class="text-break" style="vertical-align: middle;">{{ product.descripcion }}</td>
+                <td style="vertical-align: middle;">{{ product.pvp | currency }}</td>
+                <td style="padding: 0;">
+                  <ng-container *ngIf="product.foto !== 'NOT-IMAGE'; else noImage">
+                    <img [src]="product.foto" alt="Producto" class="img-thumbnail" style="max-width: 200px;" />
+                  </ng-container>
+                  <ng-template #noImage>
+                    <span>Producto no contiene imagen</span>
+                  </ng-template>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="styled-line">
+
+    <div class="container mt-5">
+      <div class="row justify-content-between align-items-center">
+        <div class="col-12 col-md-auto mb-2 mb-md-0">
+          <h4>Total de productos: {{ totalCount }}</h4>
+        </div>
+        <div class="col-12 col-md-auto">
+          <button class="btn btn-primary me-2" (click)="onPreviousPage()" [disabled]="currentPage === 1">Anterior</button>
+          <button class="btn btn-primary" (click)="onNextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
+        </div>
+      </div>
+    </div>
+
+    <hr class="styled-line">
+
+    <div class="text-center mt-5">
+      <span class="text-white small-text">
+        Developed by <strong style="color: #8B50FB;">SwiFt©</strong> (2025).
+      </span>
+    </div>
+  </form>
+
+  <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="productModalLabel">Información detallada del producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <app-extra-product-info [product]="selectedProduct"></app-extra-product-info>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 </div>

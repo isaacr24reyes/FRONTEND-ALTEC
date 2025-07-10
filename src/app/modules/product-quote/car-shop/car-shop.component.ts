@@ -34,15 +34,13 @@ export class CarShopComponent {
   cotizar() {
     const precio = this.usarPrecioMayorista ? this.product.precioMayorista : this.product.pvp;
     const total = this.cantidad * precio;
-
     const item = {
-      descripcion: this.product.descripcion,
+      ...this.product,
       cantidad: this.cantidad,
       precio: precio,
       total: total
     };
-
-    this.agregarCotizacion.emit(item); // 👈 Emitimos el item al componente padre
+    this.agregarCotizacion.emit(item);
     this.cantidad = 1;
   }
 }
