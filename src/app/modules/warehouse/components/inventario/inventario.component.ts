@@ -12,7 +12,8 @@ declare var bootstrap: any;
 })
 export class InventarioComponent implements OnInit {
   public formGroup!: UntypedFormGroup;
-  products: any[] = [];
+  allProducts: any[] = [];   // Lista completa
+  products: any[] = [];      // Productos visibles en página actual
   totalCount: number = 0;
   currentPage: number = 1;
   totalPages: number = 0;
@@ -20,57 +21,39 @@ export class InventarioComponent implements OnInit {
   selectedProduct: any;
   isFirstLoad: boolean = true;
   isLoading: boolean = true;
+
   constructor(
     private productService: ProductService,
     private fb: UntypedFormBuilder
   ) {}
 
   ngOnInit(): void {
-    // Crear el formulario con un campo de búsqueda
     this.formGroup = this.fb.group({
       searchControl: ['']
     });
 
-    this.getProducts(this.currentPage, this.pageSize);
+    this.getAllProducts();
 
-    // Escuchar cambios en el campo de búsqueda con debounce
+    // Detectar cambios en el campo de búsqueda
     this.formGroup.get('searchControl')!.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged()
-      )
-      .subscribe(term => {
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(() => {
         this.currentPage = 1;
-        this.getProducts(this.currentPage, this.pageSize, term);
+        this.applyFilter();
       });
   }
-  openProductModal(product: any): void {
-    this.selectedProduct = product;
-    const modalElement = document.getElementById('productModal');
-    if (modalElement) {
-      const modal = new bootstrap.Modal(modalElement);
-      modal.show();
-    }
-  }
 
-  getProducts(
-    pageNumber: number,
-    pageSize: number,
-    filter: string = '',
-    sortBy: string = 'descripcion',
-    sortOrder: string = 'asc'
-  ): void {
+  /** Trae todos los productos del backend una sola vez */
+  getAllProducts(): void {
     if (this.isFirstLoad) {
       Notiflix.Loading.standard('Cargando productos...');
       this.isLoading = true;
     }
 
-    this.productService.getProducts(pageNumber, pageSize, filter, sortBy, sortOrder).subscribe({
+    this.productService.getProducts(1, 1000, '', 'descripcion', 'asc').subscribe({
       next: (data: any) => {
-        this.products = data.items;
-        console.log(data.items);
-        this.totalCount = data.totalCount;
-        this.totalPages = Math.ceil(this.totalCount / pageSize);
+        this.allProducts = data.items || [];
+        this.applyFilter();
 
         if (this.isFirstLoad) {
           Notiflix.Loading.remove();
@@ -80,7 +63,6 @@ export class InventarioComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('Error al obtener los productos', error);
-
         if (this.isFirstLoad) {
           Notiflix.Loading.remove();
           this.isLoading = false;
@@ -90,20 +72,54 @@ export class InventarioComponent implements OnInit {
     });
   }
 
+  /** Filtra y pagina los productos en el frontend */
+  applyFilter(): void {
+    const term = this.normalizeText(this.formGroup.get('searchControl')!.value || '');
+    const filtered = term
+      ? this.allProducts.filter(product =>
+        this.normalizeText(product.descripcion).includes(term) ||
+        this.normalizeText(product.codigo).includes(term)
+      )
+      : this.allProducts;
+
+    this.totalCount = filtered.length;
+    this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    this.products = filtered.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  /** Paginación */
   onPreviousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
-      const term = this.formGroup.get('searchControl')!.value || '';
-      this.getProducts(this.currentPage, this.pageSize, term);
+      this.applyFilter();
     }
   }
 
   onNextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      const term = this.formGroup.get('searchControl')!.value || '';
-      this.getProducts(this.currentPage, this.pageSize, term);
+      this.applyFilter();
     }
   }
+
+  /** Modal de producto */
+  openProductModal(product: any): void {
+    this.selectedProduct = product;
+    const modalElement = document.getElementById('productModal');
+    if (modalElement) {
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+    }
+  }
+
+  /** Normaliza texto eliminando tildes y pasando a minúsculas */
+  private normalizeText(text: string): string {
+    return text
+      ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+      : '';
+  }
+
   onSubmit() {}
 }

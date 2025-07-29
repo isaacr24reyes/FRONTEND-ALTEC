@@ -1,0 +1,131 @@
+.product-quote-form {
+  background: #18181C;
+  h1{
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 1000;
+    font-size: 50px;
+    padding-top: 20px;
+  }
+  h2{
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 1000;
+    font-size:20px;
+  }
+  h4 {
+    color: white;
+    font-family: 'Acephimere', sans-serif;
+    font-weight: 1000;
+    font-size: 18px;
+    margin-right: 10px;
+  }
+  h5 {
+    color: white;
+    font-family: 'Acephimere', sans-serif;
+    font-weight: 1000;
+    font-size: 18px;
+    margin-right: 10px;
+  }
+
+  .small-text {
+    font-size: 0.75rem;
+  }
+}
+.card-img-top {
+  height: 140px;
+  object-fit: cover;
+  border-bottom: 1px solid #444;
+}
+
+
+:host {
+  display: block;
+  background-color: #18181C;
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+.product-card {
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: #04293A;
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .product-img-container {
+    position: relative;
+    height: 160px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .product-title {
+    font-size: 1rem;
+    font-weight: bold;
+    min-height: 40px;
+    color: white;
+  }
+
+  .product-price {
+    font-size: 1.6rem;
+    color: greenyellow;
+    font-weight: bold;
+  }
+
+  .btn-add-cart {
+    background-color: #007bff;
+    border: none;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+font-size: .9rem;
+    &:hover {
+      background-color: #0056b3;
+    }
+
+    i {
+      margin-right: 0px;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .product-img-container {
+    height: 120px;
+  }
+}
+.quantity-input {
+  width: 60px;
+  padding: 5px 8px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  text-align: center;
+  font-size: 0.9rem;
+
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+  }
+}
+.no-image-text {
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: black;
+  background-color: WHITE;
+  border-radius: 6px;
+}

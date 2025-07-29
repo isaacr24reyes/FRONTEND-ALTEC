@@ -10,9 +10,11 @@ import {UserSessionService} from "../../../modules/authentication/services/user-
 })
 export class HeaderComponent implements OnInit {
   public role: string | null = null;
+  public isExternal: boolean = false;
   constructor(private _router: Router, private _userSessionService: UserSessionService) { }
 
   ngOnInit(): void {
+    this.isExternal = sessionStorage.getItem('isExternal') === 'true';
     this._userSessionService.getUserInfo().subscribe(userInfo => {
       if (userInfo) {
         this.role = userInfo.role;

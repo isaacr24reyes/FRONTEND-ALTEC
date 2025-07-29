@@ -41,5 +41,43 @@ button[mat-raised-button] {
     transform: none;
   }
 }
+.guest-btn {
+  background-color: #b87400;
+  border: 2px solid #fff;
+  color: #fff;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
+.guest-btn:hover {
+  background-color: #171a4a;
+  transform: scale(1.05);
+}
 
+.guest-icon {
+  font-size: 20px;
+  color: #fff;
+}
+.guest-message {
+  color: #fff;
+  font-size: 1.4rem;
+  text-align: center;
+}
+
+.progress {
+  height: 25px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  font-weight: bold;
+  text-align: center;
+}

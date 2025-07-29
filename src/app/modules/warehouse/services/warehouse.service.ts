@@ -31,6 +31,16 @@ export class ProductService extends ApplicationBaseService {
     const queryParams = `pageNumber=${pageNumber}&pageSize=${pageSize}&filter=${filter}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
     return this.genericSend('get', `api/Products?${queryParams}`, null);
   }
+  getProductsClient(
+    pageNumber: number,
+    pageSize: number,
+    filter: string = '',
+    sortBy: string = 'descripcion',
+    sortOrder: string = 'asc'
+  ): Observable<any> {
+    const queryParams = `pageNumber=${pageNumber}&pageSize=${pageSize}&filter=${filter}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+    return this.genericSend('get', `api/Products/client?${queryParams}`, null);
+  }
   updateProduct(id: string, producto: any): Observable<any> {
     const formData = new FormData();
 

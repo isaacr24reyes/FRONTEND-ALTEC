@@ -13,6 +13,7 @@ import {FullComponent} from "./layouts/full/full.component";
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import {AuthInterceptor} from "./core/interceptor/auth.interceptor";
 import {OnlyNumbersDirective} from "./shared/directive/only-numbers.directive";
+import {LoaderComponent} from "./shared/components/LoaderComponent";
 
 @NgModule({ declarations: [
         AppComponent,
@@ -22,11 +23,11 @@ import {OnlyNumbersDirective} from "./shared/directive/only-numbers.directive";
         OnlyNumbersDirective
   ],
     bootstrap: [AppComponent], imports: [BrowserModule,
-        AppRoutingModule,
-        AppMaterialModule,
-        BlockUIModule.forRoot(),
-        SharedModule,
-        BrowserAnimationsModule], providers: [
+    AppRoutingModule,
+    AppMaterialModule,
+    BlockUIModule.forRoot(),
+    SharedModule,
+    BrowserAnimationsModule, LoaderComponent], providers: [
         { provide: ErrorHandler, useClass: GlobalErrorHandler },
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())
