@@ -11,6 +11,7 @@ import {UserSessionService} from "../../../modules/authentication/services/user-
 export class HeaderComponent implements OnInit {
   public role: string | null = null;
   public isExternal: boolean = false;
+  cartItemCount: number = 0;
   constructor(private _router: Router, private _userSessionService: UserSessionService) { }
 
   ngOnInit(): void {
@@ -35,5 +36,8 @@ export class HeaderComponent implements OnInit {
 
   navigateToIngreso(): void {
     this._router.navigate(['/warehouse/add-product']);
+  }
+  navigateToCart() {
+    this._router.navigate(['/carrito']);
   }
 }

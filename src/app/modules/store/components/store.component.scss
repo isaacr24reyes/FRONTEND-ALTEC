@@ -31,6 +31,17 @@
   .small-text {
     font-size: 0.75rem;
   }
+  @media (max-width: 576px) {
+    .product-img-container {
+      height: 120px;
+    }
+    .store-title {
+      font-size: 1.5rem;
+    }
+    h2 {
+      font-size: 13px;
+    }
+  }
 }
 .card-img-top {
   height: 140px;
@@ -99,11 +110,7 @@ font-size: .9rem;
   }
 }
 
-@media (max-width: 576px) {
-  .product-img-container {
-    height: 120px;
-  }
-}
+
 .quantity-input {
   width: 60px;
   padding: 5px 8px;
