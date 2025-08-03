@@ -16,6 +16,15 @@
         </div>
       </div>
     </div>
+    <div class="row justify-content-center mt-3">
+      <div class="col-12 col-md-8 text-end">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#inventarioModal">
+          <i class="bi bi-box-arrow-down"></i> Generar catálogo
+        </button>
+
+
+      </div>
+    </div>
 
     <div class="container mt-5">
       <div class="row justify-content-center">
@@ -88,3 +97,48 @@
     </div>
   </div>
 </div>
+<!-- Modal -->
+<div class="modal fade" id="inventarioModal" tabindex="-1" aria-labelledby="inventarioModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-0">
+        <h5 class="modal-title w-100" id="inventarioModalLabel">¿Cómo deseas descargar tu catálogo?</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+
+        <!-- ComboBox: Catálogo para -->
+        <div class="mb-4 text-start">
+          <label for="tipoInventario" class="form-label">Catálogo para:</label>
+          <select id="tipoInventario" class="form-select bg-secondary text-white" [(ngModel)]="tipoInventario">
+            <option value="estudiante">Estudiante</option>
+            <option value="importador">Importador</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <!-- ComboBox: Mostrar -->
+        <div class="mb-4 text-start">
+          <label for="categoria" class="form-label">Mostrar:</label>
+          <select id="categoria" class="form-select bg-secondary text-white" [(ngModel)]="tipoCategoria">
+            <option value="todo">Todo</option>
+            <option value="compuertas">Compuertas</option>
+            <option value="modulos">Módulos</option>
+          </select>
+        </div>
+
+        <!-- Texto centrado -->
+        <p class="mb-4 text-center">Selecciona el formato para generar tu catálogo.</p>
+
+        <!-- Botones -->
+        <div class="d-grid gap-2 col-8 mx-auto">
+          <button class="btn btn-danger" (click)="descargarPDF()">📄 Descargar PDF</button>
+          <button class="btn btn-primary" (click)="descargarExcel()">📊 Descargar Excel</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+

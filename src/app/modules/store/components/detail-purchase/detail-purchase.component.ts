@@ -5,6 +5,7 @@ import {LoaderComponent} from "../../../../shared/components/LoaderComponent";
 import {Router} from "@angular/router";
 import {FormsModule, ReactiveFormsModule, UntypedFormGroup} from "@angular/forms";
 import Notiflix from "notiflix";
+import { FormGroup, FormBuilder } from '@angular/forms';
 
 
 @Component({
@@ -18,15 +19,33 @@ export class DetailPurchaseComponent implements OnInit {
   cart: any[] = [];
   total: number = 0;
   public formGroup!: UntypedFormGroup;
-  constructor(private cartService: CartService,private router: Router) {}
+
+  constructor(private cartService: CartService,private router: Router,private fb: FormBuilder) {}
 
   ngOnInit(): void {
+    this.formGroup = this.fb.group({});
     this.cart = this.cartService.getCart();
     this.calculateTotal();
   }
 
+  onCantidadChange(item: any, event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    const cantidad = Math.max(1, parseInt(inputElement.value, 10));
+
+    if (item.cantidad !== cantidad) {
+      item.cantidad = cantidad;
+      this.recalcularTotal();
+    }
+  }
+
+
+
+
   calculateTotal(): void {
     this.total = this.cart.reduce((sum, item) => sum + item.pvp * item.cantidad, 0);
+  }
+  recalcularTotal() {
+    this.total = this.cart.reduce((acc, item) => acc + item.pvp * item.cantidad, 0);
   }
 
   removeItem(productId: string): void {

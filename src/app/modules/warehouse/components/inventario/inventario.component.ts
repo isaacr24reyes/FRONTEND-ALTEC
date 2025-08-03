@@ -12,8 +12,8 @@ declare var bootstrap: any;
 })
 export class InventarioComponent implements OnInit {
   public formGroup!: UntypedFormGroup;
-  allProducts: any[] = [];   // Lista completa
-  products: any[] = [];      // Productos visibles en página actual
+  allProducts: any[] = [];
+  products: any[] = [];
   totalCount: number = 0;
   currentPage: number = 1;
   totalPages: number = 0;
@@ -21,6 +21,9 @@ export class InventarioComponent implements OnInit {
   selectedProduct: any;
   isFirstLoad: boolean = true;
   isLoading: boolean = true;
+  tipoInventario: string = 'estudiante';
+  tipoCategoria: string = 'todo';
+
 
   constructor(
     private productService: ProductService,
@@ -72,7 +75,10 @@ export class InventarioComponent implements OnInit {
     });
   }
 
-  /** Filtra y pagina los productos en el frontend */
+  generarInventario() {
+    console.log("Generando inventario...");
+  }
+
   applyFilter(): void {
     const term = this.normalizeText(this.formGroup.get('searchControl')!.value || '');
     const filtered = term
@@ -122,4 +128,14 @@ export class InventarioComponent implements OnInit {
   }
 
   onSubmit() {}
+  descargarPDF() {
+    console.log("Descargando PDF para:", this.tipoInventario);
+    // lógica PDF
+  }
+
+  descargarExcel() {
+    console.log("Descargando Excel para:", this.tipoInventario);
+    // lógica Excel
+  }
+
 }

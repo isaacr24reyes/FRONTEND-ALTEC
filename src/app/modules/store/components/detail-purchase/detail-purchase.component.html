@@ -3,7 +3,7 @@
 <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="product-quote-form">
   <div class="container d-flex justify-content mb-3">
     <button type="button" class="btn btn-outline-light mt-4" (click)="goBackToStore()">
-      <i class="bi bi-arrow-left"></i> Volver a la tienda
+      <i class="bi bi-arrow-left"></i> Seguir Comprando
     </button>
 
   </div>
@@ -32,29 +32,49 @@
         </thead>
         <tbody>
         <tr *ngFor="let item of cart">
-          <td>
-            <img *ngIf="item.foto && item.foto !== 'NOT-IMAGE'; else noImg" [src]="item.foto" width="60" height="60" />
+          <td class="text-center align-middle">
+            <img *ngIf="item.foto && item.foto !== 'NOT-IMAGE'; else noImg" [src]="item.foto" width="60" height="60" class="img-fluid" />
             <ng-template #noImg><span class="text-muted">Sin imagen</span></ng-template>
           </td>
+
           <td>{{ item.descripcion }}</td>
-          <td>{{ item.cantidad }}</td>
-          <td>{{ item.pvp | currency: 'USD' }}</td>
-          <td>{{ item.pvp * item.cantidad | currency: 'USD' }}</td>
-          <td>
+          <td class="text-center align-middle">
+            <input
+              type="number"
+              [value]="item.cantidad"
+              (input)="onCantidadChange(item, $event)"
+              class="form-control text-center"
+              min="1"
+              style="max-width: 80px; margin: 0 auto;" />
+          </td>
+
+          <td class="text-center align-middle">{{ item.pvp | currency: 'USD' }}</td>
+          <td class="text-center align-middle">{{ item.pvp * item.cantidad | currency: 'USD' }}</td>
+          <td class="text-center align-middle">
             <button class="btn btn-sm btn-danger" (click)="removeItem(item.id)">
               <i class="bi bi-trash"></i>
             </button>
           </td>
+
         </tr>
         </tbody>
       </table>
     </div>
 
     <div class="text-end mt-3">
-      <h4 class="text-white no-inspect">Total: {{ total | currency: 'USD' }}</h4>
+      <h4 class="no-inspect" style="color: #90ee90; font-size: 1.8rem;">
+        Total: {{ total | currency: 'USD' }}
+      </h4>
+
+
+
 
       <button class="btn btn-success mt-2" (click)="finalizarCompra()">Finalizar compra</button>
-
+      <div class="text-center mt-5">
+    <span class="text-white small-text">
+      Developed by <strong style="color: #8B50FB;">SwiFt©</strong> (2025).
+    </span>
+      </div>
     </div>
   </div>
 </form>
