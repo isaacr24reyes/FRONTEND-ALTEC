@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import {R_AUTHENTICATION, R_LOGIN, R_PRODUCT_QUOTE, R_WAREHOUSE} from "../../../constants/route.constants";
 import {Router} from "@angular/router";
 import {UserSessionService} from "../../../modules/authentication/services/user-session.service";
+import {CartService} from "../../../shared/services/CartService";
+import Notiflix from "notiflix";
 
 @Component({
   selector: 'app-header',
@@ -12,7 +14,7 @@ export class HeaderComponent implements OnInit {
   public role: string | null = null;
   public isExternal: boolean = false;
   cartItemCount: number = 0;
-  constructor(private _router: Router, private _userSessionService: UserSessionService) { }
+  constructor(private _router: Router, private _userSessionService: UserSessionService,private cartService: CartService) { }
 
   ngOnInit(): void {
     this.isExternal = sessionStorage.getItem('isExternal') === 'true';
@@ -20,6 +22,9 @@ export class HeaderComponent implements OnInit {
       if (userInfo) {
         this.role = userInfo.role;
       }
+    });
+    this.cartService.cartItemCount$.subscribe(count => {
+      this.cartItemCount = count;
     });
   }
   public logout(): void {
@@ -37,7 +42,22 @@ export class HeaderComponent implements OnInit {
   navigateToIngreso(): void {
     this._router.navigate(['/warehouse/add-product']);
   }
-  navigateToCart() {
-    this._router.navigate(['/carrito']);
+  navigateToCart(): void {
+    const cart = this.cartService.getCart();
+
+    if (cart.length === 0) {
+      Notiflix.Report.info(
+        'Carrito vacío',
+        '¡Aún no has agregado productos!<br>Explora nuestra tienda y encuentra lo que necesitas 😊',
+        'Ir a la tienda',
+        () => this._router.navigate(['/store'])
+      );
+
+      return;
+    }
+
+    this._router.navigate(['/store/detail-purchase']);
   }
+
+
 }

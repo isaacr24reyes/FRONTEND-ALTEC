@@ -4,6 +4,10 @@ import { NgForOf, CurrencyPipe, NgIf } from '@angular/common';
 import { ProductService } from "../../warehouse/services/warehouse.service";
 import { LoaderService } from "../../../shared/services/LoaderService";
 import { LoaderComponent } from "../../../shared/components/LoaderComponent";
+import Notiflix from "notiflix";
+import {CartService} from "../../../shared/services/CartService";
+
+
 
 @Component({
   selector: 'app-store',
@@ -21,21 +25,29 @@ import { LoaderComponent } from "../../../shared/components/LoaderComponent";
 })
 export class StoreComponent implements OnInit {
   public formGroup!: UntypedFormGroup;
-  allProducts: any[] = [];   // Lista completa de productos
-  products: any[] = [];      // Lista visible en la página actual
+  allProducts: any[] = [];
+  products: any[] = [];
   totalCount = 0;
   currentPage = 1;
   totalPages = 0;
-  pageSize = 12;             // Productos por página
+  pageSize = 12;
   searchTerm = '';
+  cart: any[] = [];
+  cartItemCount: number = 0;
 
   constructor(
     private productService: ProductService,
     private fb: UntypedFormBuilder,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private cartService: CartService
   ) {}
 
   ngOnInit(): void {
+    Notiflix.Notify.init({
+      position: 'left-top',
+      timeout: 1000,
+      clickToClose: true
+    });
     this.formGroup = this.fb.group({
       searchTerm: ['']
     });
@@ -43,7 +55,12 @@ export class StoreComponent implements OnInit {
     this.loadProducts();
   }
 
-  /** Carga todos los productos desde el backend */
+  addToCart(product: any): void {
+    this.cartService.addToCart(product);
+    Notiflix.Notify.success(`Agregado ${product.cantidad} x ${product.descripcion} al carrito`);
+  }
+
+
   loadProducts(): void {
     this.productService.getProductsClient(1, 1000, '') // Pedimos todos (1-1000)
       .subscribe({
@@ -58,8 +75,6 @@ export class StoreComponent implements OnInit {
         }
       });
   }
-
-  /** Aplica el filtro y la paginación en el frontend */
   applyFilter(): void {
     const term = this.normalizeText(this.formGroup.value.searchTerm || '');
     const filtered = term
@@ -86,7 +101,6 @@ export class StoreComponent implements OnInit {
     this.applyFilter();
   }
 
-  /** Paginación */
   onPreviousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
@@ -100,14 +114,7 @@ export class StoreComponent implements OnInit {
       this.applyFilter();
     }
   }
-
-  /** Agregar al carrito */
-  addToCart(product: any): void {
-    console.log('Producto agregado:', product);
-  }
-
-  /** Submit del formulario */
-  onSubmit() {
+ onSubmit() {
     this.applyFilter();
   }
 }

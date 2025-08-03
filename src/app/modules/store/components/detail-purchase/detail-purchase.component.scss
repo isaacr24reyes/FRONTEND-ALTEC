@@ -1,0 +1,43 @@
+table {
+  font-size: 0.95rem;
+}
+
+img {
+  object-fit: cover;
+  border-radius: 5px;
+}
+.product-quote-form {
+  background: #18181C;
+  h1{
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 1000;
+    font-size: 50px;
+    padding-top: 20px;
+  }
+  h2{
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 1000;
+    font-size: 20px;
+    padding-top: 20px;
+  }
+
+  .small-text {
+    font-size: 0.75rem;
+  }
+  .styled-line {
+    height: 7px;
+    background-color: #8B50FB;
+    margin: 20px auto;
+    width: 70%;
+  }
+  .eliminar-columna {
+    display: none;
+  }
+}
+
+.no-inspect {
+  user-select: none;
+  pointer-events: none;
+}

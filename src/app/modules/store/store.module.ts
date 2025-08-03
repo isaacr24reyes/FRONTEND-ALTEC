@@ -6,6 +6,7 @@ import { AppMaterialModule } from "../../app-material.module";
 import { AppTranslationLanguageModule } from "../../app-translation-language.module";
 import { ReactiveFormsModule } from "@angular/forms";
 import {StoreComponent} from "./components/store.component";
+import {DetailPurchaseComponent} from "./components/detail-purchase/detail-purchase.component";
 
 
 @NgModule({
@@ -15,7 +16,8 @@ import {StoreComponent} from "./components/store.component";
     AppTranslationLanguageModule,
     RouterModule.forChild(STORE_ROUTES),
     ReactiveFormsModule,
-    StoreComponent
+    StoreComponent,
+    DetailPurchaseComponent
   ]
 })
 export class StoreModule { }

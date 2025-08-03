@@ -1,57 +1,82 @@
 <!-- navbar.component.html -->
 <nav class="navbar navbar-expand-lg navbar-light custom-navbar border-5">
   <div class="container-fluid">
+    <!-- Logo -->
     <a class="navbar-brand" href="#">
       <img src="assets/images/LOGIN.png" alt="ALTEC Logo" style="height: 40px;">
     </a>
-    <button class="navbar-toggler bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+
+    <!-- Carrito móvil (visible siempre) -->
+    <div class="d-lg-none d-flex align-items-center ms-auto me-4"> <!-- ← Aumenta margen derecho -->
+      <a class="nav-link text-white position-relative" *ngIf="isExternal" (click)="navigateToCart()" style="cursor: pointer;">
+        <i class="bi bi-cart-fill" style="font-size: 1.3rem;"></i>
+        <span *ngIf="cartItemCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+      {{ cartItemCount }}
+    </span>
+      </a>
+    </div>
+
+
+    <!-- Botón hamburguesa -->
+    <button class="navbar-toggler bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+
+    <!-- Contenido colapsable -->
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <!-- Links -->
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item" *ngIf="!isExternal">
           <a class="nav-link active text-white" aria-current="page" href="#">Inicio</a>
         </li>
+
         <li class="nav-item dropdown" *ngIf="!isExternal">
-          <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <a class="nav-link dropdown-toggle text-white" href="#" id="dropdownInventario" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Inventario
           </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown" >
+          <ul class="dropdown-menu" aria-labelledby="dropdownInventario">
             <li><a class="dropdown-item" (click)="navigateToBodega()" style="cursor: pointer;">Consultar Bodega</a></li>
             <li><a class="dropdown-item" (click)="navigateToIngreso()" style="cursor: pointer;">Cargar Productos</a></li>
           </ul>
         </li>
+
         <li class="nav-item dropdown" *ngIf="!isExternal">
-          <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <a class="nav-link dropdown-toggle text-white" href="#" id="dropdownVentas" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Ventas
           </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <ul class="dropdown-menu" aria-labelledby="dropdownVentas">
             <li><a class="dropdown-item" href="#">Realizar Venta</a></li>
             <li><a class="dropdown-item" href="#">Ver Ventas</a></li>
           </ul>
         </li>
-        <li class="nav-item"*ngIf="!isExternal">
-          <a class="nav-link active text-white" aria-current="page" (click)="navigateToCotizador()" style="cursor: pointer;">
+
+        <li class="nav-item" *ngIf="!isExternal">
+          <a class="nav-link active text-white" (click)="navigateToCotizador()" style="cursor: pointer;">
             Cotizador
           </a>
         </li>
       </ul>
+
+      <!-- Info del usuario (SIEMPRE dentro del collapse para que aparezca en burger) -->
       <div class="d-flex align-items-center">
-  <span class="text-white me-3">
-    <i class="bi bi-person-fill me-1"></i>
-    {{ isExternal ? 'Usuario externo' : role }}
-  </span>
-        <a class="nav-link text-white position-relative me-3" *ngIf="isExternal" (click)="navigateToCart()" style="cursor: pointer;">
+        <span class="text-white me-3">
+          <i class="bi bi-person-fill me-1"></i>
+          {{ isExternal ? 'Usuario externo' : role }}
+        </span>
+
+        <!-- Carrito para escritorio -->
+        <a class="nav-link text-white position-relative me-3 d-none d-lg-block" *ngIf="isExternal" (click)="navigateToCart()" style="cursor: pointer;">
           <i class="bi bi-cart-fill" style="font-size: 1.3rem;"></i>
           <span *ngIf="cartItemCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-      {{ cartItemCount }}
-    </span>
+            {{ cartItemCount }}
+          </span>
         </a>
+
         <a class="nav-link text-white" (click)="logout()" href="#">
           <i class="bx bx-power-off"></i> Salir
         </a>
       </div>
-
     </div>
   </div>
 </nav>
