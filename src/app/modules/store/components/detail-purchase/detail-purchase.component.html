@@ -53,7 +53,8 @@
     <div class="text-end mt-3">
       <h4 class="text-white no-inspect">Total: {{ total | currency: 'USD' }}</h4>
 
-      <button class="btn btn-success mt-2">Finalizar compra</button>
+      <button class="btn btn-success mt-2" (click)="finalizarCompra()">Finalizar compra</button>
+
     </div>
   </div>
 </form>

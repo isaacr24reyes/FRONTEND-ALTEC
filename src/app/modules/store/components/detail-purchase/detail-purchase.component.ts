@@ -42,6 +42,25 @@ export class DetailPurchaseComponent implements OnInit {
       );
     }
   }
+  finalizarCompra(): void {
+    if (this.cart.length === 0) return;
+
+    let message = '🧾 *Cotización de productos*%0A%0A'; // %0A = salto de línea
+    this.cart.forEach((item, index) => {
+      message += `*${index + 1}.* ${item.descripcion}%0A`;
+      message += `Cantidad: ${item.cantidad}%0A`;
+      message += `PVP: $${item.pvp.toFixed(2)}%0A`;
+      message += `Subtotal: $${(item.pvp * item.cantidad).toFixed(2)}%0A%0A`;
+    });
+
+    message += `🟢 *Total: $${this.total.toFixed(2)}*%0A`;
+    message += `%0AGracias por su preferencia.`;
+
+    const phone = '593995159078'; // Ecuador (593 + número sin 0)
+    const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
+
+    window.open(whatsappUrl, '_blank');
+  }
 
 
   goBackToStore(): void {
