@@ -20,5 +20,14 @@ export class AccountService extends ApplicationBaseService {
   public getUserInfo(username: string): Observable<any> {
     return this.genericSend('get', `api/auth/by-username?username=${username}`);
   }
+  searchUsersByName(q: string, page = 1, pageSize = 50): Observable<any> {
+    const url = `api/auth/by-name?q=${encodeURIComponent(q)}&page=${page}&pageSize=${pageSize}`;
+    return this.genericSend('get', url);
+  }
+
+  addPoints(name: string, points: number): Observable<any> {
+    const body = { name, points };
+    return this.genericSend('post', 'api/auth/add-points', body);
+  }
 
 }

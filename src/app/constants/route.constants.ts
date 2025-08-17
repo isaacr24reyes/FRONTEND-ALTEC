@@ -6,4 +6,5 @@ export const R_REGISTER: string = 'register'
 export const R_WAREHOUSE: string = 'warehouse'
 export const R_PRODUCT_QUOTE: string = 'product-quote'
 export const R_STORE: string = 'store'
+export const R_ALTEC_POINTS: string = 'qr-generator'
 

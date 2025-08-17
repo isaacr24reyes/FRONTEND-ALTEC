@@ -1,0 +1,35 @@
+.login-form {
+  background: #18181C;
+
+  h1{
+    color: white;
+    font-family: 'Acephimere', sans-serif;
+    font-weight: 1000;
+    font-size: 35px;
+    padding-top: 20px;
+  }
+  h2{
+    color: white;
+    font-family: 'Acephimere', sans-serif;
+    font-weight: 1000;
+    font-size: 15px;
+  }
+  .small-text {
+    font-size: 0.75rem;
+  }
+  .gray-input {
+    background-color: #18181C;
+    color: white;
+  }
+  .gray-input::placeholder {
+    color: #7b7979 !important;
+  }
+  .gray-input-select {
+    background-color: #18181C;
+    color: white !important;
+  }
+  .gray-input-select option {
+    color: white !important;
+    background-color: #18181C;
+  }
+}

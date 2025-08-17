@@ -2,7 +2,14 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import {AppBlankComponent} from "./layouts/blank/blank.component";
 import {FullComponent} from "./layouts/full/full.component";
-import {R_404, R_AUTHENTICATION, R_DASHBOARD, R_PRODUCT_QUOTE, R_STORE, R_WAREHOUSE} from "./constants/route.constants";
+import {
+  R_404, R_ALTEC_POINTS,
+  R_AUTHENTICATION,
+  R_DASHBOARD,
+  R_PRODUCT_QUOTE,
+  R_STORE,
+  R_WAREHOUSE
+} from "./constants/route.constants";
 
 const routes: Routes = [
   {
@@ -32,6 +39,11 @@ const routes: Routes = [
     path: R_STORE,
     component: FullComponent,
     loadChildren: () => import('./modules/store/store.module').then(mod => mod.StoreModule)
+  },
+  {
+    path: R_ALTEC_POINTS,
+    component: FullComponent,
+    loadChildren: () => import('./modules/altec-points/altec-points.module').then(mod => mod.AltecPointsModule)
   }
 ];
 
