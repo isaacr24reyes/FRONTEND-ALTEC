@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -25,15 +25,18 @@ import {AccountService} from "../../authentication/services/account.service";
   styleUrl: './altec-points.component.scss'
 })
 export class AltecPointsComponent implements OnInit {
+  @ViewChild('productDescriptionInput') productInput?: ElementRef<HTMLInputElement>;
   public formGroup!: UntypedFormGroup;
-
+  private readonly POINTS_PER_DOLLAR = 10;
+  showDropdown = false;
+  activeIndex = -1;
+  selectedItem: any | null = null;
   // Autocomplete state
   suggestions: any[] = [];
   loading = false;
-  showDropdown = false;
-  activeIndex = -1;
+  private blurTimer: any = null;
   selectedUser: any = null;
-
+  isSubmitting = false;
   constructor(
     private fb: UntypedFormBuilder,
     private account: AccountService
@@ -41,11 +44,10 @@ export class AltecPointsComponent implements OnInit {
 
   ngOnInit(): void {
     this.formGroup = this.fb.group({
-      productDescription: ['', [Validators.required]], // aquí escribes el nombre del cliente
-      productCode: ['', []] // tu monto de venta (lo dejé tal cual)
+      productDescription: ['', [Validators.required]],
+      productCode: ['', []]
     });
 
-    // Suscripción al input con debounce
     this.formGroup.get('productDescription')!.valueChanges.pipe(
       debounceTime(250),
       distinctUntilChanged(),
@@ -62,26 +64,43 @@ export class AltecPointsComponent implements OnInit {
     ).subscribe((res: any[]) => {
       this.suggestions = Array.isArray(res) ? res : [];
       this.loading = false;
-      // si no hay resultados, igual mostramos el dropdown para el mensaje “Sin resultados”
       this.showDropdown = true;
     });
   }
 
-  // UX helpers
-  onSearchFocus(): void {
-    if (this.suggestions.length || this.loading) {
-      this.showDropdown = true;
+  private toNumber(input: any): number {
+    if (typeof input === 'number') return input;
+    if (typeof input !== 'string') return NaN;
+    const raw = input.trim();
+
+    if (!raw) return NaN;
+
+    // Detecta formato común con coma decimal (ej: 1.234,56)
+    const commaAsDecimal = /^[\d.]+,\d{1,2}$/.test(raw);
+    if (commaAsDecimal) {
+      const normalized = raw.replace(/\./g, '').replace(',', '.');
+      return Number(normalized);
     }
-  }
 
-  onSearchBlur(): void {
-    // pequeño delay para permitir el mousedown del item
-    setTimeout(() => {
+    // Formato con punto decimal
+    const normalized = raw.replace(/,/g, ''); // quita separador de miles
+    return Number(normalized);
+  }
+  private moneyToPoints(amount: number): number {
+    const raw = amount * this.POINTS_PER_DOLLAR;
+    return Math.floor(raw); // ⬅️ cámbialo por Math.round(raw) si prefieres
+  }
+  deferClose(): void {
+    this.blurTimer = setTimeout(() => {
       this.showDropdown = false;
-      this.activeIndex = -1;
-    }, 120);
+      this.blurTimer = null;
+    }, 80);
   }
-
+  private blurInput(): void {
+    const el = this.productInput?.nativeElement;
+    if (!el) return;
+    requestAnimationFrame(() => el.blur());
+  }
   onSearchKeydown(ev: KeyboardEvent): void {
     if (!this.showDropdown || (!this.suggestions.length && !this.loading)) return;
 
@@ -102,21 +121,81 @@ export class AltecPointsComponent implements OnInit {
     }
   }
 
-  selectSuggestion(u: any): void {
-    const name = this.displayName(u);
-    this.formGroup.patchValue({ productDescription: name });
-    this.selectedUser = u;
+  onSelect(u: any, ev?: Event): void {
+    if (this.blurTimer) { clearTimeout(this.blurTimer); this.blurTimer = null; }
+    ev?.preventDefault();
+    ev?.stopPropagation();
+
+    const label = this.displayName(u);
+
+    this.formGroup.get('productDescription')?.setValue(label, { emitEvent: false });
+    this.formGroup.get('productDescription')?.markAsDirty();
+    this.formGroup.get('productDescription')?.markAsTouched();
+
     this.showDropdown = false;
+    this.loading = false;
+    this.suggestions = [];
+    this.selectedUser = u;
+    this.selectedItem = u;
     this.activeIndex = -1;
+    this.blurInput();
+  }
+  clearOnFocus(): void {
+    const ctrl = this.formGroup.get('productDescription');
+    ctrl?.setValue('', { emitEvent: false });
+    this.activeIndex = -1;
+    this.selectedItem = null;
+    this.showDropdown = false;
+    this.selectedUser = null;
+    this.showDropdown = false;
   }
 
-  // Dado que no tipamos el DTO, tomamos el mejor campo disponible
+  selectSuggestion(u: any): void {
+    const label = this.displayName(u);
+    this.formGroup.get('productDescription')?.setValue(label, { emitEvent: false });
+    this.showDropdown = false;
+    this.loading = false;
+    this.suggestions = [];
+    this.selectedUser = u;
+    this.selectedItem = u;
+    this.activeIndex = -1;
+    this.blurInput();
+  }
   displayName(u: any): string {
     return u?.name ?? u?.username ?? u?.fullName ?? u?.email ?? '';
   }
-
   onSubmit(): void {
     if (!this.formGroup.valid) return;
 
+    const name: string =
+      this.selectedUser?.name ??
+      (this.formGroup.value.productDescription || '').toString().trim();
+
+    const amountInput = this.formGroup.value.productCode; // tu "Monto de Venta"
+    const amount = this.toNumber(amountInput);
+
+    if (!name) {
+      console.warn('Falta el nombre del cliente.');
+      return;
+    }
+    if (isNaN(amount) || amount <= 0) {
+      console.warn('Monto inválido: ', amountInput);
+      return;
+    }
+
+    const points = this.moneyToPoints(amount); // entero para el backend
+    this.isSubmitting = true;
+
+    this.account.addPoints(name, points).subscribe({
+      next: (res) => {
+        this.isSubmitting = false;
+        console.log('Puntos acreditados:', { name, points, res });
+        // aquí puedes mostrar un toast / notificación si quieres
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        console.error('Error acreditando puntos:', err);
+      }
+    });
   }
 }

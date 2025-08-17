@@ -33,3 +33,38 @@
     background-color: #18181C;
   }
 }
+.autocomplete-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  transform: none !important;
+  min-width: 0;
+  max-height: 260px;
+  overflow: auto;
+  z-index: 1000;
+}
+.selected-user-card {
+  color: #fff;
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+.selected-user-card .suc-label {
+  opacity: 0.9;
+  font-weight: 600;
+}
+
+.selected-user-card .points-badge {
+  display: inline-block;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(139, 80, 251, 0.15);
+  border: 1px solid rgba(139, 80, 251, 0.35);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}

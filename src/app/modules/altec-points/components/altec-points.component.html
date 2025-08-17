@@ -4,68 +4,78 @@
   </div>
 
   <div class="container" style="max-width: 800px;">
-    <!-- Cliente -->
     <div class="row mt-3">
       <div class="col-12">
         <h2 class="text-left">Cliente:</h2>
       </div>
 
-      <div class="col-12 position-relative">
-        <input
-          type="text"
-          id="productDescription"
-          formControlName="productDescription"
-          class="form-control gray-input"
-          placeholder="Ingresa el nombre del cliente"
-          autocomplete="off"
-          (focus)="onSearchFocus()"
-          (blur)="onSearchBlur()"
-          (keydown)="onSearchKeydown($event)"
-        />
-
-        <!-- Dropdown de sugerencias -->
-        <ul
-          *ngIf="showDropdown"
-          class="dropdown-menu show w-100 mt-0 shadow"
-          style="max-height: 260px; overflow:auto; top: 100%;"
-        >
-          <!-- Cargando -->
-          <li *ngIf="loading" class="dropdown-item text-muted d-flex align-items-center gap-2">
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Buscando…
-          </li>
-
-          <!-- Resultados -->
-          <li
-            *ngFor="let u of suggestions; let i = index"
-            (mousedown)="selectSuggestion(u)"
+      <div class="col-12">
+        <div class="autocomplete-wrapper position-relative p-0">
+          <input
+            #productDescriptionInput
+            type="text"
+            id="productDescription"
+            formControlName="productDescription"
+            class="form-control gray-input"
+            placeholder="Ingresa el nombre del cliente"
+            autocomplete="off"
+            (focus)="clearOnFocus()"
+            (blur)="deferClose()"
+            (keydown)="onSearchKeydown($event)"
+            [ngClass]="{ 'rounded-bottom-0': showDropdown }"
+            [attr.aria-expanded]="showDropdown"
+          />
+          <ul
+            *ngIf="showDropdown"
+            class="dropdown-menu show mt-0 shadow border-top-0 rounded-top-0 autocomplete-menu"
           >
-            <button
-              type="button"
-              class="dropdown-item"
-              [class.active]="i === activeIndex"
-            >
-              {{ displayName(u) }}
-            </button>
-          </li>
+            <li *ngIf="loading" class="dropdown-item text-muted d-flex align-items-center gap-2">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Buscando…
+            </li>
 
-          <!-- Sin resultados -->
-          <li *ngIf="!loading && suggestions.length === 0" class="dropdown-item text-muted">
-            Sin resultados
-          </li>
-        </ul>
+            <li *ngFor="let u of suggestions; let i = index">
 
-        <!-- Error de validación (opcional) -->
+              <button
+                type="button"
+                class="dropdown-item"
+                [class.active]="i === activeIndex"
+                (pointerdown)="onSelect(u, $event)"
+              >
+                {{ displayName(u) }}
+              </button>
+            </li>
+
+            <li *ngIf="!loading && suggestions.length === 0" class="dropdown-item text-muted">
+              Sin resultados
+            </li>
+          </ul>
+        </div>
+
+        <!-- 🟦 Cuadro con datos seleccionados -->
+        <div *ngIf="selectedUser" class="selected-user-card mt-2">
+          <div class="row g-2 align-items-center">
+            <div class="col-12 col-md">
+              <span class="suc-label">Cliente:</span>
+              {{ selectedUser.name }} ({{ selectedUser.username }})
+            </div>
+            <div class="col-12 col-md-auto">
+              <span class="suc-label me-2">Altec puntos:</span>
+              <span class="points-badge">{{ selectedUser.altec_Points }}</span>
+            </div>
+          </div>
+        </div>
+
+
         <small class="text-danger" *ngIf="formGroup.get('productDescription')?.invalid && formGroup.get('productDescription')?.touched">
           El nombre del cliente es requerido.
         </small>
       </div>
     </div>
 
-    <!-- Monto de Venta -->
     <div class="row mt-3">
       <div class="col-12">
-        <h2 class="text-left">Monto de Venta:</h2>
+        <h2 class="text-left">Monto de Venta ($):</h2>
       </div>
       <div class="col-12">
         <input
@@ -73,7 +83,7 @@
           id="productCode"
           formControlName="productCode"
           class="form-control gray-input"
-          placeholder="Valor.."
+          placeholder="Valor(USD).."
           autocomplete="off"
         />
       </div>
