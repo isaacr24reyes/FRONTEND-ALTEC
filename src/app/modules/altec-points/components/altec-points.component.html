@@ -52,7 +52,6 @@
           </ul>
         </div>
 
-        <!-- 🟦 Cuadro con datos seleccionados -->
         <div *ngIf="selectedUser" class="selected-user-card mt-2">
           <div class="row g-2 align-items-center">
             <div class="col-12 col-md">
@@ -61,8 +60,13 @@
             </div>
             <div class="col-12 col-md-auto">
               <span class="suc-label me-2">Altec puntos:</span>
-              <span class="points-badge">{{ selectedUser.altec_Points }}</span>
+              <div class="d-flex flex-column align-items-start align-items-md-end">
+                <span class="points-badge">{{ selectedUser.altec_Points }}</span>
+                <small class="mt-1" style="color: rgba(255,255,255,.85)">≈ {{ selectedUserUsdEquivalent }}</small>
+
+              </div>
             </div>
+
           </div>
         </div>
 

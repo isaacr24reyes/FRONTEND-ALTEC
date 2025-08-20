@@ -5,9 +5,8 @@ import { ProductService } from "../../warehouse/services/warehouse.service";
 import { LoaderService } from "../../../shared/services/LoaderService";
 import { LoaderComponent } from "../../../shared/components/LoaderComponent";
 import Notiflix from "notiflix";
-import {CartService} from "../../../shared/services/CartService";
-
-
+import { CartService } from "../../../shared/services/CartService";
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-store',
@@ -48,9 +47,19 @@ export class StoreComponent implements OnInit {
       timeout: 1000,
       clickToClose: true
     });
+
     this.formGroup = this.fb.group({
       searchTerm: ['']
     });
+
+    // Suscripción con debounce para búsquedas reactivas
+    this.formGroup.get('searchTerm')!.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.applyFilter();
+      });
+
     this.loaderService.start();
     this.loadProducts();
   }
@@ -60,12 +69,16 @@ export class StoreComponent implements OnInit {
     Notiflix.Notify.success(`Agregado ${product.cantidad} x ${product.descripcion} al carrito`);
   }
 
-
   loadProducts(): void {
     this.productService.getProductsClient(1, 1000, '') // Pedimos todos (1-1000)
       .subscribe({
         next: (data: any) => {
-          this.allProducts = (data?.items ?? []).map((p: any) => ({ ...p, cantidad: 1 }));
+          this.allProducts = (data?.items ?? []).map((p: any) => ({
+            ...p,
+            cantidad: 1,
+            _normDesc: this.normalizeText(`${p.descripcion ?? ''}`),
+            _normCode: this.normalizeText(`${p.codigo ?? ''}`)
+          }));
           this.applyFilter();
           this.loaderService.finish();
         },
@@ -75,25 +88,106 @@ export class StoreComponent implements OnInit {
         }
       });
   }
+
+  /** ---------- Filtro con tokens en cualquier orden + ranking ---------- */
   applyFilter(): void {
-    const term = this.normalizeText(this.formGroup.value.searchTerm || '');
-    const filtered = term
-      ? this.allProducts.filter(product =>
-        this.normalizeText(product.descripcion).includes(term) ||
-        this.normalizeText(product.codigo).includes(term)
-      )
-      : this.allProducts;
+    const raw = this.formGroup.get('searchTerm')!.value || '';
+    const tokens = this.tokenize(raw);
+
+    let filtered = this.allProducts;
+
+    if (tokens.length) {
+      filtered = this.allProducts
+        .map(p => {
+          const normDesc = p._normDesc as string;
+          const normCode = p._normCode as string;
+
+          // AND: todos los tokens deben aparecer en desc o código (cualquier orden)
+          const matchesAll = tokens.every(t =>
+            this.textContainsToken(normDesc, t) || this.textContainsToken(normCode, t)
+          );
+
+          const score = matchesAll ? this.scoreMatch(normDesc, normCode, tokens) : -1;
+          return { p, score };
+        })
+        .filter(x => x.score >= 0)
+        .sort((a, b) => b.score - a.score) // ordenar por relevancia
+        .map(x => x.p);
+    }
 
     this.totalCount = filtered.length;
-    this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+    this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1;
 
     const startIndex = (this.currentPage - 1) * this.pageSize;
     this.products = filtered.slice(startIndex, startIndex + this.pageSize);
   }
+
+  /** ---------- Helpers de búsqueda avanzada ---------- */
+
+  /** Normaliza texto eliminando tildes, a minúsculas y colapsa espacios */
   private normalizeText(text: string): string {
-    return text
-      ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-      : '';
+    return (text || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /** Tokeniza en palabras/números */
+  private tokenize(text: string): string[] {
+    const norm = this.normalizeText(text);
+    return norm.match(/[a-z0-9]+/gi)?.map(t => this.normalizeText(t)) ?? [];
+  }
+
+  /** "Stem" muy ligero para plural/singular comunes (es, s) */
+  private stem(token: string): string {
+    return token.replace(/(es|s)$/i, '');
+  }
+
+  /** Escapa un token para expresiones regulares */
+  private escapeRegExp(s: string): string {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  /** ¿El texto contiene el token? Acepta coincidencia directa, raíz y bordes de palabra */
+  private textContainsToken(text: string, token: string): boolean {
+    if (!text || !token) return false;
+    const t = this.escapeRegExp(token);
+    const stemmed = this.escapeRegExp(this.stem(token));
+
+    return (
+      text.includes(token) ||
+      (stemmed && text.includes(stemmed)) ||
+      new RegExp(`\\b${t}`, 'i').test(text) ||
+      new RegExp(`${t}\\b`, 'i').test(text)
+    );
+  }
+
+  private scoreMatch(normDesc: string, normCode: string, tokens: string[]): number {
+    let score = 0;
+
+    for (const t of tokens) {
+      const inCode = this.textContainsToken(normCode, t);
+      const inDesc = this.textContainsToken(normDesc, t);
+
+      if (inCode) score += 10;
+      if (inDesc) score += 4;
+
+      const tEsc = this.escapeRegExp(t);
+      if (new RegExp(`\\b${tEsc}\\b`).test(normDesc)) score += 2;
+      if (new RegExp(`\\b${tEsc}\\b`).test(normCode)) score += 4;
+
+      if (normDesc.startsWith(t)) score += 2;
+      if (normCode.startsWith(t)) score += 3;
+    }
+
+    const allInDesc = tokens.every(t => this.textContainsToken(normDesc, t));
+    const allInCode = tokens.every(t => this.textContainsToken(normCode, t));
+    if (allInDesc) score += 5;
+    if (allInCode) score += 8;
+
+    return score;
   }
 
   onSearchChange(): void {
@@ -114,7 +208,8 @@ export class StoreComponent implements OnInit {
       this.applyFilter();
     }
   }
- onSubmit() {
+
+  onSubmit() {
     this.applyFilter();
   }
 }

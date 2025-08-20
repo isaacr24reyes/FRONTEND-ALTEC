@@ -24,7 +24,6 @@ export class InventarioComponent implements OnInit {
   tipoInventario: string = 'estudiante';
   tipoCategoria: string = 'todo';
 
-
   constructor(
     private productService: ProductService,
     private fb: UntypedFormBuilder
@@ -34,10 +33,7 @@ export class InventarioComponent implements OnInit {
     this.formGroup = this.fb.group({
       searchControl: ['']
     });
-
     this.getAllProducts();
-
-    // Detectar cambios en el campo de búsqueda
     this.formGroup.get('searchControl')!.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe(() => {
@@ -46,7 +42,6 @@ export class InventarioComponent implements OnInit {
       });
   }
 
-  /** Trae todos los productos del backend una sola vez */
   getAllProducts(): void {
     if (this.isFirstLoad) {
       Notiflix.Loading.standard('Cargando productos...');
@@ -55,7 +50,11 @@ export class InventarioComponent implements OnInit {
 
     this.productService.getProducts(1, 1000, '', 'descripcion', 'asc').subscribe({
       next: (data: any) => {
-        this.allProducts = data.items || [];
+        this.allProducts = (data.items || []).map((p: any) => ({
+          ...p,
+          _normDesc: this.normalizeText(`${p.descripcion ?? ''}`),
+          _normCode: this.normalizeText(`${p.codigo ?? ''}`)
+        }));
         this.applyFilter();
 
         if (this.isFirstLoad) {
@@ -80,22 +79,36 @@ export class InventarioComponent implements OnInit {
   }
 
   applyFilter(): void {
-    const term = this.normalizeText(this.formGroup.get('searchControl')!.value || '');
-    const filtered = term
-      ? this.allProducts.filter(product =>
-        this.normalizeText(product.descripcion).includes(term) ||
-        this.normalizeText(product.codigo).includes(term)
-      )
-      : this.allProducts;
+    const raw = this.formGroup.get('searchControl')!.value || '';
+    const tokens = this.tokenize(raw);
+
+    let filtered = this.allProducts;
+
+    if (tokens.length) {
+      filtered = this.allProducts
+        .map(p => {
+          const normDesc = p._normDesc as string;
+          const normCode = p._normCode as string;
+
+          const matchesAll = tokens.every(t =>
+            this.textContainsToken(normDesc, t) || this.textContainsToken(normCode, t)
+          );
+
+          const score = matchesAll ? this.scoreMatch(normDesc, normCode, tokens) : -1;
+          return { p, score };
+        })
+        .filter(x => x.score >= 0)
+        .sort((a, b) => b.score - a.score)
+        .map(x => x.p);
+    }
 
     this.totalCount = filtered.length;
-    this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+    this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1;
 
     const startIndex = (this.currentPage - 1) * this.pageSize;
     this.products = filtered.slice(startIndex, startIndex + this.pageSize);
   }
 
-  /** Paginación */
   onPreviousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
@@ -110,7 +123,6 @@ export class InventarioComponent implements OnInit {
     }
   }
 
-  /** Modal de producto */
   openProductModal(product: any): void {
     this.selectedProduct = product;
     const modalElement = document.getElementById('productModal');
@@ -120,22 +132,71 @@ export class InventarioComponent implements OnInit {
     }
   }
 
-  /** Normaliza texto eliminando tildes y pasando a minúsculas */
   private normalizeText(text: string): string {
-    return text
-      ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-      : '';
+    return (text || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  private tokenize(text: string): string[] {
+    const norm = this.normalizeText(text);
+    return norm.match(/[a-z0-9]+/gi)?.map(t => this.normalizeText(t)) ?? [];
+  }
+
+  private stem(token: string): string {
+    return token.replace(/(es|s)$/i, '');
+  }
+
+  private escapeRegExp(s: string): string {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  private textContainsToken(text: string, token: string): boolean {
+    if (!text || !token) return false;
+    const t = this.escapeRegExp(token);
+    const stemmed = this.escapeRegExp(this.stem(token));
+
+    return (
+      text.includes(token) ||
+      (stemmed && text.includes(stemmed)) ||
+      new RegExp(`\\b${t}`, 'i').test(text) ||
+      new RegExp(`${t}\\b`, 'i').test(text)
+    );
+  }
+  private scoreMatch(normDesc: string, normCode: string, tokens: string[]): number {
+    let score = 0;
+
+    for (const t of tokens) {
+      const inCode = this.textContainsToken(normCode, t);
+      const inDesc = this.textContainsToken(normDesc, t);
+
+      if (inCode) score += 10;
+      if (inDesc) score += 4;
+
+      const tEsc = this.escapeRegExp(t);
+      if (new RegExp(`\\b${tEsc}\\b`).test(normDesc)) score += 2;
+      if (new RegExp(`\\b${tEsc}\\b`).test(normCode)) score += 4;
+      if (normDesc.startsWith(t)) score += 2;
+      if (normCode.startsWith(t)) score += 3;
+    }
+    const allInDesc = tokens.every(t => this.textContainsToken(normDesc, t));
+    const allInCode = tokens.every(t => this.textContainsToken(normCode, t));
+    if (allInDesc) score += 5;
+    if (allInCode) score += 8;
+
+    return score;
   }
 
   onSubmit() {}
+
   descargarPDF() {
     console.log("Descargando PDF para:", this.tipoInventario);
-    // lógica PDF
   }
 
   descargarExcel() {
     console.log("Descargando Excel para:", this.tipoInventario);
-    // lógica Excel
   }
-
 }

@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup } from "@angular/forms";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 import { ProductService } from "../../warehouse/services/warehouse.service";
 import html2pdf from 'html2pdf.js';
-import { ViewChild, ElementRef } from '@angular/core';
 import Notiflix from "notiflix";
 declare var bootstrap: any;
 
@@ -14,14 +13,21 @@ declare var bootstrap: any;
 })
 export class ProductQuoteComponent implements OnInit {
   public formGroup!: UntypedFormGroup;
+
+  // Datos para búsqueda/paginación
+  allProducts: any[] = [];
+  filteredProducts: any[] = [];
   products: any[] = [];
+
   selectedProduct: any;
   totalCount: number = 0;
   currentPage: number = 1;
   totalPages: number = 0;
   private pageSize: number = 5;
+
   isFirstLoad: boolean = true;
   isLoading: boolean = true;
+
   cotizacion: any[] = [];
   @ViewChild('pdfCotizacion', { static: false }) pdfCotizacion!: ElementRef;
 
@@ -32,13 +38,17 @@ export class ProductQuoteComponent implements OnInit {
 
   ngOnInit(): void {
     this.formGroup = this.fb.group({ searchControl: [''] });
-    this.getProducts(this.currentPage, this.pageSize);
 
-    this.formGroup.get('searchControl')!.valueChanges
+    // Carga inicial: traemos un batch grande y filtramos en cliente
+    this.getProducts();
+
+    // Búsqueda reactiva con debounce
+    this.formGroup.get('searchControl')!
+      .valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe(term => {
+      .subscribe(() => {
         this.currentPage = 1;
-        this.getProducts(this.currentPage, this.pageSize, term);
+        this.applyFilter();
       });
   }
 
@@ -46,7 +56,6 @@ export class ProductQuoteComponent implements OnInit {
 
   openProductModal(product: any): void {
     this.selectedProduct = product;
-    console.log('Producto abierto:', product);
     const modalElement = document.getElementById('productModal');
     if (modalElement) {
       const modal = new bootstrap.Modal(modalElement);
@@ -54,23 +63,27 @@ export class ProductQuoteComponent implements OnInit {
     }
   }
 
-  getProducts(
-    pageNumber: number,
-    pageSize: number,
-    filter: string = '',
-    sortBy: string = 'descripcion',
-    sortOrder: string = 'asc'
-  ): void {
+  /**
+   * Descarga un lote grande y precalcula campos normalizados para buscar en cliente.
+   */
+  getProducts(): void {
     if (this.isFirstLoad) {
       Notiflix.Loading.standard('Cargando productos...');
       this.isLoading = true;
     }
 
-    this.productService.getProducts(pageNumber, pageSize, filter, sortBy, sortOrder).subscribe({
+    // Ajusta 1000 si necesitas más/menos
+    this.productService.getProducts(1, 1000, '', 'descripcion', 'asc').subscribe({
       next: (data: any) => {
-        this.products = data.items;
-        this.totalCount = data.totalCount;
-        this.totalPages = Math.ceil(this.totalCount / pageSize);
+        const items = data?.items ?? [];
+        this.allProducts = items.map((p: any) => ({
+          ...p,
+          _normDesc: this.normalizeText(`${p.descripcion ?? ''}`),
+          _normCode: this.normalizeText(`${p.codigo ?? ''}`)
+        }));
+
+        this.applyFilter();
+
         if (this.isFirstLoad) {
           Notiflix.Loading.remove();
           this.isLoading = false;
@@ -88,25 +101,131 @@ export class ProductQuoteComponent implements OnInit {
     });
   }
 
+  /** ---------- Filtro con tokens en cualquier orden + ranking ---------- */
+  applyFilter(): void {
+    const raw = this.formGroup.get('searchControl')!.value || '';
+    const tokens = this.tokenize(raw);
+
+    let filtered = this.allProducts;
+
+    if (tokens.length) {
+      filtered = this.allProducts
+        .map(p => {
+          const normDesc = p._normDesc as string;
+          const normCode = p._normCode as string;
+
+          // AND: todos los tokens deben aparecer en desc o código (cualquier orden)
+          const matchesAll = tokens.every(t =>
+            this.textContainsToken(normDesc, t) || this.textContainsToken(normCode, t)
+          );
+
+          const score = matchesAll ? this.scoreMatch(normDesc, normCode, tokens) : -1;
+          return { p, score };
+        })
+        .filter(x => x.score >= 0)
+        .sort((a, b) => b.score - a.score)   // ordenar por relevancia
+        .map(x => x.p);
+    }
+
+    this.filteredProducts = filtered;
+    this.totalCount = filtered.length;
+    this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1;
+
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    this.products = filtered.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  /** ---------- Paginación (cliente) ---------- */
   onPreviousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
-      const term = this.formGroup.get('searchControl')!.value || '';
-      this.getProducts(this.currentPage, this.pageSize, term);
+      this.applyFilter();
     }
   }
 
   onNextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      const term = this.formGroup.get('searchControl')!.value || '';
-      this.getProducts(this.currentPage, this.pageSize, term);
+      this.applyFilter();
     }
   }
 
+  /** ---------- Helpers de búsqueda avanzada ---------- */
+
+  /** Normaliza texto eliminando tildes, a minúsculas y colapsa espacios */
+  private normalizeText(text: string): string {
+    return (text || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /** Tokeniza en palabras/números */
+  private tokenize(text: string): string[] {
+    const norm = this.normalizeText(text);
+    return norm.match(/[a-z0-9]+/gi)?.map(t => this.normalizeText(t)) ?? [];
+  }
+
+  /** "Stem" muy ligero para plural/singular comunes (es, s) */
+  private stem(token: string): string {
+    return token.replace(/(es|s)$/i, '');
+  }
+
+  /** Escapa un token para expresiones regulares */
+  private escapeRegExp(s: string): string {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  /** ¿El texto contiene el token? Acepta coincidencia directa, raíz y bordes de palabra */
+  private textContainsToken(text: string, token: string): boolean {
+    if (!text || !token) return false;
+    const t = this.escapeRegExp(token);
+    const stemmed = this.escapeRegExp(this.stem(token));
+
+    return (
+      text.includes(token) ||
+      (stemmed && text.includes(stemmed)) ||
+      new RegExp(`\\b${t}`, 'i').test(text) ||
+      new RegExp(`${t}\\b`, 'i').test(text)
+    );
+  }
+
+  /** Puntaje de relevancia para ordenar resultados */
+  private scoreMatch(normDesc: string, normCode: string, tokens: string[]): number {
+    let score = 0;
+
+    for (const t of tokens) {
+      const inCode = this.textContainsToken(normCode, t);
+      const inDesc = this.textContainsToken(normDesc, t);
+
+      if (inCode) score += 10;               // código pesa más
+      if (inDesc) score += 4;
+
+      // Bonus por palabra completa
+      const tEsc = this.escapeRegExp(t);
+      if (new RegExp(`\\b${tEsc}\\b`).test(normDesc)) score += 2;
+      if (new RegExp(`\\b${tEsc}\\b`).test(normCode)) score += 4;
+
+      // Bonus si comienza con el token
+      if (normDesc.startsWith(t)) score += 2;
+      if (normCode.startsWith(t)) score += 3;
+    }
+
+    // Bonus si TODOS los tokens están dentro de la misma cadena (proximidad simple)
+    const allInDesc = tokens.every(t => this.textContainsToken(normDesc, t));
+    const allInCode = tokens.every(t => this.textContainsToken(normCode, t));
+    if (allInDesc) score += 5;
+    if (allInCode) score += 8;
+
+    return score;
+  }
+
+  /** ---------- Cotización / PDF (tu lógica intacta) ---------- */
+
   async agregarACotizacion(item: any) {
     const nuevoItem = { ...item };
-
     nuevoItem.foto = item.foto;
 
     if (item.foto) {
@@ -119,12 +238,9 @@ export class ProductQuoteComponent implements OnInit {
       }
     }
 
-    console.log('Item agregado con imagen base64 (o URL):', nuevoItem);
     this.cotizacion.push(nuevoItem);
     this.close();
   }
-
-
 
   getBase64ImageFromURL(url: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -139,20 +255,16 @@ export class ProductQuoteComponent implements OnInit {
         const dataURL = canvas.toDataURL('image/jpeg');
         resolve(dataURL);
       };
-      img.onerror = () => {
-        reject('No se pudo cargar la imagen desde la URL: ' + url);
-      };
+      img.onerror = () => reject('No se pudo cargar la imagen desde la URL: ' + url);
       img.src = url;
     });
   }
-
-
 
   close(): void {
     const modalElement = document.getElementById('productModal');
     if (modalElement) {
       const modal = bootstrap.Modal.getInstance(modalElement);
-      modal.hide();
+      modal?.hide();
     }
   }
 
