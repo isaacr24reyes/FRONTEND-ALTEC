@@ -1,69 +1,187 @@
 <app-loader></app-loader>
+
 <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="product-quote-form">
-  <!-- Títulos -->
   <div class="text-center">
     <h1 class="store-title">¡Bienvenid&#64; a nuestra Tienda!</h1>
     <h2 class="store-subtitle">Echa un vistazo a nuestros productos y disfruta de la compra Online</h2>
   </div>
 
-  <!-- Barra de búsqueda -->
-  <div class="container d-flex justify-content-center mt-3">
-    <div class="d-flex" style="width: 70%; justify-content: center;">
+  <div class="container mt-3">
+    <div class="d-flex justify-content-center gap-2">
       <input
         type="search"
-        class="form-control me-2"
+        class="form-control"
         placeholder="Buscar producto..."
         aria-label="Search"
         formControlName="searchTerm"
-        (input)="onSearchChange()">
+        (input)="onSearchChange()"
+        style="max-width: 700px"
+      />
+
+      <button
+        type="button"
+        class="btn btn-outline-light d-inline-flex d-md-none align-items-center"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#filtersOffcanvas"
+        aria-controls="filtersOffcanvas">
+        <i class="bi bi-funnel"></i><span class="ms-2">Filtros</span>
+      </button>
     </div>
   </div>
 </form>
 
-<!-- Listado de productos -->
-<div class="container mt-4">
+<div class="container-fluid w-90 mt-4">
   <div class="row g-3">
-    <div class="col-6 col-md-4 col-lg-3 col-xl-2" *ngFor="let product of products">
-      <div class="card product-card h-100 shadow-sm">
-        <div class="product-img-container">
-          <ng-container *ngIf="product.foto && product.foto !== 'NOT-IMAGE'; else noImage">
-            <img [src]="product.foto" class="card-img-top product-img" [alt]="product.descripcion">
-          </ng-container>
-          <ng-template #noImage>
-            <div class="no-image-text">Sin imagen</div>
-          </ng-template>
-        </div>
+    <!-- SIDEBAR IZQUIERDO (solo visual, desktop/tablet) -->
+    <aside class="col-md-3 d-none d-md-block">
+      <div class="card shadow-sm" style="background:#121a20;border:1px solid rgba(255,255,255,0.08);color:#e6f1f6;border-radius:16px;position:sticky;top:88px;">
+        <div class="card-body">
+          <h5 class="mb-3 d-flex align-items-center">
+            <i class="bi bi-funnel me-2"></i> Filtros
+          </h5>
+          <div class="mb-2 text-uppercase" style="font-size:.85rem;color:#9bb9c9;letter-spacing:.3px;">Categorías</div>
+          <div class="d-grid gap-2">
+            <label class="d-flex align-items-center gap-2 p-2 rounded"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+              <input type="checkbox" />
+              <span>Módulos</span>
+            </label>
+            <label class="d-flex align-items-center gap-2 p-2 rounded"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+              <input type="checkbox" />
+              <span>Motores</span>
+            </label>
+            <label class="d-flex align-items-center gap-2 p-2 rounded"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+              <input type="checkbox" />
+              <span>Pilas y Baterías</span>
+            </label>
+            <label class="d-flex align-items-center gap-2 p-2 rounded"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+              <input type="checkbox" />
+              <span>Microcontroladores</span>
+            </label>
+            <label class="d-flex align-items-center gap-2 p-2 rounded"
+                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+              <input type="checkbox" />
+              <span>Compuertas Lógicas</span>
+            </label>
+          </div>
 
-        <div class="card-body d-flex flex-column justify-content-between">
-          <h5 class="card-title product-title">{{ product.descripcion }}</h5>
-          <p class="product-price mb-1">{{ product.pvp | currency:'USD' }}</p>
-
-          <div class="d-flex align-items-center gap-2 mt-auto">
-            <input type="number"
-                   class="form-control quantity-input"
-                   min="1"
-                   [(ngModel)]="product.cantidad"
-                   [ngModelOptions]="{standalone: true}">
-            <button class="btn btn-primary btn-add-cart" (click)="addToCart(product)">
-              <i class="bi bi-cart-plus"></i> Agregar
-            </button>
+          <div class="d-grid mt-3">
+            <button class="btn btn-secondary" type="button">Limpiar filtros</button>
           </div>
         </div>
       </div>
+    </aside>
+
+    <!-- OFFCANVAS (visual para móvil) -->
+    <div class="offcanvas offcanvas-start bg-dark text-white d-md-none" tabindex="-1" id="filtersOffcanvas">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title"><i class="bi bi-funnel me-2"></i>Filtros</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="mb-2 text-uppercase" style="font-size:.85rem;color:#9bb9c9;letter-spacing:.3px;">Categorías</div>
+        <div class="d-grid gap-2">
+          <label class="d-flex align-items-center gap-2 p-2 rounded"
+                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+            <input type="checkbox" />
+            <span>Laptops</span>
+          </label>
+          <label class="d-flex align-items-center gap-2 p-2 rounded"
+                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+            <input type="checkbox" />
+            <span>Accesorios</span>
+          </label>
+          <label class="d-flex align-items-center gap-2 p-2 rounded"
+                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+            <input type="checkbox" />
+            <span>Audio</span>
+          </label>
+          <label class="d-flex align-items-center gap-2 p-2 rounded"
+                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+            <input type="checkbox" />
+            <span>Monitores</span>
+          </label>
+          <label class="d-flex align-items-center gap-2 p-2 rounded"
+                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+            <input type="checkbox" />
+            <span>Impresoras</span>
+          </label>
+        </div>
+
+        <div class="d-grid mt-3 gap-2">
+          <button class="btn btn-secondary" type="button" data-bs-dismiss="offcanvas">Limpiar filtros</button>
+          <button class="btn btn-primary" type="button" data-bs-dismiss="offcanvas">Aplicar</button>
+        </div>
+      </div>
     </div>
+
+    <!-- GRID DE PRODUCTOS (4x4 en desktop, 2xN en móvil) -->
+    <section class="col-12 col-md-9">
+      <!-- g-4 para más aire entre cards -->
+      <div class="row row-cols-2 row-cols-lg-4 g-4">
+        <div class="col" *ngFor="let product of products">
+          <div class="card product-card h-100 shadow-sm"
+               style="background:#0f151b;border:1px solid rgba(255,255,255,0.06);border-radius:16px;min-height:400px;">
+            <!-- IMAGEN MÁS GRANDE -->
+            <div class="product-img-container"
+                 style="background:#0c1116;height:220px;display:grid;place-items:center;border-bottom:1px solid rgba(255,255,255,0.06);border-top-left-radius:16px;border-top-right-radius:16px;overflow:hidden;">
+              <ng-container *ngIf="product.foto && product.foto !== 'NOT-IMAGE'; else noImage">
+                <img [src]="product.foto"
+                     class="card-img-top product-img"
+                     [alt]="product.descripcion"
+                     style="max-height:100%;max-width:100%;object-fit:contain;">
+              </ng-container>
+              <ng-template #noImage>
+                <div class="no-image-text" style="color:#9bb9c9;font-size:1rem;">Sin imagen</div>
+              </ng-template>
+            </div>
+
+            <div class="card-body d-flex flex-column justify-content-between">
+              <!-- TÍTULO MÁS GRANDE -->
+              <h5 class="card-title product-title"
+                  style="color:#e6f1f6;font-size:1.05rem;line-height:1.25;min-height:52px;">
+                {{ product.descripcion }}
+              </h5>
+
+              <!-- PRECIO MÁS GRANDE -->
+              <p class="product-price mb-2" style="color:greenyellow;font-weight:700;font-size:1.12rem;">
+                {{ product.pvp | currency:'USD' }}
+              </p>
+
+              <div class="d-flex align-items-center gap-2 mt-auto">
+                <input
+                  type="number"
+                  class="form-control quantity-input"
+                  min="1"
+                  [(ngModel)]="product.cantidad"
+                  [ngModelOptions]="{standalone: true}"
+                  style="background:#0c1116;color:#e6f1f6;border:1px solid rgba(255,255,255,0.08);max-width:80px;">
+                <button class="btn btn-primary flex-grow-1" style="border-radius:12px;" (click)="addToCart(product)">
+                  <i class="bi bi-cart-plus"></i> Agregar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paginación (INTACTA) -->
+      <div class="d-flex justify-content-between align-items-center mt-3 px-2">
+        <p class="mb-0 fw-bold text-white">Total de productos: {{ totalCount }}</p>
+        <div>
+          <button class="btn btn-primary me-2" [disabled]="currentPage === 1" (click)="onPreviousPage()">Anterior</button>
+          <button class="btn btn-primary" [disabled]="currentPage === totalPages" (click)="onNextPage()">Siguiente</button>
+        </div>
+      </div>
+    </section>
   </div>
-  <!-- Paginación -->
-  <div class="d-flex justify-content-between align-items-center mt-3 px-2">
-    <p class="mb-0 fw-bold text-white">Total de productos: {{ totalCount }}</p>
-    <div>
-      <button class="btn btn-primary me-2" [disabled]="currentPage === 1" (click)="onPreviousPage()">Anterior</button>
-      <button class="btn btn-primary" [disabled]="currentPage === totalPages" (click)="onNextPage()">Siguiente</button>
-    </div>
-  </div>
+
   <div class="text-center mt-5">
     <span class="text-white small-text">
-      Developed by <strong style="color: #8B50FB;">SwiFt©</strong> (2025).
+      Developed by <strong style="color:#8B50FB;">SwiFt©</strong> (2025).
     </span>
   </div>
 </div>
-
