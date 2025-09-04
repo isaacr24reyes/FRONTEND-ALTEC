@@ -28,8 +28,26 @@ export class EditProductComponent implements OnInit {
   pageSize = 25;
   totalCount: number = 0;
   totalPages: number = 0;
+  categoriasValidas: string[] = [
+    'Audio y video',
+    'Baquelitas',
+    'Compuertas e Integrados',
+    'Componentes Electrónicos',
+    'Fuentes',
+    'Herramientas',
+    'Microcontroladores y Arduinos',
+    'Modulos y Sensores',
+    'Motores',
+    'Parlantes',
+    'Pilas y Baterias',
+    'Proyectos Y kits',
+    'Protoboards',
+    'Redes y Comunicación',
+    'Transformadores'
+  ];
 
-  // Loading inicial
+  categoriaActual: string = '';
+
   isFirstLoad: boolean = true;
   isLoading: boolean = true;
 
@@ -39,6 +57,10 @@ export class EditProductComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    if (this.selectedProduct) {
+      this.categoriaActual = this.selectedProduct.categoria || '';
+    }
+
     this.formGroup = this.fb.group({
       searchControl: ['']
     });
@@ -137,7 +159,11 @@ export class EditProductComponent implements OnInit {
   }
 
   openModal(producto: any): void {
-    this.selectedProduct = { ...producto };
+    this.selectedProduct = {
+      ...producto,
+      isImport: this.convertToBoolean(producto.isImport)
+    };
+
     const modalElement = document.getElementById('productModal');
     if (modalElement) {
       const modal = new bootstrap.Modal(modalElement);
@@ -145,9 +171,17 @@ export class EditProductComponent implements OnInit {
     }
   }
 
+  private convertToBoolean(value: any): boolean {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'number') return value === 1;
+    if (typeof value === 'string') return value.toLowerCase() === 'true' || value === '1';
+    return false;
+  }
+
+
+
   guardarEdicion(): void {
     if (!this.selectedProduct) return;
-
     this.productService.updateProduct(this.selectedProduct.id, this.selectedProduct).subscribe(
       (updatedProduct: any) => {
         const idxAll = this.allProducts.findIndex(p => p.id === updatedProduct.id);

@@ -31,8 +31,24 @@ export class StoreComponent implements OnInit {
   totalPages = 0;
   pageSize = 12;
   searchTerm = '';
-  cart: any[] = [];
-  cartItemCount: number = 0;
+  categories = [
+    'Audio y video',
+    'Baquelitas',
+    'Componentes Electrónicos',
+    'Compuertas e Integrados',
+    'Fuentes',
+    'Herramientas',
+    'Microcontroladores y Arduinos',
+    'Modulos y Sensores',
+    'Motores',
+    'Parlantes',
+    'Pilas y Baterias',
+    'Protoboards',
+    'Proyectos Y kits',
+    'Redes y Comunicación',
+    'Transformadores'
+  ];
+
 
   constructor(
     private productService: ProductService,
@@ -121,10 +137,6 @@ export class StoreComponent implements OnInit {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     this.products = filtered.slice(startIndex, startIndex + this.pageSize);
   }
-
-  /** ---------- Helpers de búsqueda avanzada ---------- */
-
-  /** Normaliza texto eliminando tildes, a minúsculas y colapsa espacios */
   private normalizeText(text: string): string {
     return (text || '')
       .normalize('NFD')
@@ -134,23 +146,16 @@ export class StoreComponent implements OnInit {
       .trim();
   }
 
-  /** Tokeniza en palabras/números */
   private tokenize(text: string): string[] {
     const norm = this.normalizeText(text);
     return norm.match(/[a-z0-9]+/gi)?.map(t => this.normalizeText(t)) ?? [];
   }
-
-  /** "Stem" muy ligero para plural/singular comunes (es, s) */
   private stem(token: string): string {
     return token.replace(/(es|s)$/i, '');
   }
-
-  /** Escapa un token para expresiones regulares */
   private escapeRegExp(s: string): string {
     return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
-
-  /** ¿El texto contiene el token? Acepta coincidencia directa, raíz y bordes de palabra */
   private textContainsToken(text: string, token: string): boolean {
     if (!text || !token) return false;
     const t = this.escapeRegExp(token);

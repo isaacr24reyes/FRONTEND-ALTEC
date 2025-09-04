@@ -43,9 +43,37 @@
       <div class="modal-body" *ngIf="selectedProduct">
         <form>
           <div class="mb-3">
+            <label for="categoria" class="lbl">Categoría</label>
+            <select id="categoria" [(ngModel)]="selectedProduct.categoria" name="categoria" class="select">
+              <!-- Mostrar la actual si no es válida -->
+              <option *ngIf="!categoriasValidas.includes(categoriaActual)" [value]="categoriaActual">
+                {{ categoriaActual }} Otros
+              </option>
+
+              <!-- Lista de opciones válidas -->
+              <option *ngFor="let categoria of categoriasValidas" [value]="categoria">
+                {{ categoria }}
+              </option>
+            </select>
+
+          </div>
+          <div class="mb-3">
             <label class="form-label">Código</label>
             <input type="text" class="form-control" [(ngModel)]="selectedProduct.codigo" name="codigo">
           </div>
+          <div class="form-check form-switch mb-3">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="isimportCheck"
+              [(ngModel)]="selectedProduct.isImport"
+              name="isImport" />
+            <label class="form-check-label" for="isimportCheck">
+              ¿Es importado?
+            </label>
+          </div>
+
+
 
           <div class="mb-3">
             <label class="form-label">Descripción</label>

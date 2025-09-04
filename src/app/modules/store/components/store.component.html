@@ -32,7 +32,6 @@
 
 <div class="container-fluid w-90 mt-4">
   <div class="row g-3">
-    <!-- SIDEBAR IZQUIERDO (solo visual, desktop/tablet) -->
     <aside class="col-md-3 d-none d-md-block">
       <div class="card shadow-sm" style="background:#121a20;border:1px solid rgba(255,255,255,0.08);color:#e6f1f6;border-radius:16px;position:sticky;top:88px;">
         <div class="card-body">
@@ -41,30 +40,10 @@
           </h5>
           <div class="mb-2 text-uppercase" style="font-size:.85rem;color:#9bb9c9;letter-spacing:.3px;">Categorías</div>
           <div class="d-grid gap-2">
-            <label class="d-flex align-items-center gap-2 p-2 rounded"
+            <label *ngFor="let cat of categories" class="d-flex align-items-center gap-2 p-2 rounded"
                    style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
-              <input type="checkbox" />
-              <span>Módulos</span>
-            </label>
-            <label class="d-flex align-items-center gap-2 p-2 rounded"
-                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
-              <input type="checkbox" />
-              <span>Motores</span>
-            </label>
-            <label class="d-flex align-items-center gap-2 p-2 rounded"
-                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
-              <input type="checkbox" />
-              <span>Pilas y Baterías</span>
-            </label>
-            <label class="d-flex align-items-center gap-2 p-2 rounded"
-                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
-              <input type="checkbox" />
-              <span>Microcontroladores</span>
-            </label>
-            <label class="d-flex align-items-center gap-2 p-2 rounded"
-                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
-              <input type="checkbox" />
-              <span>Compuertas Lógicas</span>
+              <input type="checkbox" [value]="cat" />
+              <span>{{ cat }}</span>
             </label>
           </div>
 
@@ -83,30 +62,10 @@
       <div class="offcanvas-body">
         <div class="mb-2 text-uppercase" style="font-size:.85rem;color:#9bb9c9;letter-spacing:.3px;">Categorías</div>
         <div class="d-grid gap-2">
-          <label class="d-flex align-items-center gap-2 p-2 rounded"
+          <label *ngFor="let cat of categories" class="d-flex align-items-center gap-2 p-2 rounded"
                  style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
-            <input type="checkbox" />
-            <span>Laptops</span>
-          </label>
-          <label class="d-flex align-items-center gap-2 p-2 rounded"
-                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
-            <input type="checkbox" />
-            <span>Accesorios</span>
-          </label>
-          <label class="d-flex align-items-center gap-2 p-2 rounded"
-                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
-            <input type="checkbox" />
-            <span>Audio</span>
-          </label>
-          <label class="d-flex align-items-center gap-2 p-2 rounded"
-                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
-            <input type="checkbox" />
-            <span>Monitores</span>
-          </label>
-          <label class="d-flex align-items-center gap-2 p-2 rounded"
-                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
-            <input type="checkbox" />
-            <span>Impresoras</span>
+            <input type="checkbox" [value]="cat" />
+            <span>{{ cat }}</span>
           </label>
         </div>
 
@@ -146,7 +105,7 @@
               </h5>
 
               <!-- PRECIO MÁS GRANDE -->
-              <p class="product-price mb-2" style="color:greenyellow;font-weight:700;font-size:1.12rem;">
+              <p class="product-price mb-2" style="color:greenyellow;font-weight:800;font-size:1.75rem;">
                 {{ product.pvp | currency:'USD' }}
               </p>
 

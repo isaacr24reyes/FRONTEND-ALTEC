@@ -47,6 +47,8 @@ export class ProductService extends ApplicationBaseService {
     formData.append('Id', producto.id);
     formData.append('Categoria', producto.categoria);
     formData.append('Codigo', producto.codigo);
+    formData.append('IsImport', producto.isImport ? 'true' : 'false');
+
     formData.append('Stock', String(producto.stock));
     formData.append('Pvp', String(producto.pvp));
     formData.append('PrecioMayorista', String(producto.precioMayorista));

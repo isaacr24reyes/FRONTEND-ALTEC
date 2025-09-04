@@ -1,4 +1,4 @@
-<form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="login-form">
+<form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="login-form" autocomplete="off">
   <div class="text-center">
     <h1>Ingresar Productos</h1>
   </div>
@@ -9,16 +9,21 @@
         <h2 class="text-left">Categoría:</h2>
       </div>
       <div class="col-12">
-        <select id="productCategory" formControlName="productCategory" class="form-control gray-input-select">
-          <option value="" disabled selected>Selecciona una categoría</option>
-          <option value="estudiantes">Estudiantes</option>
-          <option value="motores">Motores</option>
-          <option value="modulos">Módulos</option>
-          <option value="electronica">Electrónica</option>
-          <option value="bateria">Pilas y Baterias</option>
-          <option value="bateria">Microcontroladores</option>
-          <option value="bateria">Compuertas Lógicas</option>
-        </select>
+        <div class="col-12">
+          <div class="input input-multiselect" (click)="toggleCategoryList($event)">
+            <span class="chip" *ngIf="selectedCategory">{{ selectedCategory }}</span>
+            <i class="bi bi-caret-down-fill caret"></i>
+          </div>
+          <div class="category-panel" *ngIf="showCategoryList">
+            <div
+              class="category-option"
+              *ngFor="let cat of categories"
+              (click)="selectCategory(cat, $event)"
+              [class.active]="cat === selectedCategory">
+              {{ cat }}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -27,29 +32,43 @@
         <h2 class="text-left">Código:</h2>
       </div>
       <div class="col-12">
-        <input type="text" id="productCode" formControlName="productCode" class="form-control gray-input" placeholder="Código..">
+        <input type="text" id="productCode" formControlName="productCode"
+               class="form-control gray-input" placeholder="Código.." autocomplete="off">
       </div>
     </div>
+    <div class="row mt-3">
+      <div class="col-6">
+        <h2 class="text-left">¿Es producto de importación?</h2>
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="isImported" formControlName="isImported">
+        </div>
+      </div>
+    </div>
+
 
     <div class="row mt-3">
       <div class="col-6">
         <h2 class="text-left">Stock:</h2>
-        <input type="text" id="productStock" formControlName="productStock" class="form-control gray-input" placeholder="Stock.." appOnlyNumbers>
+        <input type="text" id="productStock" formControlName="productStock"
+               class="form-control gray-input" placeholder="Stock.." appOnlyNumbers autocomplete="off">
       </div>
       <div class="col-6">
         <h2 class="text-left">PVP:</h2>
-        <input type="text" id="productPvp" formControlName="productPvp" class="form-control gray-input" placeholder="PVP.." appOnlyNumbers>
+        <input type="text" id="productPvp" formControlName="productPvp"
+               class="form-control gray-input" placeholder="PVP.." appOnlyNumbers autocomplete="off">
       </div>
     </div>
 
     <div class="row mt-3">
       <div class="col-6">
         <h2 class="text-left">Precio Mayorista:</h2>
-        <input type="text" id="productMp" formControlName="productMp" class="form-control gray-input" placeholder="Precio Mayorista.." appOnlyNumbers>
+        <input type="text" id="productMp" formControlName="productMp"
+               class="form-control gray-input" placeholder="Precio Mayorista.." appOnlyNumbers autocomplete="off">
       </div>
-      <div class="col-6">
+      <div class="col-6" *ngIf="formGroup.get('isImported')?.value">
         <h2 class="text-left">Precio de Importación:</h2>
-        <input type="text" id="productPi" formControlName="productPi" class="form-control gray-input" placeholder="Precio Importación.." appOnlyNumbers>
+        <input type="text" id="productPi" formControlName="productPi"
+               class="form-control gray-input" placeholder="Precio Importación.." appOnlyNumbers autocomplete="off">
       </div>
     </div>
 
@@ -59,7 +78,8 @@
         <h2 class="text-left">Descripción:</h2>
       </div>
       <div class="col-12">
-        <input type="text" id="productDescription" formControlName="productDescription" class="form-control gray-input" placeholder="Ingresa la descripción del producto">
+        <input type="text" id="productDescription" formControlName="productDescription"
+               class="form-control gray-input" placeholder="Ingresa la descripción del producto" autocomplete="off">
       </div>
     </div>
 
@@ -68,15 +88,18 @@
         <h2 class="text-left">Subir Foto:</h2>
       </div>
       <div class="col-6">
-        <input type="file" id="productImage" formControlName="productImage" class="form-control"
-               accept=".jpg, .jpeg, .png" (change)="onFileSelected($event)">      </div>
+        <input type="file" id="productImage" formControlName="productImage"
+               class="form-control" accept=".jpg, .jpeg, .png"
+               (change)="onFileSelected($event)" autocomplete="off">
+      </div>
     </div>
 
     <!-- Previsualización de la imagen -->
     <div *ngIf="imagePreview" class="row mt-3">
       <div class="col-12">
         <h2 class="text-left">Previsualización:</h2>
-        <img [src]="imagePreview" alt="Vista previa" class="img-fluid" style="max-width: 300px; max-height: 300px;">
+        <img [src]="imagePreview" alt="Vista previa" class="img-fluid"
+             style="max-width: 300px; max-height: 300px;">
       </div>
     </div>
   </div>
