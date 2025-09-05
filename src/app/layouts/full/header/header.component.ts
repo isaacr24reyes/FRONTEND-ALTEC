@@ -23,15 +23,22 @@ export class HeaderComponent implements OnInit {
   constructor(private _router: Router, private _userSessionService: UserSessionService,private cartService: CartService) { }
 
   ngOnInit(): void {
-    this.isExternal = sessionStorage.getItem('isExternal') === 'true';
-    this._userSessionService.getUserInfo().subscribe(userInfo => {
-      if (userInfo) {
+    const token = sessionStorage.getItem('token'); // usa la clave real de tu token
+
+    if (token) {
+      // hay sesión → es Admin (tu app solo tiene Admin/Invitado)
+      this.isExternal = false;
+      this._userSessionService.getUserInfo().subscribe(userInfo => {
+        // pon fallback por si viene vacío:
         this.role = userInfo.role;
-      }
-    });
-    this.cartService.cartItemCount$.subscribe(count => {
-      this.cartItemCount = count;
-    });
+      });
+    } else {
+      // no hay sesión → Invitado
+      this.isExternal = true;
+      this.role = 'Invitado';
+    }
+
+    this.cartService.cartItemCount$.subscribe(c => (this.cartItemCount = c));
   }
   public logout(): void {
     sessionStorage.clear();

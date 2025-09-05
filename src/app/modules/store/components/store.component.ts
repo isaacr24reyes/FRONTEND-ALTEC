@@ -48,6 +48,7 @@ export class StoreComponent implements OnInit {
     'Redes y Comunicación',
     'Transformadores'
   ];
+  selectedCategories: string[] = [];
 
 
   constructor(
@@ -104,21 +105,19 @@ export class StoreComponent implements OnInit {
         }
       });
   }
-
-  /** ---------- Filtro con tokens en cualquier orden + ranking ---------- */
   applyFilter(): void {
     const raw = this.formGroup.get('searchTerm')!.value || '';
     const tokens = this.tokenize(raw);
 
     let filtered = this.allProducts;
 
+    // FILTRO POR TEXTO (como ya lo tenías)
     if (tokens.length) {
       filtered = this.allProducts
         .map(p => {
           const normDesc = p._normDesc as string;
           const normCode = p._normCode as string;
 
-          // AND: todos los tokens deben aparecer en desc o código (cualquier orden)
           const matchesAll = tokens.every(t =>
             this.textContainsToken(normDesc, t) || this.textContainsToken(normCode, t)
           );
@@ -127,16 +126,19 @@ export class StoreComponent implements OnInit {
           return { p, score };
         })
         .filter(x => x.score >= 0)
-        .sort((a, b) => b.score - a.score) // ordenar por relevancia
+        .sort((a, b) => b.score - a.score)
         .map(x => x.p);
     }
 
+    if (this.selectedCategories.length > 0) {
+      filtered = filtered.filter(p => this.selectedCategories.includes(p.categoria));
+    }
     this.totalCount = filtered.length;
     this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1;
-
     const startIndex = (this.currentPage - 1) * this.pageSize;
     this.products = filtered.slice(startIndex, startIndex + this.pageSize);
   }
+
   private normalizeText(text: string): string {
     return (text || '')
       .normalize('NFD')
@@ -217,4 +219,26 @@ export class StoreComponent implements OnInit {
   onSubmit() {
     this.applyFilter();
   }
+  onCategoryChange(event: any): void {
+    const value = event.target.value;
+    const checked = event.target.checked;
+
+    if (checked) {
+      if (!this.selectedCategories.includes(value)) {
+        this.selectedCategories.push(value);
+      }
+    } else {
+      this.selectedCategories = this.selectedCategories.filter(cat => cat !== value);
+    }
+
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+  clearFilters(): void {
+    this.formGroup.get('searchTerm')?.setValue('');
+    this.selectedCategories = [];
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+
 }

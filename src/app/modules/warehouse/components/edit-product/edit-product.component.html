@@ -49,8 +49,6 @@
               <option *ngIf="!categoriasValidas.includes(categoriaActual)" [value]="categoriaActual">
                 {{ categoriaActual }} Otros
               </option>
-
-              <!-- Lista de opciones válidas -->
               <option *ngFor="let categoria of categoriasValidas" [value]="categoria">
                 {{ categoria }}
               </option>
