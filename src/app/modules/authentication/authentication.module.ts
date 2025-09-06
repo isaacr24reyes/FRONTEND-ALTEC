@@ -10,19 +10,21 @@ import {AppMaterialModule} from "../../app-material.module";
 import {AppTranslationLanguageModule} from "../../app-translation-language.module";
 import {SharedModule} from "../../shared/shared.module";
 import {MatIcon} from "@angular/material/icon";
+import {LoaderComponent} from "../../shared/components/LoaderComponent";
 
 @NgModule({
   declarations: [AuthenticationModule.COMPONENT],
-  imports: [
-    CommonModule,
-    AppTranslationLanguageModule,
-    AppMaterialModule,
-    FormsModule,
-    ReactiveFormsModule,
-    RouterModule.forChild(AuthenticationRoutes),
-    SharedModule,
-    MatIcon
-  ]
+    imports: [
+        CommonModule,
+        AppTranslationLanguageModule,
+        AppMaterialModule,
+        FormsModule,
+        ReactiveFormsModule,
+        RouterModule.forChild(AuthenticationRoutes),
+        SharedModule,
+        MatIcon,
+        LoaderComponent
+    ]
 })
 export class AuthenticationModule {
 

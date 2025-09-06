@@ -15,7 +15,7 @@ import { LoaderService } from '../services/LoaderService';
           {{ progress }}%
         </div>
       </div>
-      <p class="text-white mt-2">Cargando tienda... {{ progress }}%</p>
+      <p class="text-white mt-2">Cargando.... {{ progress }}%</p>
     </div>
   `,
   styleUrls: ['./loader.component.scss']

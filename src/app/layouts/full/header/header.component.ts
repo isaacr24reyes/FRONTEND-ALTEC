@@ -42,7 +42,7 @@ export class HeaderComponent implements OnInit {
   }
   public logout(): void {
     sessionStorage.clear();
-    this._router.navigate([`${R_AUTHENTICATION}/${R_LOGIN}`])
+    this._router.navigate(['/']);
   }
   navigateToCotizador(): void {
     this._router.navigate([`/${R_PRODUCT_QUOTE}`]);

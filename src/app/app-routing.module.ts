@@ -13,6 +13,12 @@ import {
 
 const routes: Routes = [
   {
+    path: '',
+    component: AppBlankComponent,
+    loadChildren: () => import('./modules/landing-page/landing-page.module').then(m => m.LandingPageModule)
+  },
+
+  {
     path: R_DASHBOARD,
     component: FullComponent,
     loadChildren: () => import('./modules/dashboard/dashboard.module').then(mod => mod.DashboardModule)
@@ -27,7 +33,7 @@ const routes: Routes = [
     component: AppBlankComponent,
     loadChildren: () => import('./modules/authentication/authentication.module').then(mod => mod.AuthenticationModule)
   },
-  { path: '', redirectTo: `${R_DASHBOARD}`, pathMatch: 'full' },
+//  { path: '', redirectTo: `${R_DASHBOARD}`, pathMatch: 'full' },
   { path: '**', redirectTo: `${R_AUTHENTICATION}/${R_404}` }
   ,
   {
@@ -44,7 +50,7 @@ const routes: Routes = [
     path: R_ALTEC_POINTS,
     component: FullComponent,
     loadChildren: () => import('./modules/altec-points/altec-points.module').then(mod => mod.AltecPointsModule)
-  }
+  },
 ];
 
 @NgModule({

@@ -1,25 +1,26 @@
+
 <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="login-form">
-  <div class="text-center">
-    <img src="assets/images/LOGIN.png" alt="Logo" class="img-fluid" style="max-width: 300px;">
-  </div>
-  <div class="d-flex flex-column align-items-center mt-3">
-    <button class="guest-btn"
-            (click)="continueAsGuest()"
-            [disabled]="disableGuestButton">
-      <mat-icon class="guest-icon">shopping_cart</mat-icon>
-      <strong>Ir a tienda sin usuario</strong>
+  <div class="d-flex flex-column align-items-center gap-2 mt-3">
+    <button type="button" class="guest-btn-colored btn-blue" (click)="goToLanding()">
+      <mat-icon class="guest-icon">arrow_back</mat-icon>
+      Regresar al inicio
     </button>
 
+    <button type="button" class="guest-btn-colored btn-orange" (click)="goToStore()">
+      <mat-icon class="guest-icon">store</mat-icon>
+      Ir a la tienda sin usuario
+    </button>
+  </div>
 
-    <p class="guest-message mt-4">
-      Si tienes un usuario, <strong>por favor ingresa tus credenciales</strong>.
-    </p>
+  <div class="text-center mt-3">
+    <img src="assets/images/LOGIN.png" alt="Logo" class="img-fluid" style="max-width: 300px;">
+    <h3 class="login-title mt-3">Iniciar sesión</h3>
   </div>
 
   <div class="container d-flex flex-column align-items-center login-form-fields">
     <div class="d-flex flex-column">
       <mat-form-field>
-        <input matInput placeholder="{{'forms.login.username' | translate}}"
+        <input matInput placeholder="{{'forms.login.username' | translate}} "autocomplete="off"
                [formControl]="$any(formGroup).controls['username']" appOnlyLetters>
       </mat-form-field>
       <small *ngIf="formGroup.controls['username'].hasError('required') && formGroup.controls['username'].touched"
@@ -28,7 +29,7 @@
 
     <div class="d-flex flex-column">
       <mat-form-field>
-        <input matInput type="password" placeholder="{{'forms.login.password' | translate}}"
+        <input matInput type="password"     autocomplete="off" placeholder="{{'forms.login.password' | translate}}"
                [formControl]="$any(formGroup).controls['password']">
       </mat-form-field>
       <small *ngIf="formGroup.controls['password'].hasError('required') && formGroup.controls['password'].touched"

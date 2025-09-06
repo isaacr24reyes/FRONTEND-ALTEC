@@ -29,6 +29,7 @@ button[mat-raised-button] {
     transform: scale(1.05);
   }
 
+
   &:active {
     background-color: #004494;
     transform: scale(0.95);
@@ -70,6 +71,21 @@ button[mat-raised-button] {
   font-size: 1.4rem;
   text-align: center;
 }
+.login-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 1.2px;
+  text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease-in-out;
+  text-transform: uppercase;
+
+  &:hover {
+    color: #6FB855;
+    text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.7);
+  }
+}
 
 .progress {
   height: 25px;
@@ -81,3 +97,48 @@ button[mat-raised-button] {
   font-weight: bold;
   text-align: center;
 }
+.guest-btn-colored {
+  border: none;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  transition: all 0.25s ease;
+  text-transform: none;
+
+  .guest-icon {
+    font-size: 18px;
+  }
+
+  &:hover {
+    transform: scale(1.03);
+    opacity: 0.9;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Azul para "Regresar" */
+.btn-blue {
+  background-color: #1e2a78;
+}
+
+/* Naranja para "Tienda" */
+.btn-orange {
+  background-color: #f57c00;
+}
+
+mat-form-field + small {
+  margin-top: -18px; // Ajusta según lo pegado que lo quieras
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+}
+

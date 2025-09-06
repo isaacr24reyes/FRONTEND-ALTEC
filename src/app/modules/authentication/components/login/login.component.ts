@@ -16,19 +16,21 @@ import {LoaderService} from "../../../../shared/services/LoaderService"; // Impo
 export class LoginComponent extends ApplicationBase implements OnInit {
   disableGuestButton = false;
   public formGroup!: UntypedFormGroup;
-
+  isLoading: boolean = true;
 
   constructor(
     private _fb: UntypedFormBuilder,
     private _router: Router,
     private _accountService: AccountService,
     private _userSessionService: UserSessionService,
-    private loaderService:LoaderService
+    private loaderService:LoaderService,
+
   ) {
     super();
   }
 
   ngOnInit() {
+
     this.formGroup = this._fb.group({
       username: [null, Validators.compose([Validators.required])],
       password: [null, Validators.compose([Validators.required])]
@@ -76,10 +78,17 @@ export class LoginComponent extends ApplicationBase implements OnInit {
       complete: () => Notiflix.Loading.remove()
     });
   }
-  continueAsGuest() {
+  goToStore() {
     sessionStorage.setItem('isExternal', 'true');
     this.loaderService.start();
 
+    this._router.navigate([`/${R_STORE}`]);
+  }
+  goToLanding(): void {
+    this._router.navigate(['/']);
+  }
+  return() {
+    this.loaderService.start();
     this._router.navigate([`/${R_STORE}`]);
   }
 
