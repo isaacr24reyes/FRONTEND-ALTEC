@@ -30,7 +30,23 @@ export class CartService {
   }
 
   addToCart(product: any): void {
-    const existing = this.cartItems.find(p => p.id === product.id);
+    const descripcion = product.descripcion?.toLowerCase() || '';
+    let existing;
+
+    const matchByDescripcion = (
+      (descripcion.includes('resistencia') && product.descripcion.includes('1/4 W')) ||
+      (descripcion.includes('led') && descripcion.includes('diodo'))
+    );
+
+    if (matchByDescripcion) {
+      // Comparar por ID y descripción exacta
+      existing = this.cartItems.find(p =>
+        p.id === product.id && p.descripcion === product.descripcion
+      );
+    } else {
+      // Comparar solo por ID
+      existing = this.cartItems.find(p => p.id === product.id);
+    }
 
     if (existing) {
       existing.cantidad += product.cantidad;
@@ -42,6 +58,7 @@ export class CartService {
     this.saveCartToStorage();
   }
 
+
   updateCount(): void {
     const count = this.cartItems.length;
     this.cartItemCountSubject.next(count);
@@ -51,5 +68,4 @@ export class CartService {
     this.saveCartToStorage();
     this.updateCount();
   }
-
 }

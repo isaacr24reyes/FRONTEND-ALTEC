@@ -8,6 +8,7 @@ import Notiflix from "notiflix";
 import { CartService } from "../../../shared/services/CartService";
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
+
 @Component({
   selector: 'app-store',
   standalone: true,
@@ -31,6 +32,13 @@ export class StoreComponent implements OnInit {
   totalPages = 0;
   pageSize = 12;
   searchTerm = '';
+  selectedProduct: any = null;
+  selectedValue: string = '';
+  resistorValues: string[] = [
+    '100Ω', '220Ω', '330Ω',
+    '470Ω', '1kΩ', '2.2kΩ',
+    '4.7kΩ', '10kΩ'
+  ];
   categories = [
     'Audio y video',
     'Baquelitas',
@@ -68,23 +76,63 @@ export class StoreComponent implements OnInit {
     this.formGroup = this.fb.group({
       searchTerm: ['']
     });
-
-    // Suscripción con debounce para búsquedas reactivas
     this.formGroup.get('searchTerm')!.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe(() => {
         this.currentPage = 1;
         this.applyFilter();
       });
-
     this.loaderService.start();
     this.loadProducts();
   }
 
   addToCart(product: any): void {
+    const descripcion = product.descripcion?.toLowerCase() || '';
+
+    // Modal para resistencias
+    if (descripcion.includes('resistencia') && product.descripcion.includes('1/4 W')) {
+      this.selectedProduct = product;
+      this.selectedValue = '';
+      const modal = new (window as any).bootstrap.Modal(document.getElementById('resistorModal'));
+      modal.show();
+      return;
+    }
+
+    // Modal para LEDs
+    if (descripcion.includes('led') && descripcion.includes('diodo')) {
+      this.selectedProduct = product;
+      this.selectedValue = '';
+      const modal = new (window as any).bootstrap.Modal(document.getElementById('ledModal')); // 👈 ESTE CAMBIO
+      modal.show();
+      return;
+    }
+
     this.cartService.addToCart(product);
     Notiflix.Notify.success(`Agregado ${product.cantidad} x ${product.descripcion} al carrito`);
   }
+
+
+  confirmAddResistor(): void {
+    if (!this.selectedValue) {
+      Notiflix.Notify.warning('Selecciona un valor de resistencia');
+      return;
+    }
+
+    const newProduct = {
+      ...this.selectedProduct,
+      descripcion: `${this.selectedProduct.descripcion} - ${this.selectedValue}`
+    };
+
+    this.cartService.addToCart(newProduct);
+    Notiflix.Notify.success(`Agregado ${newProduct.cantidad} x ${newProduct.descripcion} al carrito`);
+
+    const modalElement = document.getElementById('resistorModal');
+    const modalInstance = (window as any).bootstrap.Modal.getInstance(modalElement);
+    modalInstance?.hide();
+
+    modalInstance?.hide(); // solo si existe
+  }
+
 
   loadProducts(): void {
     this.productService.getProductsClient(1, 1000, '') // Pedimos todos (1-1000)
@@ -105,13 +153,27 @@ export class StoreComponent implements OnInit {
         }
       });
   }
+  confirmAddLed(): void {
+    if (!this.selectedProduct || !this.selectedValue) return;
+
+    const cloned = { ...this.selectedProduct };
+    cloned.descripcion += ` - ${this.selectedValue}`;
+
+    this.cartService.addToCart(cloned);
+    Notiflix.Notify.success(`Agregado ${cloned.cantidad} x ${cloned.descripcion} al carrito`);
+
+    // ✅ Cierra el modal de LED correctamente
+    const modalElement = document.getElementById('ledModal');
+    const modalInstance = (window as any).bootstrap.Modal.getInstance(modalElement);
+    modalInstance?.hide();
+  }
+
+
   applyFilter(): void {
     const raw = this.formGroup.get('searchTerm')!.value || '';
     const tokens = this.tokenize(raw);
-
     let filtered = this.allProducts;
 
-    // FILTRO POR TEXTO (como ya lo tenías)
     if (tokens.length) {
       filtered = this.allProducts
         .map(p => {
@@ -230,7 +292,7 @@ export class StoreComponent implements OnInit {
     } else {
       this.selectedCategories = this.selectedCategories.filter(cat => cat !== value);
     }
-
+    this.formGroup.get('searchTerm')?.setValue('');
     this.currentPage = 1;
     this.applyFilter();
   }

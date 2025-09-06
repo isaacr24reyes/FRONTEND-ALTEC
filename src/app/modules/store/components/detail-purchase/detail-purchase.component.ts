@@ -48,10 +48,33 @@ export class DetailPurchaseComponent implements OnInit {
     this.total = this.cart.reduce((acc, item) => acc + item.pvp * item.cantidad, 0);
   }
 
-  removeItem(productId: string): void {
-    this.cart = this.cart.filter(item => item.id !== productId);
+  removeItem(product: any): void {
+    this.cart = this.cart.filter(item => {
+      // 🔸 Excepción 1: RESISTENCIA 1/4 W
+      if (
+        product.descripcion?.toLowerCase().includes('resistencia') &&
+        product.descripcion.includes('1/4 W')
+      ) {
+        // elimina solo si id y descripción coinciden exactamente
+        return !(item.id === product.id && item.descripcion === product.descripcion);
+      }
+
+      // 🔸 Excepción 2: DIODO LED 5mm
+      if (
+        product.descripcion?.toLowerCase().includes('led') &&
+        product.descripcion.toLowerCase().includes('diodo')
+      ) {
+        // elimina solo si id y descripción coinciden exactamente
+        return !(item.id === product.id && item.descripcion === product.descripcion);
+      }
+
+      // 🔹 Para todos los demás productos: elimina por id como antes
+      return item.id !== product.id;
+    });
+
     this.cartService.setCart(this.cart);
     this.calculateTotal();
+
     if (this.cart.length === 0) {
       Notiflix.Report.info(
         'Carrito vacío',
@@ -61,6 +84,7 @@ export class DetailPurchaseComponent implements OnInit {
       );
     }
   }
+
   finalizarCompra(): void {
     if (this.cart.length === 0) return;
 

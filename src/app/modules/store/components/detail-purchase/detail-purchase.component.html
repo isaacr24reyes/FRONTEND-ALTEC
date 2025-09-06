@@ -50,7 +50,7 @@
           <td class="text-center align-middle">{{ item.pvp | currency: 'USD' }}</td>
           <td class="text-center align-middle">{{ item.pvp * item.cantidad | currency: 'USD' }}</td>
           <td class="text-center align-middle">
-            <button class="btn btn-sm btn-danger" (click)="removeItem(item.id)">
+            <button class="btn btn-danger btn-sm" (click)="removeItem(item)">
               <i class="bi bi-trash"></i>
             </button>
           </td>
