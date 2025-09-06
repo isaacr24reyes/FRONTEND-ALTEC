@@ -29,11 +29,9 @@ export class LoaderComponent implements OnInit {
   ngOnInit() {
     this.loaderService.isLoading$.subscribe(status => {
       this.isLoading = status;
-      console.log('Loader status:', status); // Debug
     });
     this.loaderService.progress$.subscribe(value => {
       this.progress = value;
-      console.log('Progress value:', value); // Debug
     });
   }
 }
