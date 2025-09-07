@@ -44,6 +44,7 @@ export class StoreComponent implements OnInit {
     'Baquelitas',
     'Componentes Electrónicos',
     'Compuertas e Integrados',
+    'Electricidad',
     'Fuentes',
     'Herramientas',
     'Microcontroladores y Arduinos',
@@ -51,10 +52,12 @@ export class StoreComponent implements OnInit {
     'Motores',
     'Parlantes',
     'Pilas y Baterias',
+    'Plugs y Conectores',
     'Protoboards',
     'Proyectos Y kits',
     'Redes y Comunicación',
-    'Transformadores'
+    'Transformadores',
+    'Otros'
   ];
   selectedCategories: string[] = [];
 

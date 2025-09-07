@@ -65,11 +65,12 @@
         <input type="text" id="productMp" formControlName="productMp"
                class="form-control gray-input" placeholder="Precio Mayorista.." appOnlyNumbers autocomplete="off">
       </div>
-      <div class="col-6" *ngIf="formGroup.get('isImported')?.value">
-        <h2 class="text-left">Precio de Importación:</h2>
+      <div class="col-6">
+        <h2 class="text-left">Precio de Compra:</h2>
         <input type="text" id="productPi" formControlName="productPi"
-               class="form-control gray-input" placeholder="Precio Importación.." appOnlyNumbers autocomplete="off">
+               class="form-control gray-input" placeholder="Precio Compra.." appOnlyNumbers autocomplete="off">
       </div>
+
     </div>
 
     <div class="row mt-3">

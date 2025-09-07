@@ -47,7 +47,7 @@
             <select id="categoria" [(ngModel)]="selectedProduct.categoria" name="categoria" class="select">
               <!-- Mostrar la actual si no es válida -->
               <option *ngIf="!categoriasValidas.includes(categoriaActual)" [value]="categoriaActual">
-                {{ categoriaActual }} Otros
+                {{ categoriaActual }}
               </option>
               <option *ngFor="let categoria of categoriasValidas" [value]="categoria">
                 {{ categoria }}

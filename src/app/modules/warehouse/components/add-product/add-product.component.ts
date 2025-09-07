@@ -20,6 +20,7 @@ export class AddProductComponent {
     'Baquelitas',
     'Componentes Electrónicos',
     'Compuertas e Integrados',
+    'Electricidad',
     'Fuentes',
     'Herramientas',
     'Microcontroladores y Arduinos',
@@ -27,10 +28,12 @@ export class AddProductComponent {
     'Motores',
     'Parlantes',
     'Pilas y Baterias',
+    'Plugs y Conectores',
     'Protoboards',
     'Proyectos Y kits',
     'Redes y Comunicación',
-    'Transformadores'
+    'Transformadores',
+    'Otros'
   ];
 
   showCategoryList = false;
@@ -146,7 +149,12 @@ export class AddProductComponent {
               this.formGroup.reset();
               this.selectedFile = null;
               this.imagePreview = null;
+              this.selectedCategory = null;
+              this.formGroup.get('productCategory')?.setValue('');
+              this.formGroup.get('isImported')?.setValue(false);
+              this.showCategoryList = false;
             }, 2000);
+
           },
           error => {
             Notiflix.Loading.remove();

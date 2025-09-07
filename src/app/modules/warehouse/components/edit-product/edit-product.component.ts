@@ -33,6 +33,7 @@ export class EditProductComponent implements OnInit {
     'Baquelitas',
     'Compuertas e Integrados',
     'Componentes Electrónicos',
+    'Electricidad',
     'Fuentes',
     'Herramientas',
     'Microcontroladores y Arduinos',
@@ -40,10 +41,12 @@ export class EditProductComponent implements OnInit {
     'Motores',
     'Parlantes',
     'Pilas y Baterias',
+    'Plugs y Conectores',
     'Proyectos Y kits',
     'Protoboards',
     'Redes y Comunicación',
-    'Transformadores'
+    'Transformadores',
+    'Otros'
   ];
 
   categoriaActual: string = '';

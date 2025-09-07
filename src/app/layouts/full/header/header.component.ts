@@ -26,14 +26,12 @@ export class HeaderComponent implements OnInit {
     const token = sessionStorage.getItem('token'); // usa la clave real de tu token
 
     if (token) {
-      // hay sesión → es Admin (tu app solo tiene Admin/Invitado)
       this.isExternal = false;
       this._userSessionService.getUserInfo().subscribe(userInfo => {
         // pon fallback por si viene vacío:
         this.role = userInfo.role;
       });
     } else {
-      // no hay sesión → Invitado
       this.isExternal = true;
       this.role = 'Invitado';
     }
