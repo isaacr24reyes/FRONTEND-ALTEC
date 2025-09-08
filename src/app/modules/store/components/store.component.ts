@@ -60,7 +60,8 @@ export class StoreComponent implements OnInit {
     'Otros'
   ];
   selectedCategories: string[] = [];
-
+  isDistribuidor: boolean = false;
+  distribuidorName: string = '';
 
   constructor(
     private productService: ProductService,
@@ -70,6 +71,18 @@ export class StoreComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.isDistribuidor = sessionStorage.getItem('isDistribuidor') === 'true';
+    if (this.isDistribuidor) {
+      const userInfo = sessionStorage.getItem('userInfo');
+      if (userInfo) {
+        try {
+          const parsedUser = JSON.parse(userInfo);
+          this.distribuidorName = parsedUser.name ?? '';
+        } catch (err) {
+          console.error('Error al parsear userInfo:', err);
+        }
+      }
+    }
     Notiflix.Notify.init({
       position: 'left-top',
       timeout: 1000,
@@ -138,24 +151,33 @@ export class StoreComponent implements OnInit {
 
 
   loadProducts(): void {
-    this.productService.getProductsClient(1, 1000, '') // Pedimos todos (1-1000)
-      .subscribe({
-        next: (data: any) => {
-          this.allProducts = (data?.items ?? []).map((p: any) => ({
-            ...p,
-            cantidad: 1,
-            _normDesc: this.normalizeText(`${p.descripcion ?? ''}`),
-            _normCode: this.normalizeText(`${p.codigo ?? ''}`)
-          }));
-          this.applyFilter();
-          this.loaderService.finish();
-        },
-        error: (err) => {
-          console.error('Error al obtener productos:', err);
-          this.loaderService.finish();
-        }
-      });
+    const isDistribuidor = sessionStorage.getItem('isDistribuidor') === 'true';
+
+    const loadObservable = isDistribuidor
+      ? this.productService.getProductsImport()
+      : this.productService.getProductsClient(1, 1000, '');
+
+    loadObservable.subscribe({
+      next: (data: any) => {
+        const items = Array.isArray(data) ? data : data?.items ?? [];
+
+        this.allProducts = items.map((p: any) => ({
+          ...p,
+          cantidad: 1,
+          _normDesc: this.normalizeText(`${p.descripcion ?? ''}`),
+          _normCode: this.normalizeText(`${p.codigo ?? ''}`)
+        }));
+
+        this.applyFilter();
+        this.loaderService.finish();
+      },
+      error: (err) => {
+        console.error('Error al obtener productos:', err);
+        this.loaderService.finish();
+      }
+    });
   }
+
   confirmAddLed(): void {
     if (!this.selectedProduct || !this.selectedValue) return;
 

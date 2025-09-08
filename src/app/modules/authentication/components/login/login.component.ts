@@ -6,7 +6,8 @@ import {R_DASHBOARD, R_STORE} from '../../../../constants/route.constants';
 import Notiflix from 'notiflix';
 import { AccountService } from '../../services/account.service';
 import { UserSessionService } from '../../services/user-session.service';
-import {LoaderService} from "../../../../shared/services/LoaderService"; // Importa el servicio
+import {LoaderService} from "../../../../shared/services/LoaderService";
+import {CartService} from "../../../../shared/services/CartService"; // Importa el servicio
 
 @Component({
   selector: 'app-login',
@@ -24,6 +25,7 @@ export class LoginComponent extends ApplicationBase implements OnInit {
     private _accountService: AccountService,
     private _userSessionService: UserSessionService,
     private loaderService:LoaderService,
+    private cartService: CartService,
 
   ) {
     super();
@@ -35,14 +37,11 @@ export class LoginComponent extends ApplicationBase implements OnInit {
       username: [null, Validators.compose([Validators.required])],
       password: [null, Validators.compose([Validators.required])]
     });
-
-    // Detectar cambios en los campos para bloquear el botón invitado
     this.formGroup.valueChanges.subscribe(() => {
       const { username, password } = this.formGroup.value;
       this.disableGuestButton = !!(username || password);
     });
   }
-
 
   public login(): void {
     if (this.formGroup.invalid) {
@@ -55,20 +54,24 @@ export class LoginComponent extends ApplicationBase implements OnInit {
     Notiflix.Loading.circle('Autenticando...');
 
     this._accountService.login(username, password).subscribe({
-      next: (response: { token: string; }) => {
+      next: (response: { token: string }) => {
         sessionStorage.setItem('token', response.token);
         Notiflix.Notify.success('Inicio de sesión exitoso.');
+
         this._accountService.getUserInfo(username).subscribe({
           next: (userInfo) => {
             console.log('Información del usuario:', userInfo);
             this._userSessionService.setUserInfo(userInfo);
+            const isDistribuidor = userInfo?.role === 'Distribuidor';
+            sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
+            this.cartService.switchScope();
+            sessionStorage.setItem('isDistribuidor', isDistribuidor ? 'true' : 'false');
+            this._router.navigate([isDistribuidor ? `${R_STORE}` : `${R_DASHBOARD}`]);
           },
           error: (err) => {
             console.error('Error obteniendo info del usuario:', err);
           }
         });
-
-        this._router.navigate([`${R_DASHBOARD}`]);
       },
       error: (error: any) => {
         Notiflix.Notify.failure('Error de autenticación. Verifique sus credenciales.');
@@ -78,6 +81,7 @@ export class LoginComponent extends ApplicationBase implements OnInit {
       complete: () => Notiflix.Loading.remove()
     });
   }
+
   goToStore() {
     sessionStorage.setItem('isExternal', 'true');
     this.loaderService.start();

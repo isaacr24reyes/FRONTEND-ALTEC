@@ -39,9 +39,14 @@ export class HeaderComponent implements OnInit {
     this.cartService.cartItemCount$.subscribe(c => (this.cartItemCount = c));
   }
   public logout(): void {
-    sessionStorage.clear();
+    sessionStorage.removeItem('userInfo');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('isDistribuidor');
+    this.cartService.switchScope();
     this._router.navigate(['/']);
   }
+
+
   navigateToCotizador(): void {
     this._router.navigate([`/${R_PRODUCT_QUOTE}`]);
 

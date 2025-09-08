@@ -10,6 +10,7 @@ import {
   R_STORE,
   R_WAREHOUSE
 } from "./constants/route.constants";
+import {RoleGuard} from "./core/guard/role.guard";
 
 const routes: Routes = [
   {
@@ -21,11 +22,13 @@ const routes: Routes = [
   {
     path: R_DASHBOARD,
     component: FullComponent,
+    canActivate: [RoleGuard],
     loadChildren: () => import('./modules/dashboard/dashboard.module').then(mod => mod.DashboardModule)
   },
   {
     path: R_WAREHOUSE,
     component: FullComponent,
+    canActivate: [RoleGuard],
     loadChildren: () => import('./modules/warehouse/warehouse.module').then(mod => mod.WarehouseModule)
   },
   {
@@ -39,6 +42,7 @@ const routes: Routes = [
   {
     path: R_PRODUCT_QUOTE,
     component: FullComponent,
+    canActivate: [RoleGuard],
     loadChildren: () => import('./modules/product-quote/product-quote.module').then(mod => mod.ProductQuoteModule)
   },
   {
@@ -49,6 +53,7 @@ const routes: Routes = [
   {
     path: R_ALTEC_POINTS,
     component: FullComponent,
+    canActivate: [RoleGuard],
     loadChildren: () => import('./modules/altec-points/altec-points.module').then(mod => mod.AltecPointsModule)
   },
 ];

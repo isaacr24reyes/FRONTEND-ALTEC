@@ -2,8 +2,16 @@
 
 <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="product-quote-form">
   <div class="text-center">
-    <h1 class="store-title">¡Bienvenid&#64; a nuestra Tienda!</h1>
-    <h2 class="store-subtitle">Echa un vistazo a nuestros productos y disfruta de la compra Online</h2>
+    <h1 class="store-title">
+      {{ isDistribuidor ? ('Hola ' + distribuidorName + '!') : '¡Bienvenid@ a nuestra Tienda!' }}
+    </h1>
+
+    <h2 class="store-subtitle">
+      {{ isDistribuidor
+      ? 'Explora tus productos exclusivos con precios mayoristas'
+      : 'Echa un vistazo a nuestros productos y disfruta de la compra Online' }}
+    </h2>
+
   </div>
 
   <div class="container mt-3">
@@ -123,10 +131,11 @@
                 {{ product.descripcion }}
               </h5>
 
-              <!-- PRECIO MÁS GRANDE -->
               <p class="product-price mb-2" style="color:greenyellow;font-weight:800;font-size:1.75rem;">
-                {{ product.pvp | currency:'USD' }}
+                {{ isDistribuidor ? ('$' + product.precioMayorista) : (product.pvp | currency:'USD') }}
               </p>
+
+
               <div
                 class="text-uppercase mb-1"
                 style="font-size:.75rem; color:#9bb9c9; letter-spacing:.3px; opacity:.9;">

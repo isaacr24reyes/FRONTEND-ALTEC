@@ -46,9 +46,8 @@
               min="1"
               style="max-width: 80px; margin: 0 auto;" />
           </td>
-
-          <td class="text-center align-middle">{{ item.pvp | currency: 'USD' }}</td>
-          <td class="text-center align-middle">{{ item.pvp * item.cantidad | currency: 'USD' }}</td>
+          <td class="text-center align-middle">{{ itemPrecioUnitario(item) | currency: 'USD' }}</td>
+          <td class="text-center align-middle">{{ itemPrecioUnitario(item) * item.cantidad | currency: 'USD' }}</td>
           <td class="text-center align-middle">
             <button class="btn btn-danger btn-sm" (click)="removeItem(item)">
               <i class="bi bi-trash"></i>
