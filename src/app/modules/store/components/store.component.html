@@ -3,14 +3,25 @@
 <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="product-quote-form">
   <div class="text-center">
     <h1 class="store-title">
-      {{ isDistribuidor ? ('Hola ' + distribuidorName + '!') : '¡Bienvenid@ a nuestra Tienda!' }}
+      {{
+        isDistribuidor
+          ? ('Hola ' + distribuidorName + '!')
+          : isCliente
+            ? ('Hola ' + clienteName + '!')
+            : '¡Bienvenid@ a nuestra Tienda!'
+      }}
     </h1>
 
     <h2 class="store-subtitle">
-      {{ isDistribuidor
-      ? 'Explora tus productos exclusivos con precios mayoristas'
-      : 'Echa un vistazo a nuestros productos y disfruta de la compra Online' }}
+      {{
+        isDistribuidor
+          ? 'Explora tus productos exclusivos con precios mayoristas'
+          : isCliente
+            ? 'Ya eres Cliente acumula Altec-puntos'
+            : 'Echa un vistazo a nuestros productos y disfruta de la compra Online'
+      }}
     </h2>
+
 
   </div>
 

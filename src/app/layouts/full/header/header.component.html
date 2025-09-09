@@ -1,15 +1,23 @@
-<nav class="navbar navbar-expand-lg navbar-light custom-navbar border-5">
+<nav class="navbar navbar-expand-lg navbar-light custom-navbar border-5 position-relative">
   <div class="container-fluid">
-    <a class="navbar-brand" [routerLink]="isExternal ? '/store' : '/dashboard'" style="cursor: pointer;">
+    <a class="navbar-brand"
+       [routerLink]="(isExternal || role === 'Distribuidor' || role === 'Cliente') ? '/store' : '/dashboard'"
+       style="cursor: pointer;">
       <img src="assets/images/LOGIN.png" alt="ALTEC Logo" style="height: 40px;">
     </a>
-
-    <!-- Carrito en móviles -->
+    <div
+      *ngIf="role === 'Cliente'"
+      class="text-center text-white"
+      style="position: absolute; left: 50%; transform: translateX(-50%); font-weight: bold; font-size: 1.1rem;"
+    >
+<span class="ap-badge bg-warning text-dark rounded-pill shadow-sm">
+   {{ altecPoints }} AP
+</span>
+    </div>
     <div class="d-lg-none d-flex align-items-center ms-auto me-4">
       <a class="nav-link text-white position-relative"
-         *ngIf="isExternal || role === 'Distribuidor'"
-         (click)="navigateToCart()"
-         style="cursor: pointer;">
+         *ngIf="isExternal || role === 'Distribuidor' || role === 'Cliente'"
+         (click)="navigateToCart()" style="cursor: pointer;">
         <i class="bi bi-cart-fill" style="font-size: 1.3rem;"></i>
         <span *ngIf="cartItemCount > 0"
               class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -19,49 +27,45 @@
     </div>
 
     <button class="navbar-toggler bg-white" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+            aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <!-- Links -->
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item" *ngIf="!isExternal && role !== 'Distribuidor'">
+        <li class="nav-item" *ngIf="!isExternal && role !== 'Distribuidor' && role !== 'Cliente'">
           <a class="nav-link text-white" [routerLink]="['/dashboard']">
             <i class="bi bi-house"></i> Inicio
           </a>
         </li>
 
-        <li class="nav-item dropdown" *ngIf="!isExternal && role !== 'Distribuidor'">
+        <li class="nav-item dropdown" *ngIf="!isExternal && role !== 'Distribuidor' && role !== 'Cliente'">
           <a class="nav-link dropdown-toggle text-white" href="#" id="dropdownInventario" role="button"
-             data-bs-toggle="dropdown" aria-expanded="false">
-            Inventario
-          </a>
+             data-bs-toggle="dropdown" aria-expanded="false">Inventario</a>
           <ul class="dropdown-menu" aria-labelledby="dropdownInventario">
             <li><a class="dropdown-item" (click)="navigateToBodega()" style="cursor: pointer;">Consultar Bodega</a></li>
             <li><a class="dropdown-item" (click)="navigateToIngreso()" style="cursor: pointer;">Cargar Productos</a></li>
           </ul>
         </li>
 
-        <li class="nav-item dropdown" *ngIf="!isExternal && role !== 'Distribuidor'">
+        <li class="nav-item dropdown" *ngIf="!isExternal && role !== 'Distribuidor' && role !== 'Cliente'">
           <a class="nav-link dropdown-toggle text-white" href="#" id="dropdownVentas" role="button"
-             data-bs-toggle="dropdown" aria-expanded="false">
-            Ventas
-          </a>
+             data-bs-toggle="dropdown" aria-expanded="false">Ventas</a>
           <ul class="dropdown-menu" aria-labelledby="dropdownVentas">
             <li><a class="dropdown-item" href="#">Realizar Venta</a></li>
             <li><a class="dropdown-item" href="#">Ver Ventas</a></li>
           </ul>
         </li>
 
-        <li class="nav-item" *ngIf="!isExternal && role !== 'Distribuidor'">
+        <li class="nav-item" *ngIf="!isExternal && role !== 'Distribuidor' && role !== 'Cliente'">
           <a class="nav-link active text-white" (click)="navigateToCotizador()" style="cursor: pointer;">
             Cotizador
           </a>
         </li>
 
-        <li class="nav-item" *ngIf="!isExternal && role !== 'Distribuidor'">
+        <li class="nav-item" *ngIf="!isExternal && role !== 'Distribuidor' && role !== 'Cliente'">
           <a class="nav-link active text-white" (click)="navigateToAltecPoints()" style="cursor: pointer;">
             Altec-Puntos
           </a>
@@ -74,10 +78,10 @@
           {{ isExternal ? 'Invitado' : role }}
         </span>
 
+        <!-- Carrito en desktop -->
         <a class="nav-link text-white position-relative me-3 d-none d-lg-block"
-           *ngIf="isExternal || role === 'Distribuidor'"
-           (click)="navigateToCart()"
-           style="cursor: pointer;">
+           *ngIf="isExternal || role === 'Distribuidor' || role === 'Cliente'"
+           (click)="navigateToCart()" style="cursor: pointer;">
           <i class="bi bi-cart-fill" style="font-size: 1.3rem;"></i>
           <span *ngIf="cartItemCount > 0"
                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">

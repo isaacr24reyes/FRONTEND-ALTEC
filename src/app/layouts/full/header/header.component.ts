@@ -20,17 +20,25 @@ export class HeaderComponent implements OnInit {
   public role: string | null = null;
   public isExternal: boolean = false;
   cartItemCount: number = 0;
+  public altecPoints: number = 0;
+  public showPoints: boolean = false;
   constructor(private _router: Router, private _userSessionService: UserSessionService,private cartService: CartService) { }
 
   ngOnInit(): void {
-    const token = sessionStorage.getItem('token'); // usa la clave real de tu token
+    const token = sessionStorage.getItem('token');
 
     if (token) {
       this.isExternal = false;
+      // Intenta por servicio
       this._userSessionService.getUserInfo().subscribe(userInfo => {
-        // pon fallback por si viene vacío:
-        this.role = userInfo.role;
+        this.role = userInfo?.role ?? this.role;
+        this.altecPoints = userInfo.altec_Points ?? 0;
+        this.showPoints = this.role?.toLowerCase() === 'cliente';
       });
+      const sUser = sessionStorage.getItem('userInfo');
+      if (sUser) {
+        try { this.role = JSON.parse(sUser).role ?? this.role; } catch {}
+      }
     } else {
       this.isExternal = true;
       this.role = 'Invitado';
@@ -38,6 +46,7 @@ export class HeaderComponent implements OnInit {
 
     this.cartService.cartItemCount$.subscribe(c => (this.cartItemCount = c));
   }
+
   public logout(): void {
     sessionStorage.removeItem('userInfo');
     sessionStorage.removeItem('token');

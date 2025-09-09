@@ -62,11 +62,22 @@ export class LoginComponent extends ApplicationBase implements OnInit {
           next: (userInfo) => {
             console.log('Información del usuario:', userInfo);
             this._userSessionService.setUserInfo(userInfo);
-            const isDistribuidor = userInfo?.role === 'Distribuidor';
+
+            const role = userInfo?.role;
+            const isDistribuidor = role === 'Distribuidor';
+            const isCliente = role === 'Cliente';
+
             sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
-            this.cartService.switchScope();
             sessionStorage.setItem('isDistribuidor', isDistribuidor ? 'true' : 'false');
-            this._router.navigate([isDistribuidor ? `${R_STORE}` : `${R_DASHBOARD}`]);
+
+            this.cartService.switchScope();
+
+            // 🔁 Redirección según el rol
+            if (role === 'Distribuidor' || role === 'Cliente') {
+              this._router.navigate([R_STORE]);
+            } else {
+              this._router.navigate([R_DASHBOARD]);
+            }
           },
           error: (err) => {
             console.error('Error obteniendo info del usuario:', err);
@@ -81,6 +92,7 @@ export class LoginComponent extends ApplicationBase implements OnInit {
       complete: () => Notiflix.Loading.remove()
     });
   }
+
 
   goToStore() {
     sessionStorage.setItem('isExternal', 'true');

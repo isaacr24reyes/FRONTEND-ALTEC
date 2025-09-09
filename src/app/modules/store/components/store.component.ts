@@ -62,7 +62,8 @@ export class StoreComponent implements OnInit {
   selectedCategories: string[] = [];
   isDistribuidor: boolean = false;
   distribuidorName: string = '';
-
+  public clienteName: string = '';
+  public isCliente: boolean = false;
   constructor(
     private productService: ProductService,
     private fb: UntypedFormBuilder,
@@ -72,17 +73,28 @@ export class StoreComponent implements OnInit {
 
   ngOnInit(): void {
     this.isDistribuidor = sessionStorage.getItem('isDistribuidor') === 'true';
-    if (this.isDistribuidor) {
-      const userInfo = sessionStorage.getItem('userInfo');
-      if (userInfo) {
-        try {
-          const parsedUser = JSON.parse(userInfo);
+
+    const userInfoString = sessionStorage.getItem('userInfo');
+    if (userInfoString) {
+      try {
+        const parsedUser = JSON.parse(userInfoString);
+        const role = parsedUser?.role;
+
+        if (this.isDistribuidor) {
           this.distribuidorName = parsedUser.name ?? '';
-        } catch (err) {
-          console.error('Error al parsear userInfo:', err);
         }
+
+        // Detectar si es Cliente
+        if (role === 'Cliente') {
+          this.isCliente = true;
+          this.clienteName = parsedUser.name ?? '';
+        }
+
+      } catch (err) {
+        console.error('Error al parsear userInfo:', err);
       }
     }
+
     Notiflix.Notify.init({
       position: 'left-top',
       timeout: 1000,
@@ -92,15 +104,18 @@ export class StoreComponent implements OnInit {
     this.formGroup = this.fb.group({
       searchTerm: ['']
     });
+
     this.formGroup.get('searchTerm')!.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe(() => {
         this.currentPage = 1;
         this.applyFilter();
       });
+
     this.loaderService.start();
     this.loadProducts();
   }
+
 
   addToCart(product: any): void {
     const descripcion = product.descripcion?.toLowerCase() || '';
