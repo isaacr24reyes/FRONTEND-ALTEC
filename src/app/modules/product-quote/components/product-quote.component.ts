@@ -5,6 +5,12 @@ import { ProductService } from "../../warehouse/services/warehouse.service";
 import html2pdf from 'html2pdf.js';
 import Notiflix from "notiflix";
 declare var bootstrap: any;
+import ExcelJS from 'exceljs/dist/exceljs.min.js';
+
+import { saveAs } from 'file-saver';
+
+
+
 
 @Component({
   selector: 'app-product-quote',
@@ -18,7 +24,6 @@ export class ProductQuoteComponent implements OnInit {
   allProducts: any[] = [];
   filteredProducts: any[] = [];
   products: any[] = [];
-
   selectedProduct: any;
   totalCount: number = 0;
   currentPage: number = 1;
@@ -402,4 +407,50 @@ ${item.fotoBase64
   updateTotal() {
     this.cotizacion = [...this.cotizacion];
   }
+  async descargarExcelConImagenes() {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Cotización');
+
+    // Cabeceras
+    worksheet.addRow(['Producto', 'Imagen', 'Cantidad']);
+
+    for (const item of this.cotizacion) {
+      const row = worksheet.addRow([item.descripcion, '', item.cantidad]);
+
+      if (item.foto) {
+        try {
+          // Cargar imagen desde URL
+          const response = await fetch(item.foto);
+          const blob = await response.blob();
+          const buffer = await blob.arrayBuffer();
+
+          const imageId = workbook.addImage({
+            buffer: buffer,
+            extension: 'jpeg' // ajusta según tus imágenes
+          });
+
+          worksheet.addImage(imageId, {
+            tl: { col: 1, row: row.number - 1 }, // columna B
+            ext: { width: 80, height: 60 }       // tamaño
+          });
+
+          worksheet.getRow(row.number).height = 50; // aumentar alto fila
+        } catch (err) {
+          console.warn('No se pudo cargar la imagen:', err);
+        }
+      }
+    }
+
+    // Ajustar ancho de columnas
+    worksheet.columns = [
+      { width: 40 },
+      { width: 20 },
+      { width: 15 }
+    ];
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), `cotizacion-${new Date().toISOString().slice(0,10)}.xlsx`);
+  }
+
+
 }
