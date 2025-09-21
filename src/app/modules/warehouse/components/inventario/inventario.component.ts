@@ -4,6 +4,7 @@ import { ProductService } from '../../services/warehouse.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import Notiflix from "notiflix";
 declare var bootstrap: any;
+import jsPDF from "jspdf";
 
 @Component({
   selector: 'app-inventario',
@@ -22,8 +23,29 @@ export class InventarioComponent implements OnInit {
   isFirstLoad: boolean = true;
   isLoading: boolean = true;
   tipoInventario: string = 'estudiante';
-  tipoCategoria: string = 'todo';
-
+  selectedCategory: string = "";
+  onlyImport: boolean = false;
+  onlyLowStock: boolean = false;
+  categories = [
+    'Audio y video',
+    'Baquelitas',
+    'Componentes Electrónicos',
+    'Compuertas e Integrados',
+    'Electricidad',
+    'Fuentes',
+    'Herramientas',
+    'Microcontroladores y Arduinos',
+    'Modulos y Sensores',
+    'Motores',
+    'Parlantes',
+    'Pilas y Baterias',
+    'Plugs y Conectores',
+    'Protoboards',
+    'Proyectos Y kits',
+    'Redes y Comunicación',
+    'Transformadores',
+    'Otros'
+  ];
   constructor(
     private productService: ProductService,
     private fb: UntypedFormBuilder
@@ -31,7 +53,9 @@ export class InventarioComponent implements OnInit {
 
   ngOnInit(): void {
     this.formGroup = this.fb.group({
-      searchControl: ['']
+      searchControl: [''],
+      importCheck: [false],
+      lowStockCheck: [false]
     });
     this.getAllProducts();
     this.formGroup.get('searchControl')!.valueChanges
@@ -41,6 +65,25 @@ export class InventarioComponent implements OnInit {
         this.applyFilter();
       });
   }
+  filtrarCategoria(categoria: string, event?: Event) {
+    if (event) event.preventDefault();
+
+    this.selectedCategory = categoria;
+    this.currentPage = 1; // reinicia paginación al aplicar filtro
+    this.applyFilter();
+  }
+  toggleLowStock() {
+    this.onlyLowStock = this.formGroup.get('lowStockCheck')?.value;
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+  toggleImport() {
+    this.onlyImport = this.formGroup.get('importCheck')?.value;
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+
+
 
   getAllProducts(): void {
     if (this.isFirstLoad) {
@@ -74,18 +117,30 @@ export class InventarioComponent implements OnInit {
     });
   }
 
-  generarInventario() {
-    console.log("Generando inventario...");
-  }
-
   applyFilter(): void {
     const raw = this.formGroup.get('searchControl')!.value || '';
     const tokens = this.tokenize(raw);
 
     let filtered = this.allProducts;
 
+    // 🔹 Filtro por categoría
+    if (this.selectedCategory) {
+      filtered = filtered.filter(p => p.categoria === this.selectedCategory);
+    }
+
+    // 🔹 Filtro por importación
+    if (this.onlyImport) {
+      filtered = filtered.filter(p => p.isImport === true || p.isImport === 1);
+    }
+
+    // 🔹 Filtro por stock bajo (< 5)
+    if (this.onlyLowStock) {
+      filtered = filtered.filter(p => p.stock < 5);
+    }
+
+    // 🔹 Filtro por texto
     if (tokens.length) {
-      filtered = this.allProducts
+      filtered = filtered
         .map(p => {
           const normDesc = p._normDesc as string;
           const normCode = p._normCode as string;
@@ -102,12 +157,15 @@ export class InventarioComponent implements OnInit {
         .map(x => x.p);
     }
 
+    // 🔹 Actualiza contador y paginación
     this.totalCount = filtered.length;
     this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1;
 
     const startIndex = (this.currentPage - 1) * this.pageSize;
     this.products = filtered.slice(startIndex, startIndex + this.pageSize);
   }
+
+
 
   onPreviousPage(): void {
     if (this.currentPage > 1) {
@@ -191,12 +249,159 @@ export class InventarioComponent implements OnInit {
   }
 
   onSubmit() {}
+  async descargarPDF() {
+    if (!this.allProducts || this.allProducts.length === 0) {
+      console.warn("No hay productos en allProducts");
+      return;
+    }
 
-  descargarPDF() {
-    console.log("Descargando PDF para:", this.tipoInventario);
+    Notiflix.Loading.standard("Generando catálogo...");
+
+    const doc = new jsPDF("p", "mm", "a4");
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let y = 20;
+
+    // 🔹 Cabecera
+    const now = new Date();
+    const options: Intl.DateTimeFormatOptions = {
+      timeZone: "America/Guayaquil",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    };
+    const fechaHoraFormateada = new Intl.DateTimeFormat("es-EC", options).format(now);
+    const [fecha, hora] = fechaHoraFormateada.split(",");
+
+    doc.addImage("assets/images/Logo-completo.jpeg", "JPEG", 10, 10, 40, 20);
+    doc.setFontSize(16);
+    doc.text(
+      this.tipoInventario === "importador"
+        ? "CATÁLOGO MAYORISTA"
+        : "CATÁLOGO ESTUDIANTES",
+      pageWidth / 2,
+      20,
+      { align: "center" }
+    );
+    doc.setFontSize(10);
+    doc.text(`Fecha: ${fecha.trim()} | Hora: ${hora.trim()} (hora de Quito)`, pageWidth / 2, 27, { align: "center" });
+    doc.text("Ubicación: Quito, Villaflora, Rodrigo de Chávez. | WhatsApp: (099) 515-9078", pageWidth / 2, 32, { align: "center" });
+
+    y = 40;
+
+    // 🔹 Iteramos categorías
+    for (const categoria of this.categories) {
+      const productosCat = this.allProducts.filter(
+        (p) =>
+          p.categoria === categoria &&
+          (this.tipoInventario !== "importador" || p.isImport === true || p.isImport === 1)
+      );
+      if (productosCat.length === 0) continue;
+
+      // Título categoría
+      doc.setFontSize(14);
+      doc.setTextColor(8, 39, 79);
+      doc.text(categoria, 10, y);
+      y += 8;
+
+      // Encabezado tabla
+      doc.setFontSize(11);
+      doc.setTextColor(255, 255, 255);
+      doc.setFillColor(8, 39, 79);
+      doc.rect(10, y, pageWidth - 20, 8, "F");
+      doc.text("Código", 12, y + 6);
+      doc.text("Descripción", 45, y + 6);
+      doc.text(
+        this.tipoInventario === "importador" ? "Precio Mayorista" : "PVP",
+        140,
+        y + 6
+      );
+      doc.text("Imagen", 170, y + 6);
+      y += 12;
+
+      // Filas
+      doc.setTextColor(0, 0, 0);
+      for (const prod of productosCat) {
+        if (y > 260) {
+          doc.addPage();
+          y = 20;
+        }
+
+        // Código
+        doc.text(prod.codigo || "", 12, y);
+
+        // 🔹 Descripción multilínea
+        const descripcion = prod.descripcion || "";
+        const descLines = doc.splitTextToSize(descripcion, 90);
+        const lineHeight = 6;
+        const descHeight = descLines.length * lineHeight;
+        doc.text(descLines, 45, y);
+
+        // 🔹 Calculamos Y centrada para precio e imagen
+        const centroFila = y + descHeight / 2;
+
+        const precio =
+          this.tipoInventario === "importador"
+            ? prod.precioMayorista
+            : prod.pvp;
+        doc.text(
+          new Intl.NumberFormat("es-EC", {
+            style: "currency",
+            currency: "USD",
+          }).format(precio || 0),
+          this.tipoInventario === "importador" ? 130 : 140,
+          centroFila
+        );
+
+        if (prod.foto && prod.foto !== "NOT-IMAGE") {
+          try {
+            const imgData = await this.loadImageAsBase64(prod.foto);
+            doc.addImage(imgData, "JPEG", 170, centroFila - 7, 20, 15);
+          } catch (e) {
+            console.warn("No se pudo cargar imagen:", prod.foto);
+          }
+        }
+
+        // 🔹 Avanzamos según la descripción más alta
+        y += Math.max(descHeight, 20);
+      }
+
+      // Salto entre categorías
+      y += 10;
+      if (y > 260) {
+        doc.addPage();
+        y = 20;
+      }
+    }
+
+    doc.save(
+      `${this.tipoInventario === "importador" ? "catalogo-mayorista" : "catalogo-estudiantes"}-${
+        new Date().toISOString().slice(0, 10)
+      }.pdf`
+    );
+
+    Notiflix.Loading.remove();
   }
 
-  descargarExcel() {
-    console.log("Descargando Excel para:", this.tipoInventario);
+
+// 🔹 Convierte URL a Base64
+  private loadImageAsBase64(url: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject("No se pudo crear contexto");
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/jpeg"));
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
   }
 }

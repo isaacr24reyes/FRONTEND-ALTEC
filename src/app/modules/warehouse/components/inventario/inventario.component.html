@@ -3,9 +3,10 @@
     <div class="text-center">
       <h1>Consultar en bodega</h1>
     </div>
-
     <div class="container mt-3">
-      <div class="row justify-content-center">
+
+      <!-- 🔹 Buscador -->
+      <div class="row justify-content-center mb-4">
         <div class="col-12 col-md-8">
           <input
             type="search"
@@ -15,16 +16,67 @@
             formControlName="searchControl">
         </div>
       </div>
-    </div>
-    <div class="row justify-content-center mt-3">
-      <div class="col-12 col-md-8 text-end">
-        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#inventarioModal">
-          <i class="bi bi-box-arrow-down"></i> Generar catálogo
-        </button>
 
+      <!-- 🔹 Filtros -->
+      <div class="row justify-content-center mb-4">
+        <div class="col-12 col-md-10 d-flex flex-wrap justify-content-center gap-4">
 
+          <!-- Checkbox importación -->
+          <div class="form-check">
+            <input class="form-check-input"
+                   type="checkbox"
+                   id="importCheck"
+                   formControlName="importCheck"
+                   (change)="toggleImport()">
+            <label class="form-check-label text-white fw-bold ms-2" for="importCheck">
+              Productos de importación
+            </label>
+          </div>
+
+          <!-- Checkbox stock bajo -->
+          <div class="form-check">
+            <input class="form-check-input"
+                   type="checkbox"
+                   id="lowStockCheck"
+                   formControlName="lowStockCheck"
+                   (change)="toggleLowStock()">
+            <label class="form-check-label text-white fw-bold ms-2" for="lowStockCheck">
+              Stock &lt; 5
+            </label>
+          </div>
+
+          <!-- Dropdown categorías -->
+          <div class="dropdown">
+            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownCategorias" data-bs-toggle="dropdown" aria-expanded="false">
+              Filtrar por categoría
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownCategorias">
+              <li>
+                <button class="dropdown-item" (click)="filtrarCategoria('')">Todas</button>
+              </li>
+              <li *ngFor="let cat of categories">
+                <button class="dropdown-item" (click)="filtrarCategoria(cat)">{{ cat }}</button>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
+      <!-- 🔹 Botón catálogo -->
+      <div class="row justify-content-center mb-4">
+        <div class="col-12 col-md-10 text-end">
+          <button type="button"
+                  class="btn btn-success"
+                  data-bs-toggle="modal"
+                  data-bs-target="#inventarioModal">
+            <i class="bi bi-box-arrow-down"></i> Generar catálogo
+          </button>
+        </div>
+      </div>
+
+
     </div>
+
+
 
     <div class="container mt-5">
       <div class="row justify-content-center">
@@ -46,7 +98,7 @@
                 <td style="vertical-align: middle;">{{ product.pvp | currency }}</td>
                 <td style="padding: 0;">
                   <ng-container *ngIf="product.foto !== 'NOT-IMAGE'; else noImage">
-                    <img [src]="product.foto" alt="Producto" class="img-thumbnail" style="max-width: 200px;" />
+                    <img [src]="product.foto" alt="Producto" class="img-thumbnail" style="max-width: 100px; max-height: 80px;" />
                   </ng-container>
                   <ng-template #noImage>
                     <span>Producto no contiene imagen</span>
@@ -112,33 +164,15 @@
           <label for="tipoInventario" class="form-label">Catálogo para:</label>
           <select id="tipoInventario" class="form-select bg-secondary text-white" [(ngModel)]="tipoInventario">
             <option value="estudiante">Estudiante</option>
-            <option value="importador">Importador</option>
+            <option value="importador">Mayorista</option>
             <option value="admin">Admin</option>
           </select>
         </div>
 
-        <!-- ComboBox: Mostrar -->
-        <div class="mb-4 text-start">
-          <label for="categoria" class="form-label">Mostrar:</label>
-          <select id="categoria" class="form-select bg-secondary text-white" [(ngModel)]="tipoCategoria">
-            <option value="todo">Todo</option>
-            <option value="compuertas">Compuertas</option>
-            <option value="modulos">Módulos</option>
-          </select>
-        </div>
-
-        <!-- Texto centrado -->
-        <p class="mb-4 text-center">Selecciona el formato para generar tu catálogo.</p>
-
-        <!-- Botones -->
         <div class="d-grid gap-2 col-8 mx-auto">
           <button class="btn btn-danger" (click)="descargarPDF()">📄 Descargar PDF</button>
-          <button class="btn btn-primary" (click)="descargarExcel()">📊 Descargar Excel</button>
         </div>
-
       </div>
     </div>
   </div>
 </div>
-
-
