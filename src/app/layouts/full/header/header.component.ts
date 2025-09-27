@@ -29,7 +29,6 @@ export class HeaderComponent implements OnInit {
 
     if (token) {
       this.isExternal = false;
-      // Intenta por servicio
       this._userSessionService.getUserInfo().subscribe(userInfo => {
         this.role = userInfo?.role ?? this.role;
         this.altecPoints = userInfo.altec_Points ?? 0;

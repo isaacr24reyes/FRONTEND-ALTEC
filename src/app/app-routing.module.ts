@@ -7,7 +7,7 @@ import {
   R_AUTHENTICATION,
   R_DASHBOARD,
   R_PRODUCT_QUOTE,
-  R_STORE,
+  R_STORE, R_USER_ADMIN,
   R_WAREHOUSE
 } from "./constants/route.constants";
 import {RoleGuard} from "./core/guard/role.guard";
@@ -56,6 +56,12 @@ const routes: Routes = [
     canActivate: [RoleGuard],
     loadChildren: () => import('./modules/altec-points/altec-points.module').then(mod => mod.AltecPointsModule)
   },
+  {
+    path: R_USER_ADMIN,
+    component: FullComponent,
+    canActivate: [RoleGuard],
+    loadChildren: () => import('./modules/user-admin/user-admin.module').then(mod => mod.UserAdminModule)
+  }
 ];
 
 @NgModule({
