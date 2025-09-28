@@ -29,5 +29,12 @@ export class AccountService extends ApplicationBaseService {
     const body = { name, points };
     return this.genericSend('post', 'api/auth/add-points', body);
   }
+  public getAllUsers(): Observable<any> {
+    return this.genericSend('get', 'api/auth/getAll');
+  }
+  public createUser(name: string, telefono: string, role: string): Observable<any> {
+    const body = { name, telefono, role };
+    return this.genericSend('post', 'api/auth/create', body);
+  }
 
 }

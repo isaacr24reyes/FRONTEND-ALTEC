@@ -1,1 +1,149 @@
-<p>user-admin works!</p>
+<form class="login-form">
+  <div class="text-center">
+    <h1>👥 Administrador de Usuarios</h1>
+  </div>
+
+  <div class="container mt-4">
+    <!-- 🔹 Buscador -->
+    <div class="row justify-content-center mb-3">
+      <div class="col-12 col-md-6">
+        <input
+          type="search"
+          class="form-control"
+          placeholder="Buscar usuario por nombre..."
+          aria-label="Buscar"
+          name="searchTerm"
+          [(ngModel)]="searchTerm"
+          (input)="applyFilter()"
+          autocomplete="off">
+      </div>
+    </div>
+
+    <!-- 🔹 Botón Crear Usuario -->
+    <div class="row justify-content-end mb-3">
+      <div class="col-12 col-md-4 text-end">
+        <button type="button"
+                class="btn btn-success"
+                data-bs-toggle="modal"
+                data-bs-target="#crearUsuarioModal">
+          <i class="bi bi-person-plus"></i> Crear Usuario
+        </button>
+      </div>
+    </div>
+
+    <!-- 🔹 Tabla Usuarios -->
+    <div class="row">
+      <div class="col-12">
+        <div class="table-responsive shadow">
+          <table class="table table-dark table-hover text-center align-middle">
+            <thead>
+            <tr>
+              <th style="background-color: #08274F; color: white; font-weight: bold;">Nombre</th>
+              <th style="background-color: #08274F; color: white; font-weight: bold;">Username</th>
+              <th style="background-color: #08274F; color: white; font-weight: bold;">Celular</th>
+              <th style="background-color: #08274F; color: white; font-weight: bold;">Rol</th>
+              <th style="background-color: #08274F; color: white; font-weight: bold;">Altec Puntos</th>
+              <th style="background-color: #08274F; color: white; font-weight: bold;">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let user of filteredUsers | slice:(currentPage-1)*pageSize:(currentPage*pageSize)">
+              <td>{{ user.name }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.telefono }}</td>
+              <td>{{ user.role }}</td>
+              <td>{{ user.altec_Points ?? 0 }}</td>
+              <td>
+                <button class="btn btn-outline-danger btn-sm">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredUsers.length === 0">
+              <td colspan="5" class="text-muted">No hay usuarios registrados.</td>
+            </tr>
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <hr class="styled-line">
+
+    <!-- 🔹 Paginación -->
+    <div class="container mt-4">
+      <div class="row justify-content-between align-items-center">
+        <div class="col-12 col-md-auto mb-2 mb-md-0">
+          <h5>Total de usuarios: {{ filteredUsers.length }}</h5>
+        </div>
+        <div class="col-12 col-md-auto">
+          <button class="btn btn-primary me-2"
+                  (click)="currentPage = currentPage - 1"
+                  [disabled]="currentPage === 1">
+            Anterior
+          </button>
+          <button class="btn btn-primary"
+                  (click)="currentPage = currentPage + 1"
+                  [disabled]="currentPage >= totalPages">
+            Siguiente
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <span class="text-white small-text">
+        Developed by <strong style="color: #8B50FB;">SwiFt©</strong> (2025).
+      </span>
+    </div>
+  </div>
+</form>
+<!-- Modal Crear Usuario -->
+<div class="modal fade" id="crearUsuarioModal" tabindex="-1" aria-labelledby="crearUsuarioModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-0">
+        <h5 class="modal-title w-100" id="crearUsuarioModalLabel">➕ Crear Nuevo Usuario</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form autocomplete="off">
+          <!-- Nombre -->
+          <div class="mb-3">
+            <label for="name" class="form-label">Nombre</label>
+            <input id="name" type="text" class="form-control" placeholder="Ej: Juan Pérez"
+                   [(ngModel)]="newUser.name" name="name" autocomplete="off">
+          </div>
+
+          <!-- Celular -->
+          <div class="mb-3">
+            <label for="phone" class="form-label">Celular</label>
+            <input id="phone" type="text" class="form-control" placeholder="Ej: 0987654321"
+                   [(ngModel)]="newUser.telefono" name="telefono" autocomplete="off">
+          </div>
+
+          <!-- Rol -->
+          <div class="mb-3">
+            <label for="role" class="form-label">Rol</label>
+            <select id="role" class="form-select" [(ngModel)]="newUser.role" name="role">
+              <option value="Cliente" selected>Cliente</option>
+              <option value="Distribuidor">Distribuidor</option>
+            </select>
+          </div>
+
+          <!-- Botón Guardar -->
+          <div class="d-grid gap-2">
+            <button type="button"
+                    class="btn btn-primary"
+                    (click)="createUser()"
+                    data-bs-dismiss="modal">
+              <i class="bi bi-check-circle"></i> Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
