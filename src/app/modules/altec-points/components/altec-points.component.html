@@ -42,7 +42,7 @@
                 [class.active]="i === activeIndex"
                 (pointerdown)="onSelect(u, $event)"
               >
-                {{ displayName(u) }}
+                {{ u.name }} ({{ u.username }})
               </button>
             </li>
 
@@ -59,12 +59,11 @@
               {{ selectedUser.name }} ({{ selectedUser.username }})
             </div>
             <div class="col-12 col-md-auto">
-              <span class="suc-label me-2">Altec puntos:</span>
+              <span class="suc-label me-2">Balance:</span>
               <div class="d-flex flex-column align-items-start align-items-md-end">
-                <span class="points-badge">{{ selectedUser.altec_Points }}</span>
-                <small class="mt-1" style="color: rgba(255,255,255,.85)">≈ {{ selectedUserUsdEquivalent }}</small>
-
+                <span class="points-badge">$ {{ selectedUser.altec_Points }}</span>
               </div>
+
             </div>
 
           </div>

@@ -27,3 +27,54 @@ h1 {
 .modal-content {
   border-radius: 12px;
 }
+@media (max-width: 768px) {
+  .user-table thead {
+    display: none; /* Ocultar cabecera en móvil */
+  }
+
+  .user-table tr {
+    display: block;
+    margin-bottom: 0.2rem;          /* tarjetas más pegadas */
+
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;         /* menos padding → más compactas */
+    background: rgb(40, 40, 40);   /* 👈 gris uniforme */
+
+    text-align: left;
+    transition: transform 0.2s ease;
+  }
+
+  .user-table tr:hover {
+    transform: scale(1.01);         /* pequeño efecto hover */
+    background: none;
+  }
+
+  .user-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.10rem 0;
+    font-size: 16px;                /* letra un poco más chica */
+    border-bottom: none;
+    background: none;
+  }
+
+  .user-table td:last-child {
+    border-bottom: none;
+  }
+
+  .user-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color:greenyellow; /* etiquetas en azul */
+    flex: 1;
+    background: transparent !important;
+  }
+
+  /* Botones dentro de la card */
+  .user-table td button {
+    padding: 2px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+}

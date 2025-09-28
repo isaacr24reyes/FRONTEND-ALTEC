@@ -20,9 +20,10 @@
   <div class="container d-flex flex-column align-items-center login-form-fields">
     <div class="d-flex flex-column">
       <mat-form-field>
-        <input matInput placeholder="{{'forms.login.username' | translate}} "autocomplete="off"
-               [formControl]="$any(formGroup).controls['username']" appOnlyLetters>
+        <input matInput placeholder="{{'forms.login.username' | translate}}" autocomplete="off"
+               [formControl]="$any(formGroup).controls['username']">
       </mat-form-field>
+
       <small *ngIf="formGroup.controls['username'].hasError('required') && formGroup.controls['username'].touched"
              class="text-danger">Usuario es requerido.</small>
     </div>

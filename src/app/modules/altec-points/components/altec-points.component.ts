@@ -171,15 +171,15 @@ export class AltecPointsComponent implements OnInit {
   onSubmit(): void {
     if (!this.formGroup.valid) return;
 
-    const name: string =
-      this.selectedUser?.name ??
+    const username: string =
+      this.selectedUser?.username ??
       (this.formGroup.value.productDescription || '').toString().trim();
 
     const amountInput = this.formGroup.value.productCode;
     const amount = this.toNumber(amountInput);
 
-    if (!name) {
-      Notiflix.Notify.warning('Falta el nombre del cliente.');
+    if (!username) {
+      Notiflix.Notify.warning('Falta el usuario.');
       return;
     }
     if (isNaN(amount) || amount <= 0) {
@@ -187,38 +187,37 @@ export class AltecPointsComponent implements OnInit {
       return;
     }
 
-    const points = this.moneyToPoints(amount);
+    const saldo = amount / 15;
 
     Notiflix.Confirm.show(
-      '¿Acreditar puntos?',
-      `Vas a acreditar <b>${points} AP</b> a <b>${name}</b>`,
+      '¿Acreditar saldo?',
+      `Vas a acreditar <b>$${saldo.toFixed(2)}</b> a <b>${username}</b>`,
       'Sí, acreditar',
       'Cancelar',
       () => {
-
         this.isSubmitting = true;
-        Notiflix.Loading.standard('Acreditando puntos...');
+        Notiflix.Loading.standard('Acreditando saldo...');
 
-        this.account.addPoints(name, points).subscribe({
+        this.account.addPoints(username, saldo).subscribe({
           next: (res) => {
             this.isSubmitting = false;
             Notiflix.Loading.remove();
-            const totalPoints =
+
+            const totalSaldo =
               (res && (
-                res.currentPoints ??
-                res.totalPoints ??
-                res.points ??
-                res.pointsBalance ??
+                res.currentBalance ??
+                res.totalBalance ??
+                res.saldo ??
                 res.balance ??
-                res?.data?.currentPoints ??
-                res?.data?.totalPoints
+                res?.data?.currentBalance ??
+                res?.data?.totalBalance
               )) ?? null;
 
-            const msg = totalPoints !== null
-              ? `<b>${name}</b> tiene actualmente <b>${totalPoints} AP</b>.`
-              : `Se acreditaron <b>${points} AP</b> a <b>${name}</b>.`;
+            const msg = totalSaldo !== null
+              ? `<b>${username}</b> tiene actualmente <b>$${totalSaldo.toFixed(2)}</b>.`
+              : `Se acreditaron <b>$${saldo.toFixed(2)}</b> a <b>${username}</b>.`;
 
-            Notiflix.Report.success('Puntos acreditados', msg, 'Aceptar');
+            Notiflix.Report.success('Saldo acreditado', msg, 'Aceptar');
 
             this.resetFormAndFocus();
           },
@@ -226,24 +225,20 @@ export class AltecPointsComponent implements OnInit {
             this.isSubmitting = false;
             Notiflix.Loading.remove();
 
-            console.error('Error acreditando puntos:', err);
+            console.error('Error acreditando saldo:', err);
             Notiflix.Report.failure(
               'Error',
-              'No se pudo acreditar los puntos. Inténtalo nuevamente.',
+              'No se pudo acreditar el saldo. Inténtalo nuevamente.',
               'Cerrar'
             );
           }
         });
       },
-      () => {
-      }
+      () => {}
     );
   }
-  get selectedUserUsdEquivalent(): string {
-    const ap = Number(this.selectedUser?.altec_Points) || 0;
-    const usd = ap / this.AP_PER_USD_DISPLAY;
-    return new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' }).format(usd);
-  }
+
+
   private resetFormAndFocus(): void {
     this.formGroup.reset({
       productDescription: '',

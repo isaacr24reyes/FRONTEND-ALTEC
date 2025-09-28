@@ -32,42 +32,45 @@
     </div>
 
     <!-- 🔹 Tabla Usuarios -->
+    <!-- 🔹 Tabla Usuarios -->
     <div class="row">
       <div class="col-12">
         <div class="table-responsive shadow">
-          <table class="table table-dark table-hover text-center align-middle">
+          <table class="table table-dark table-hover text-center align-middle user-table">
             <thead>
             <tr>
               <th style="background-color: #08274F; color: white; font-weight: bold;">Nombre</th>
               <th style="background-color: #08274F; color: white; font-weight: bold;">Username</th>
               <th style="background-color: #08274F; color: white; font-weight: bold;">Celular</th>
               <th style="background-color: #08274F; color: white; font-weight: bold;">Rol</th>
-              <th style="background-color: #08274F; color: white; font-weight: bold;">Altec Puntos</th>
+              <th style="background-color: #08274F; color: white; font-weight: bold;">Balance</th>
               <th style="background-color: #08274F; color: white; font-weight: bold;">Acciones</th>
             </tr>
             </thead>
             <tbody>
             <tr *ngFor="let user of filteredUsers | slice:(currentPage-1)*pageSize:(currentPage*pageSize)">
-              <td>{{ user.name }}</td>
-              <td>{{ user.username }}</td>
-              <td>{{ user.telefono }}</td>
-              <td>{{ user.role }}</td>
-              <td>{{ user.altec_Points ?? 0 }}</td>
-              <td>
-                <button class="btn btn-outline-danger btn-sm">
-                  <i class="bi bi-trash"></i>
+              <td data-label="Nombre">{{ user.name }}</td>
+              <td data-label="Username">{{ user.username }}</td>
+              <td data-label="Celular">{{ user.telefono }}</td>
+              <td data-label="Rol">{{ user.role }}</td>
+              <td data-label="Balance">${{ user.altec_Points ?? 0 }}</td>
+              <td data-label="Acciones">
+                <button class="btn btn-outline-success btn-sm"
+                        (click)="abrirConsumirModal(user)"
+                        aria-label="Acreditar / Consumir">
+                  <i class="bi bi-plus-lg"></i>
                 </button>
               </td>
             </tr>
             <tr *ngIf="filteredUsers.length === 0">
-              <td colspan="5" class="text-muted">No hay usuarios registrados.</td>
+              <td colspan="6" class="text-muted">No hay usuarios registrados.</td>
             </tr>
             </tbody>
-
           </table>
         </div>
       </div>
     </div>
+
 
     <hr class="styled-line">
 
@@ -146,4 +149,58 @@
     </div>
   </div>
 </div>
+<!-- Modal Consumir Puntos -->
+<!-- Modal Consumir Puntos -->
+<div class="modal fade" id="consumirModal" tabindex="-1" aria-labelledby="consumirModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title" id="consumirModalLabel">💳 Consumir Puntos</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="consumirForm">
+          <!-- Venta -->
+          <div class="mb-3">
+            <label for="venta" class="form-label">Venta</label>
+            <input id="venta" type="number" min="0" step="0.01" class="form-control"
+                   formControlName="venta" (input)="calcularDiferencia()">
+          </div>
 
+          <!-- Diferencia -->
+          <div class="mb-3">
+            <label for="diferencia" class="form-label">Diferencia</label>
+            <input id="diferencia" type="number" class="form-control bg-secondary text-white"
+                   formControlName="diferencia" readonly>
+          </div>
+
+          <!-- 👇 Efectivo recibido + indicador de vuelto/falta -->
+          <div class="mb-3">
+            <label for="efectivo" class="form-label">Efectivo recibido</label>
+            <input id="efectivo" type="number" min="0" step="0.01" class="form-control"
+                   formControlName="efectivo" (input)="onEfectivoInput()">
+          </div>
+
+          <div class="mt-2">
+            <ng-container *ngIf="(consumirForm.get('efectivo')?.value || 0) >= (consumirForm.get('diferencia')?.value || 0); else faltaTpl">
+              <div class="alert alert-success py-2 mb-0">
+                Vuelto: <strong>${{ ((consumirForm.get('efectivo')?.value || 0) - (consumirForm.get('diferencia')?.value || 0)) | number:'1.2-2' }}</strong>
+              </div>
+            </ng-container>
+            <ng-template #faltaTpl>
+              <div class="alert alert-warning py-2 mb-0">
+                Falta: <strong>${{ ((consumirForm.get('diferencia')?.value || 0) - (consumirForm.get('efectivo')?.value || 0)) | number:'1.2-2' }}</strong>
+              </div>
+            </ng-template>
+          </div>
+          <!-- 👆 fin calculadora simple -->
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="confirmarCompra()">Comprar</button>
+      </div>
+    </div>
+  </div>
+</div>
