@@ -18,8 +18,6 @@ import { saveAs } from 'file-saver';
 })
 export class ProductQuoteComponent implements OnInit {
   public formGroup!: UntypedFormGroup;
-
-  // Datos para búsqueda/paginación
   allProducts: any[] = [];
   filteredProducts: any[] = [];
   products: any[] = [];
@@ -28,11 +26,48 @@ export class ProductQuoteComponent implements OnInit {
   currentPage: number = 1;
   totalPages: number = 0;
   private pageSize: number = 5;
-
   isFirstLoad: boolean = true;
   isLoading: boolean = true;
-
   cotizacion: any[] = [];
+  resistorValues: string[] = [
+    '1Ω','8.2Ω','10Ω','20Ω','22Ω','27Ω','47Ω','56Ω','62Ω','68Ω','75Ω','82Ω',
+    '100Ω','110Ω','120Ω','200Ω','220Ω','240Ω','270Ω','300Ω','330Ω','360Ω',
+    '390Ω','470Ω','510Ω','560Ω','680Ω','820Ω',
+
+    '1kΩ','1.2kΩ','1.8kΩ','2kΩ','2.2kΩ','2.7kΩ','3.3kΩ','3.9kΩ','4.7kΩ',
+    '5.1kΩ','5.6kΩ','6.2kΩ','6.8kΩ','8.2kΩ','10kΩ','12kΩ','15kΩ','16kΩ',
+    '20kΩ','22kΩ','27kΩ','39kΩ','47kΩ','56kΩ','68kΩ','82kΩ','100kΩ',
+    '120kΩ','150kΩ','220kΩ','270kΩ','330kΩ','470kΩ','560kΩ','750kΩ','820kΩ',
+
+    '1MΩ','2.2MΩ','10MΩ'
+  ];
+  selectedCategory: string = '';
+  onlyImport: boolean = false;
+  onlyLowStock: boolean = false;
+
+  categories = [
+    'Audio y video',
+    'Baquelitas',
+    'Componentes Electrónicos',
+    'Compuertas e Integrados',
+    'Electricidad',
+    'Fuentes',
+    'Herramientas',
+    'Microcontroladores y Arduinos',
+    'Modulos y Sensores',
+    'Motores',
+    'Parlantes',
+    'Pilas y Baterias',
+    'Plugs y Conectores',
+    'Protoboards',
+    'Proyectos Y kits',
+    'Redes y Comunicación',
+    'Transformadores',
+    'Otros'
+  ];
+
+  selectedResistorValue = '';
+  isResistor: boolean = false;
   @ViewChild('pdfCotizacion', { static: false }) pdfCotizacion!: ElementRef;
 
   constructor(
@@ -41,7 +76,12 @@ export class ProductQuoteComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.formGroup = this.fb.group({ searchControl: [''] });
+    this.formGroup = this.fb.group({
+      searchControl: [''],
+      importCheck: [false],
+      lowStockCheck: [false]
+    });
+
 
     // Carga inicial: traemos un batch grande y filtramos en cliente
     this.getProducts();
@@ -55,11 +95,32 @@ export class ProductQuoteComponent implements OnInit {
         this.applyFilter();
       });
   }
+  filtrarCategoria(categoria: string) {
+    this.selectedCategory = categoria;
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+
+  toggleImport() {
+    this.onlyImport = this.formGroup.get('importCheck')?.value;
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+
+  toggleLowStock() {
+    this.onlyLowStock = this.formGroup.get('lowStockCheck')?.value;
+    this.currentPage = 1;
+    this.applyFilter();
+  }
 
   onSubmit() {}
-
   openProductModal(product: any): void {
     this.selectedProduct = product;
+
+    const desc = product.descripcion?.toLowerCase() || '';
+    this.isResistor = desc.includes('resistencia') && desc.includes('1/4');
+    this.selectedResistorValue = '';
+
     const modalElement = document.getElementById('productModal');
     if (modalElement) {
       const modal = new bootstrap.Modal(modalElement);
@@ -67,9 +128,25 @@ export class ProductQuoteComponent implements OnInit {
     }
   }
 
-  /**
-   * Descarga un lote grande y precalcula campos normalizados para buscar en cliente.
-   */
+  confirmAddResistor(): void {
+    if (!this.selectedResistorValue) {
+      Notiflix.Notify.warning('Selecciona un valor de resistencia');
+      return;
+    }
+
+    const item = {
+      ...this.selectedProduct,
+      descripcion: `${this.selectedProduct.descripcion} - ${this.selectedResistorValue}`
+    };
+
+    this.agregarACotizacion(item);
+
+    const modal = bootstrap.Modal.getInstance(
+      document.getElementById('resistorModal')
+    );
+    modal?.hide();
+  }
+
   getProducts(): void {
     if (this.isFirstLoad) {
       Notiflix.Loading.standard('Cargando productos...');
@@ -104,21 +181,34 @@ export class ProductQuoteComponent implements OnInit {
       }
     });
   }
-
-  /** ---------- Filtro con tokens en cualquier orden + ranking ---------- */
   applyFilter(): void {
     const raw = this.formGroup.get('searchControl')!.value || '';
     const tokens = this.tokenize(raw);
 
     let filtered = this.allProducts;
 
+    // 🔹 Categoría
+    if (this.selectedCategory) {
+      filtered = filtered.filter(p => p.categoria === this.selectedCategory);
+    }
+
+    // 🔹 Importación
+    if (this.onlyImport) {
+      filtered = filtered.filter(p => p.isImport === true || p.isImport === 1);
+    }
+
+    // 🔹 Stock bajo
+    if (this.onlyLowStock) {
+      filtered = filtered.filter(p => p.stock < 5);
+    }
+
+    // 🔹 Texto (tu lógica existente)
     if (tokens.length) {
-      filtered = this.allProducts
+      filtered = filtered
         .map(p => {
           const normDesc = p._normDesc as string;
           const normCode = p._normCode as string;
 
-          // AND: todos los tokens deben aparecer en desc o código (cualquier orden)
           const matchesAll = tokens.every(t =>
             this.textContainsToken(normDesc, t) || this.textContainsToken(normCode, t)
           );
@@ -127,7 +217,7 @@ export class ProductQuoteComponent implements OnInit {
           return { p, score };
         })
         .filter(x => x.score >= 0)
-        .sort((a, b) => b.score - a.score)   // ordenar por relevancia
+        .sort((a, b) => b.score - a.score)
         .map(x => x.p);
     }
 
@@ -229,22 +319,36 @@ export class ProductQuoteComponent implements OnInit {
   /** ---------- Cotización / PDF (tu lógica intacta) ---------- */
 
   async agregarACotizacion(item: any) {
+
+    // 🔌 Si es resistencia, exige valor
+    if (this.isResistor) {
+      if (!this.selectedResistorValue) {
+        Notiflix.Notify.warning('Selecciona el valor de la resistencia');
+        return;
+      }
+
+      item = {
+        ...item,
+        descripcion: `${item.descripcion} - ${this.selectedResistorValue}`
+      };
+    }
+
     const nuevoItem = { ...item };
     nuevoItem.foto = item.foto;
 
     if (item.foto) {
       try {
-        const base64 = await this.getBase64ImageFromURL(item.foto); // Cloudinary URL
+        const base64 = await this.getBase64ImageFromURL(item.foto);
         nuevoItem.fotoBase64 = base64;
-      } catch (err) {
-        console.warn('Error al convertir imagen a base64:', err);
-        nuevoItem.fotoBase64 = null; // fallback
+      } catch {
+        nuevoItem.fotoBase64 = null;
       }
     }
 
     this.cotizacion.push(nuevoItem);
     this.close();
   }
+
 
   getBase64ImageFromURL(url: string): Promise<string> {
     return new Promise((resolve, reject) => {

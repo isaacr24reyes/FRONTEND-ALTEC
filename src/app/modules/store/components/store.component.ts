@@ -35,10 +35,79 @@ export class StoreComponent implements OnInit {
   selectedProduct: any = null;
   selectedValue: string = '';
   resistorValues: string[] = [
-    '100Ω', '220Ω', '330Ω',
-    '470Ω', '1kΩ', '2.2kΩ',
-    '4.7kΩ', '10kΩ'
+    '1Ω',
+    '8.2Ω',
+    '10Ω',
+    '20Ω',
+    '22Ω',
+    '27Ω',
+    '47Ω',
+    '56Ω',
+    '62Ω',
+    '68Ω',
+    '75Ω',
+    '82Ω',
+    '100Ω',
+    '110Ω',
+    '120Ω',
+    '200Ω',
+    '220Ω',
+    '240Ω',
+    '270Ω',
+    '300Ω',
+    '330Ω',
+    '360Ω',
+    '390Ω',
+    '470Ω',
+    '510Ω',
+    '560Ω',
+    '680Ω',
+    '820Ω',
+
+    // kΩ (Kiloohmios)
+    '1kΩ',
+    '1.2kΩ',
+    '1.8kΩ',
+    '2kΩ',
+    '2.2kΩ',
+    '2.7kΩ',
+    '3.3kΩ',
+    '3.9kΩ',
+    '4.7kΩ',
+    '5.1kΩ',
+    '5.6kΩ',
+    '6.2kΩ',
+    '6.8kΩ',
+    '8.2kΩ',
+    '10kΩ',
+    '12kΩ',
+    '15kΩ',
+    '16kΩ',
+    '20kΩ',
+    '22kΩ',
+    '27kΩ',
+    '39kΩ',
+    '47kΩ',
+    '56kΩ',
+    '68kΩ',
+    '82kΩ',
+    '100kΩ',
+    '120kΩ',
+    '150kΩ',
+    '220kΩ',
+    '270kΩ',
+    '330kΩ',
+    '470kΩ',
+    '560kΩ',
+    '750kΩ',
+    '820kΩ',
+
+    // MΩ (Megaohmios)
+    '1MΩ',
+    '2.2MΩ',
+    '10MΩ'
   ];
+
   categories = [
     'Audio y video',
     'Baquelitas',
@@ -202,7 +271,6 @@ export class StoreComponent implements OnInit {
     this.cartService.addToCart(cloned);
     Notiflix.Notify.success(`Agregado ${cloned.cantidad} x ${cloned.descripcion} al carrito`);
 
-    // ✅ Cierra el modal de LED correctamente
     const modalElement = document.getElementById('ledModal');
     const modalInstance = (window as any).bootstrap.Modal.getInstance(modalElement);
     modalInstance?.hide();
@@ -290,7 +358,6 @@ export class StoreComponent implements OnInit {
       if (normDesc.startsWith(t)) score += 2;
       if (normCode.startsWith(t)) score += 3;
     }
-
     const allInDesc = tokens.every(t => this.textContainsToken(normDesc, t));
     const allInCode = tokens.every(t => this.textContainsToken(normCode, t));
     if (allInDesc) score += 5;
@@ -298,26 +365,22 @@ export class StoreComponent implements OnInit {
 
     return score;
   }
-
   onSearchChange(): void {
     this.currentPage = 1;
     this.applyFilter();
   }
-
   onPreviousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
       this.applyFilter();
     }
   }
-
   onNextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
       this.applyFilter();
     }
   }
-
   onSubmit() {
     this.applyFilter();
   }
@@ -342,5 +405,4 @@ export class StoreComponent implements OnInit {
     this.currentPage = 1;
     this.applyFilter();
   }
-
 }

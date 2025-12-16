@@ -15,7 +15,68 @@
       </form>
     </div>
   </div>
+  <!-- 🔹 Filtros -->
+  <div class="row justify-content-center mt-4 mb-4 filters-container">
+    <div class="col-12 col-md-10 d-flex flex-wrap justify-content-center gap-4">
+
+      <!-- Importación -->
+      <div class="form-check">
+        <input class="form-check-input"
+               type="checkbox"
+               formControlName="importCheck"
+               (change)="toggleImport()">
+        <label class="form-check-label fw-bold ms-2 text-white">
+          Productos de importación
+        </label>
+      </div>
+
+      <!-- Stock bajo -->
+      <div class="form-check">
+        <input class="form-check-input"
+               type="checkbox"
+               formControlName="lowStockCheck"
+               (change)="toggleLowStock()">
+        <label class="form-check-label fw-bold ms-2 text-white">
+          Stock &lt; 5
+        </label>
+      </div>
+      <div class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          formControlName="noImageCheck"
+          (change)="toggleNoImage()">
+        <label class="form-check-label fw-bold ms-2 text-white">
+          Sin imagen
+        </label>
+      </div>
+      <!-- Categorías -->
+      <div class="dropdown">
+        <button class="btn btn-outline-primary dropdown-toggle text-white"
+                type="button"
+                data-bs-toggle="dropdown">
+          Filtrar por categoría
+        </button>
+        <ul class="dropdown-menu bg-dark">
+          <li>
+            <button class="dropdown-item text-white"
+                    (click)="filtrarCategoria('')">
+              Todas
+            </button>
+          </li>
+          <li *ngFor="let cat of categoriasValidas">
+            <button class="dropdown-item text-white"
+                    (click)="filtrarCategoria(cat)">
+              {{ cat }}
+            </button>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
 </form>
+
 
 <div class="container mt-4">
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">

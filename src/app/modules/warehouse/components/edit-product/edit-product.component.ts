@@ -48,11 +48,13 @@ export class EditProductComponent implements OnInit {
     'Transformadores',
     'Otros'
   ];
-
+  selectedCategory: string = '';
+  onlyImport: boolean = false;
+  onlyLowStock: boolean = false;
   categoriaActual: string = '';
-
   isFirstLoad: boolean = true;
   isLoading: boolean = true;
+  onlyNoImage: boolean = false;
 
   constructor(
     private productService: ProductService,
@@ -65,8 +67,12 @@ export class EditProductComponent implements OnInit {
     }
 
     this.formGroup = this.fb.group({
-      searchControl: ['']
+      searchControl: [''],
+      importCheck: [false],
+      lowStockCheck: [false],
+      noImageCheck: [false]
     });
+
     this.getProducts();
     this.formGroup.get('searchControl')?.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged())
@@ -112,33 +118,54 @@ export class EditProductComponent implements OnInit {
       this.applyFilter();
     }
   }
-
-  /** ---------- Filtro con tokens en cualquier orden + ranking ---------- */
   applyFilter(): void {
     const raw = this.formGroup.get('searchControl')?.value || '';
     const tokens = this.tokenize(raw);
 
     let filtered = this.allProducts;
 
+    // 🔹 Categoría
+    if (this.selectedCategory) {
+      filtered = filtered.filter(p => p.categoria === this.selectedCategory);
+    }
+
+    // 🔹 Importación
+    if (this.onlyImport) {
+      filtered = filtered.filter(p => p.isImport === true || p.isImport === 1);
+    }
+
+    // 🔹 Stock bajo
+    if (this.onlyLowStock) {
+      filtered = filtered.filter(p => p.stock < 5);
+    }
+    // 🔹 Sin imagen
+    if (this.onlyNoImage) {
+      filtered = filtered.filter(p => p.foto === 'NOT-IMAGE');
+    }
+    // 🔹 Filtro por texto (ENCADENADO correctamente)
     if (tokens.length) {
-      filtered = this.allProducts
+      filtered = filtered
         .map(p => {
           const normDesc = p._normDesc as string;
           const normCode = p._normCode as string;
 
-          // AND: todos los tokens deben aparecer en desc o código (cualquier orden)
           const matchesAll = tokens.every(t =>
-            this.textContainsToken(normDesc, t) || this.textContainsToken(normCode, t)
+            this.textContainsToken(normDesc, t) ||
+            this.textContainsToken(normCode, t)
           );
 
-          const score = matchesAll ? this.scoreMatch(normDesc, normCode, tokens) : -1;
+          const score = matchesAll
+            ? this.scoreMatch(normDesc, normCode, tokens)
+            : -1;
+
           return { p, score };
         })
         .filter(x => x.score >= 0)
-        .sort((a, b) => b.score - a.score)   // ordenar por relevancia
+        .sort((a, b) => b.score - a.score)
         .map(x => x.p);
     }
 
+    // 🔹 Paginación
     this.filteredProducts = filtered;
     this.totalCount = filtered.length;
     this.totalPages = Math.ceil(this.totalCount / this.pageSize) || 1;
@@ -146,6 +173,7 @@ export class EditProductComponent implements OnInit {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     this.products = filtered.slice(startIndex, startIndex + this.pageSize);
   }
+
 
   onPreviousPage(): void {
     if (this.currentPage > 1) {
@@ -298,4 +326,27 @@ export class EditProductComponent implements OnInit {
 
     return score;
   }
+  filtrarCategoria(categoria: string) {
+    this.selectedCategory = categoria;
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+
+  toggleImport() {
+    this.onlyImport = this.formGroup.get('importCheck')?.value;
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+
+  toggleLowStock() {
+    this.onlyLowStock = this.formGroup.get('lowStockCheck')?.value;
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+  toggleNoImage() {
+    this.onlyNoImage = this.formGroup.get('noImageCheck')?.value;
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+
 }
