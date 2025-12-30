@@ -1,1 +1,191 @@
-<p>sales-module works!</p>
+<div class="login-form">
+
+  <div class="text-center mb-4">
+    <h1>💲Módulo de ventas</h1>
+  </div>
+
+  <div class="container">
+    <div class="row">
+
+
+      <div class="col-12 col-lg-7 mb-4">
+        <div class="card bg-dark text-white p-3 mb-3">
+          <h5>👤 Datos del Cliente</h5>
+
+          <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Nombre del cliente"
+              [(ngModel)]="cliente.nombre"
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Celular</label>
+            <input
+              type="tel"
+              class="form-control"
+              placeholder="Ej: 0999999999"
+              [(ngModel)]="cliente.celular"
+            />
+          </div>
+
+          <!-- Rol -->
+          <div>
+            <label class="form-label">Tipo de cliente</label>
+            <select
+              class="form-select"
+              [(ngModel)]="cliente.rol">
+              <option value="cliente">Cliente</option>
+              <option value="distribuidor">Distribuidor</option>
+            </select>
+          </div>
+        </div>
+
+
+        <div class="card bg-dark text-white p-3" [formGroup]="formGroup">
+          <h5>🔍 Buscar producto</h5>
+
+          <input
+            type="search"
+            class="form-control mt-2 mb-3"
+            placeholder="Código, nombre o escáner..."
+            formControlName="searchControl"
+          />
+          <div class="table-responsive" *ngIf="products.length > 0">
+            <table class="table table-dark table-hover align-middle mb-0">
+              <tbody>
+              <tr
+                *ngFor="let product of products"
+                style="cursor:pointer"
+                (click)="addProductToCart(product)"
+              >
+                <td style="width:70px">
+                  <img
+                    *ngIf="product.foto && product.foto !== 'NOT-IMAGE'"
+                    [src]="product.foto"
+                    class="img-thumbnail"
+                    style="width:60px;height:45px;object-fit:cover"
+                  />
+                  <span *ngIf="!product.foto || product.foto === 'NOT-IMAGE'">
+              📦
+            </span>
+                </td>
+
+                <td class="text-start">
+                  <div class="fw-bold">{{ product.descripcion }}</div>
+
+                  <div class="d-flex gap-3">
+                    <small class="text-white-50">Código: {{ product.codigo }}</small>
+                    <small
+                      [ngClass]="{
+                        'text-success': product.stock > 5,
+                        'text-warning': product.stock > 0 && product.stock <= 5,
+                        'text-danger': product.stock === 0
+                        }">
+                      Stock: {{ product.stock }}
+                    </small>
+                  </div>
+                </td>
+
+
+                <td class="fw-bold text-success text-end">
+                  {{ product.pvp | currency }}
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div *ngIf="products.length === 0" class="text-muted text-center mt-2">
+            No hay productos para mostrar
+          </div>
+        </div>
+
+
+      </div>
+
+
+      <div class="col-12 col-lg-5">
+
+        <div class="card bg-dark text-white p-3">
+
+          <h5 class="mb-3">🧾 Detalle de Venta</h5>
+
+          <div class="table-responsive">
+            <table class="table table-dark table-bordered text-center align-middle">
+              <thead>
+              <tr>
+                <th>Producto</th>
+                <th style="width: 110px;">Cantidad</th>
+                <th>PVP</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+              </thead>
+
+              <tbody>
+              <tr *ngFor="let item of cartItems; let i = index">
+                <td class="text-start">{{ item.descripcion }}</td>
+
+                <td>
+                  <input
+                    type="number"
+                    min="1"
+                    class="form-control text-center"
+                    [(ngModel)]="item.cantidad"
+                    (ngModelChange)="recalculate()"
+                  />
+                </td>
+
+                <td>{{ item.pvp | currency }}</td>
+
+                <td class="fw-bold text-success">
+                  {{ item.pvp * item.cantidad | currency }}
+                </td>
+                <td>
+                  <button
+                    class="btn btn-sm btn-danger"
+                    (click)="removeItem(i)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+
+              <tr *ngIf="cartItems.length === 0">
+                <td colspan="5" class="text-muted">
+                  No hay productos agregados
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+
+          <div class="total-box mt-4">
+            <span class="total-label">TOTAL</span>
+            <div class="total-value">
+              <i class="bi bi-currency-dollar"></i>
+              {{ getTotal() | number:'1.2-2' }}
+            </div>
+          </div>
+
+          <div class="d-flex gap-3 mt-4">
+            <button
+              class="btn btn-success btn-lg w-100"
+              [disabled]="cartItems.length === 0"
+              (click)="confirmVenta()">
+              Vender
+            </button>
+
+
+            <button
+              class="btn btn-danger btn-lg w-100"
+              (click)="clearCart()">
+              CANCELAR
+            </button>
+          </div>
+        </div>
+      </div>
