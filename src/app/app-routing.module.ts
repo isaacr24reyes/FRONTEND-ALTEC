@@ -6,7 +6,7 @@ import {
   R_404, R_ALTEC_POINTS,
   R_AUTHENTICATION,
   R_DASHBOARD,
-  R_PRODUCT_QUOTE,
+  R_PRODUCT_QUOTE, R_SALES_MODULE,
   R_STORE, R_USER_ADMIN,
   R_WAREHOUSE
 } from "./constants/route.constants";
@@ -61,6 +61,12 @@ const routes: Routes = [
     component: FullComponent,
     canActivate: [RoleGuard],
     loadChildren: () => import('./modules/user-admin/user-admin.module').then(mod => mod.UserAdminModule)
+  },
+  {
+    path: R_SALES_MODULE,
+    component: FullComponent,
+    canActivate: [RoleGuard],
+    loadChildren: () => import('./modules/sales-module/sales-module.module').then(mod => mod.SalesModuleModule)
   }
 ];
 
