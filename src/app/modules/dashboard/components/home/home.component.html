@@ -1,66 +1,131 @@
-<form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="login-form">
-  <div class="text-center">
-    <h1>Bienvenido, {{ name }} </h1>
-    <h2>¿Qué deseas hacer hoy?</h2>
-  </div>
-  <hr class="styled-line">
-  <div class="container mt-4">
-    <div class="row text-center">
+<div class="modern-dashboard">
 
-      <div class="col-4 mb-3">
-        <a [routerLink]="['/product-quote']" class="btn rounded-image">
-          <img src="assets/images/Cotizador.png" alt="Imagen 1" class="img-fluid mt-3">
-        </a>
-      </div>
-
-      <div class="col-4 mb-3">
-              <a [routerLink]="['/warehouse/add-product']" class="btn rounded-image">
-              <img src="assets/images/Agregar.png" alt="Imagen 1" class="img-fluid mt-3">
-              </a>
-      </div>
-
-      <div class="col-4 mb-3">
-              <a [routerLink]="['/ruta-destino']" class="btn rounded-image">
-                <img src="assets/images/Historial.png" alt="Imagen 1" class="img-fluid mt-3">
-              </a>
+  <!-- 🎨 HERO SECTION -->
+  <div class="dashboard-hero">
+    <div class="container">
+      <div class="hero-content text-center">
+        <h1 class="hero-title animate-fade-in">
+          ¡Bienvenido, <span class="name-highlight">{{ name }}</span>! 👋
+        </h1>
+        <p class="hero-subtitle animate-fade-in-delay">
+          ¿Qué deseas hacer hoy?
+        </p>
       </div>
     </div>
+  </div>
 
-    <div class="row text-center">
-      <div class="col-4 mb-3">
-              <a [routerLink]="['/warehouse/inventario']" class="btn rounded-image">
-                <img src="assets/images/Bodega.png" alt="Imagen 1" class="img-fluid mt-3">
-              </a>
-      </div>
+  <!-- 📦 GRID DE ACCIONES -->
+  <div class="dashboard-content">
+    <div class="container">
 
-      <div class="col-4 mb-3">
-              <a [routerLink]="['/sales-module']" class="btn rounded-image">
-                <img src="assets/images/Vender.png" alt="Imagen 1" class="img-fluid mt-3">
-              </a>
-      </div>
-      <div class="col-4 mb-3">
+      <!-- Grid de cards -->
+      <div class="actions-grid">
 
-        <a [routerLink]="['/warehouse/edit-product']" class="btn rounded-image">
-          <img src="assets/images/Editar.png" alt="Imagen 1" class="img-fluid mt-3">
+        <!-- Card: Cotizador -->
+        <a [routerLink]="['/product-quote']" class="action-card">
+          <div class="card-icon-wrapper">
+            <img src="assets/images/Cotizador.png" alt="Cotizador" class="card-image">
+          </div>
+          <div class="card-overlay">
+            <i class="bi bi-calculator-fill overlay-icon"></i>
+            <h3 class="card-title">Cotizador</h3>
+            <p class="card-description">Genera cotizaciones rápidas</p>
+          </div>
         </a>
-      </div>
-      <div class="col-4 mb-3">
-        <a [routerLink]="['/altec-points']" class="btn rounded-image">
-          <img src="assets/images/acreditar-puntos.png" alt="Imagen 1" class="img-fluid mt-3">
+
+        <!-- Card: Agregar Producto -->
+        <a [routerLink]="['/warehouse/add-product']" class="action-card">
+          <div class="card-icon-wrapper">
+            <img src="assets/images/Agregar.png" alt="Agregar" class="card-image">
+          </div>
+          <div class="card-overlay">
+            <i class="bi bi-plus-circle-fill overlay-icon"></i>
+            <h3 class="card-title">Agregar Producto</h3>
+            <p class="card-description">Carga nuevos productos</p>
+          </div>
         </a>
-      </div>
-      <div class="col-4 mb-3">
-        <a [routerLink]="['/user-admin']" class="btn rounded-image">
-          <img src="assets/images/user-admin.png" alt="Imagen 1" class="img-fluid mt-3">
+
+        <!-- Card: Historial -->
+        <a [routerLink]="['/ruta-destino']" class="action-card">
+          <div class="card-icon-wrapper">
+            <img src="assets/images/Historial.png" alt="Historial" class="card-image">
+          </div>
+          <div class="card-overlay">
+            <i class="bi bi-clock-history overlay-icon"></i>
+            <h3 class="card-title">Historial</h3>
+            <p class="card-description">Revisa movimientos</p>
+          </div>
         </a>
+
+        <!-- Card: Bodega -->
+        <a [routerLink]="['/warehouse/inventario']" class="action-card">
+          <div class="card-icon-wrapper">
+            <img src="assets/images/Bodega.png" alt="Bodega" class="card-image">
+          </div>
+          <div class="card-overlay">
+            <i class="bi bi-archive-fill overlay-icon"></i>
+            <h3 class="card-title">Bodega</h3>
+            <p class="card-description">Consulta inventario</p>
+          </div>
+        </a>
+
+        <!-- Card: Vender -->
+        <a [routerLink]="['/sales-module']" class="action-card">
+          <div class="card-icon-wrapper">
+            <img src="assets/images/Vender.png" alt="Vender" class="card-image">
+          </div>
+          <div class="card-overlay">
+            <i class="bi bi-cart-check-fill overlay-icon"></i>
+            <h3 class="card-title">Vender</h3>
+            <p class="card-description">Gestiona ventas</p>
+          </div>
+        </a>
+
+        <!-- Card: Editar Producto -->
+        <a [routerLink]="['/warehouse/edit-product']" class="action-card">
+          <div class="card-icon-wrapper">
+            <img src="assets/images/Editar.png" alt="Editar" class="card-image">
+          </div>
+          <div class="card-overlay">
+            <i class="bi bi-pencil-square overlay-icon"></i>
+            <h3 class="card-title">Editar Producto</h3>
+            <p class="card-description">Modifica productos</p>
+          </div>
+        </a>
+
+        <!-- Card: Altec-Puntos -->
+        <a [routerLink]="['/altec-points']" class="action-card">
+          <div class="card-icon-wrapper">
+            <img src="assets/images/acreditar-puntos.png" alt="Altec-Puntos" class="card-image">
+          </div>
+          <div class="card-overlay">
+            <i class="bi bi-star-fill overlay-icon"></i>
+            <h3 class="card-title">Altec-Puntos</h3>
+            <p class="card-description">Acredita puntos</p>
+          </div>
+        </a>
+
+        <!-- Card: Administrar Usuarios -->
+        <a [routerLink]="['/user-admin']" class="action-card">
+          <div class="card-icon-wrapper">
+            <img src="assets/images/user-admin.png" alt="Admin Usuarios" class="card-image">
+          </div>
+          <div class="card-overlay">
+            <i class="bi bi-people-fill overlay-icon"></i>
+            <h3 class="card-title">Usuarios</h3>
+            <p class="card-description">Administra usuarios</p>
+          </div>
+        </a>
+
       </div>
     </div>
+  </div>
 
-  </div>
-  <hr class="styled-line">
-  <div class="text-center mt-5">
-          <span class="text-white small-text">
-    Developed by <strong style="color: #8B50FB;">SwiFt©</strong> (2025).
-          </span>
-  </div>
-</form>
+  <!-- 🦶 FOOTER -->
+  <footer class="dashboard-footer text-center">
+    <p class="footer-text mb-0">
+      Developed by <strong class="brand-purple">SwiFt©</strong> 2025
+    </p>
+  </footer>
+
+</div>

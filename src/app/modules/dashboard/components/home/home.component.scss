@@ -1,41 +1,282 @@
-html, body {
-  margin: 0;
-  height: 100%;
-  background: #18181C;
+// 🎨 DASHBOARD MODERNO - UX/UI PROFESIONAL
+// Paleta tech consistente
+
+// 🌐 CONTENEDOR PRINCIPAL
+.modern-dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0D1117 0%, #161B22 50%, #0D1117 100%);
+  display: flex;
+  flex-direction: column;
 }
-.login-form {
-  background: #18181C;
-  h1{
-    color: white;
-    font-family: 'Acephimere', sans-serif;
-    font-weight: 1000;
-    font-size: 50px;
-    padding-top: 50px;
+
+// 🎨 HERO SECTION
+.dashboard-hero {
+  background: linear-gradient(135deg, #0C1E3A 0%, #020617 100%);
+  padding: 2rem 0 1.5rem;
+  border-bottom: 2px solid rgba(96, 165, 250, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+
+  .hero-content {
+    .hero-title {
+      color: #fff;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+
+      .name-highlight {
+        background: linear-gradient(135deg, #60A5FA, #8B50FB);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 800;
+      }
+    }
+
+    .hero-subtitle {
+      color: #8B949E;
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 0;
+    }
   }
-  h2{
-    color: white;
-    font-family: 'Acephimere', sans-serif;
-    font-weight: 1000;
-    font-size: 15px;
+}
+
+// 🎬 ANIMACIONES DE ENTRADA
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  .hover-border:hover {
-    border: 20px solid #007bff;
-    border-radius: 50px;
-    transition: border 0.6s ease;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  .rounded-image img {
-    transition: all 0.3s ease;
-    border-radius: 25px;
-  }
-  .rounded-image:hover img {
-    box-shadow: 0 0 0 10px #F60D0B;
-    border-radius: 15px;
-  }
-  .styled-line {
-    height: 7px;
-    background-color: #8B50FB;
-    margin: 20px auto;
-    width: 80%;
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-fade-in-delay {
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+// 📦 CONTENIDO DEL DASHBOARD
+.dashboard-content {
+  flex: 1;
+  padding: 2rem 0 1rem;
+}
+
+// 📐 GRID DE ACCIONES
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 
+  @media (min-width: 769px) and (max-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 1025px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// 🃏 ACTION CARD
+.action-card {
+  position: relative;
+  aspect-ratio: 1;
+  background: rgba(22, 27, 34, 0.95);
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(96, 165, 250, 0.2);
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+  // Imagen del card
+  .card-icon-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+
+    .card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+    }
+  }
+
+  // Overlay con info
+  .card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(12, 30, 58, 0.98), rgba(2, 6, 23, 0.98));
+    backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    .overlay-icon {
+      font-size: 2rem;
+      color: #60A5FA;
+      animation: iconFloat 2s ease-in-out infinite;
+    }
+
+    .card-title {
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0;
+      text-align: center;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .card-description {
+      color: #8B949E;
+      font-size: 0.8rem;
+      margin: 0;
+      text-align: center;
+      line-height: 1.3;
+    }
+  }
+
+  // HOVER EFFECT
+  &:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: #60A5FA;
+    box-shadow: 0 12px 40px rgba(96, 165, 250, 0.4), 0 0 0 4px rgba(96, 165, 250, 0.1);
+
+    .card-image {
+      transform: scale(0.8);
+      opacity: 0.3;
+      filter: blur(4px) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+    }
+
+    .card-overlay {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // ACTIVE EFFECT
+  &:active {
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+// 🎬 ANIMACIÓN ICONO FLOTANTE
+@keyframes iconFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+// 🦶 FOOTER
+.dashboard-footer {
+  padding: 1rem 0;
+  background: rgba(13, 17, 23, 0.8);
+  border-top: 1px solid rgba(96, 165, 250, 0.1);
+
+  .footer-text {
+    color: #8B949E;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    .brand-purple {
+      color: #8B50FB;
+      font-weight: 700;
+      text-shadow: 0 0 10px rgba(139, 80, 251, 0.3);
+    }
+  }
+}
+
+// 📱 RESPONSIVE ESPECÍFICO
+@media (max-width: 576px) {
+  .dashboard-hero {
+    padding: 1rem 0 0.75rem;
+
+    .hero-title {
+      font-size: 1.4rem !important;
+      margin-bottom: 0.5rem !important;
+    }
+
+    .hero-subtitle {
+      font-size: 0.85rem !important;
+    }
+  }
+
+  .dashboard-content {
+    padding: 1rem 0 0.5rem;
+  }
+
+  .actions-grid {
+    gap: 0.75rem;
+  }
+
+  .action-card {
+    border-radius: 12px;
+
+    .card-icon-wrapper {
+      padding: 1rem;
+    }
+
+    .card-overlay {
+      gap: 0.25rem;
+      padding: 1rem;
+
+      .overlay-icon {
+        font-size: 1.5rem;
+      }
+
+      .card-title {
+        font-size: 0.9rem;
+      }
+
+      .card-description {
+        font-size: 0.7rem;
+      }
+    }
+  }
+
+  .dashboard-footer {
+    padding: 1rem 0;
+
+    .footer-text {
+      font-size: 0.75rem;
+    }
+  }
+}
+
+@media (min-width: 1400px) {
+  .actions-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
