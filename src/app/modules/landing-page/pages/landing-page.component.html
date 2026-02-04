@@ -1,106 +1,207 @@
-<div class="container-fluid landing-page d-flex flex-column justify-content-center align-items-center text-center text-white px-3 px-md-5">
+<div class="modern-landing-page">
 
-  <div class="logo-container">
-    <img src="assets/images/LOGIN.png" alt="ALTEC Logo" class="logo-img" />
-  </div>
+  <!-- 🧠 Canvas de neuronas animadas -->
+  <canvas #neuronCanvas class="neuron-canvas-landing"></canvas>
 
-  <div class="social-icons d-none d-md-flex align-items-center position-absolute top-0 end-0 p-3">
-    <span class="me-2 fst-italic text-white">Síguenos en</span>
-    <a href="https://www.facebook.com/profile.php?id=100036847254071" target="_blank" aria-label="Facebook"><i class="bi bi-facebook fs-4"></i></a>
-    <a href="https://www.youtube.com/@mecatronicaaltec3227" target="_blank" aria-label="YouTube"><i class="bi bi-youtube fs-4"></i></a>
-    <a href="https://www.instagram.com/altecmecatronica/" target="_blank" aria-label="Instagram"><i class="bi bi-instagram fs-4"></i></a>
-    <a href="https://tiktok.com" target="_blank" aria-label="TikTok"><i class="bi bi-tiktok fs-4"></i></a>
-  </div>
-
-  <!-- Redes sociales en móvil -->
-  <div class="d-flex d-md-none gap-3 position-absolute top-0 end-0 p-3">
-    <a href="https://www.facebook.com/profile.php?id=100036847254071" target="_blank" aria-label="Facebook"><i class="bi bi-facebook fs-5 text-white"></i></a>
-    <a href="https://www.youtube.com/@mecatronicaaltec3227" target="_blank" aria-label="YouTube"><i class="bi bi-youtube fs-5 text-white"></i></a>
-    <a href="https://www.instagram.com/altecmecatronica/" target="_blank" aria-label="Instagram"><i class="bi bi-instagram fs-5 text-white"></i></a>
-    <a href="https://tiktok.com" target="_blank" aria-label="TikTok"><i class="bi bi-tiktok fs-5 text-white"></i></a>
-  </div>
-
-  <div class="row align-items-center w-100">
-    <div class="col-12 col-md-6 mb-5 mb-md-0">
-      <h1 class="landing-title">
-        Bienvenido a <span class="text-highlight">ALTEC Mecatrónica</span>
-      </h1>
-
-      <p class="lead mt-3">Explora nuestro catálogo de productos y conviertete en cliente (acumula altec puntos).</p>
-
-      <div class="d-flex flex-column flex-md-row justify-content-center gap-3 mt-4">
-        <a class="btn btn-primary btn-lg px-4" routerLink="/dashboard">Ingreso Clientes</a>
-        <a class="btn btn-outline-success btn-lg px-4" routerLink="/store">Ir a la tienda</a>
-      </div>
-
-      <div class="features d-none d-md-flex justify-content-center gap-4 mt-5">
-        <div class="feature">
-          <i class="bi bi-person-badge-fill fs-3"></i>
-          <p class="mt-2">Gestión de Clientes</p>
+  <!-- 🎨 Header con logo y redes sociales -->
+  <header class="landing-header">
+    <div class="container-fluid">
+      <div class="row align-items-center">
+        <!-- Logo -->
+        <div class="col-auto">
+          <div class="logo-wrapper">
+            <img src="assets/images/LOGIN.png" alt="ALTEC Logo" class="logo-img" />
+          </div>
         </div>
-        <div class="feature">
-          <i class="bi bi-gear-fill fs-3"></i>
-          <p class="mt-2">Seguimiento de Proyectos</p>
+
+        <!-- Redes sociales desktop -->
+        <div class="col text-end d-none d-md-block">
+          <div class="social-links">
+            <span class="social-label">Síguenos en</span>
+            <a href="https://www.facebook.com/profile.php?id=100036847254071" target="_blank" class="social-icon">
+              <i class="bi bi-facebook"></i>
+            </a>
+            <a href="https://www.youtube.com/@mecatronicaaltec3227" target="_blank" class="social-icon">
+              <i class="bi bi-youtube"></i>
+            </a>
+            <a href="https://www.instagram.com/altecmecatronica/" target="_blank" class="social-icon">
+              <i class="bi bi-instagram"></i>
+            </a>
+            <a href="https://tiktok.com" target="_blank" class="social-icon">
+              <i class="bi bi-tiktok"></i>
+            </a>
+          </div>
         </div>
-        <div class="feature">
-          <i class="bi bi-graph-up-arrow fs-3"></i>
-          <p class="mt-2">Análisis en Tiempo Real</p>
+
+        <!-- Redes móvil -->
+        <div class="col text-end d-md-none">
+          <div class="social-links-mobile">
+            <a href="https://www.facebook.com/profile.php?id=100036847254071" target="_blank" class="social-icon-mobile">
+              <i class="bi bi-facebook"></i>
+            </a>
+            <a href="https://www.youtube.com/@mecatronicaaltec3227" target="_blank" class="social-icon-mobile">
+              <i class="bi bi-youtube"></i>
+            </a>
+            <a href="https://www.instagram.com/altecmecatronica/" target="_blank" class="social-icon-mobile">
+              <i class="bi bi-instagram"></i>
+            </a>
+            <a href="https://tiktok.com" target="_blank" class="social-icon-mobile">
+              <i class="bi bi-tiktok"></i>
+            </a>
+          </div>
         </div>
       </div>
     </div>
-    <div class="col-12 col-md-6 text-center d-none d-md-block">
-      <img src="assets/images/landing-5.png" alt="Robot ALTEC" class="img-fluid robot-img" />
-    </div>
+  </header>
 
-  </div>
-  <!-- Servicios (3 columnas) -->
-  <section class="container services-section mt-3 pt-2">
-    <h1 class="text-center text-white fw-bold mb-4">Nuestros servicios</h1>
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+  <!-- 🚀 Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="row align-items-center g-5">
 
-      <!-- Impresión 3D -->
-      <div class="col">
-        <div class="card service-card h-100 text-white">
-          <img src="assets/images/3d.jpg" class="card-img service-img" alt="Impresión 3D">
-          <div class="card-img-overlay d-flex flex-column justify-content-end p-3 gradient-mask">
-            <h3 class="h5 fw-bold mb-1">Impresión 3D</h3>
-            <p class="mb-0 small opacity-75">Prototipos, piezas funcionales y carcasas personalizadas.</p>
+        <!-- Contenido izquierda -->
+        <div class="col-12 col-lg-6">
+          <div class="hero-content">
+
+            <!-- Título principal -->
+            <h1 class="hero-title animate-fade-in">
+              Bienvenido a <br>
+              <span class="brand-highlight">ALTEC</span>
+              <span class="text-gradient">Mecatrónica</span>
+            </h1>
+
+            <!-- Subtítulo -->
+            <p class="hero-subtitle animate-fade-in-delay-1">
+              Explora nuestro catálogo de productos y conviértete en cliente para acumular
+              <strong class="text-success">Altec-Puntos</strong>
+            </p>
+
+            <!-- CTAs -->
+            <div class="hero-ctas animate-fade-in-delay-2">
+              <a routerLink="/dashboard" class="btn-modern btn-primary-modern">
+                <i class="bi bi-box-arrow-in-right me-2"></i>
+                Ingreso Clientes
+              </a>
+              <a routerLink="/store" class="btn-modern btn-secondary-modern">
+                <i class="bi bi-shop me-2"></i>
+                Visitar Tienda
+              </a>
+            </div>
+
+            <!-- Features desktop -->
+            <div class="hero-features d-none d-lg-flex animate-fade-in-delay-3">
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="bi bi-person-badge-fill"></i>
+                </div>
+                <p class="feature-text">Gestión de<br>Clientes</p>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="bi bi-gear-fill"></i>
+                </div>
+                <p class="feature-text">Seguimiento<br>de Proyectos</p>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <p class="feature-text">Análisis en<br>Tiempo Real</p>
+              </div>
+            </div>
+
           </div>
         </div>
-      </div>
 
-      <!-- Proyectos: Electrónica, Robótica, Tesis -->
-      <div class="col">
-        <div class="card service-card h-100 text-white">
-          <img src="assets/images/project.jpg" class="card-img service-img" alt="Proyectos de electrónica y robótica">
-          <div class="card-img-overlay d-flex flex-column justify-content-end p-3 gradient-mask">
-            <h3 class="h5 fw-bold mb-1">Proyectos: Electrónica, Robótica, Tesis</h3>
-            <p class="mb-0 small opacity-75">Diseño, desarrollo y acompañamiento de principio a fin.</p>
+        <!-- Imagen robot derecha (desktop) -->
+        <div class="col-lg-6 d-none d-lg-block">
+          <div class="hero-image-wrapper animate-float">
+            <img src="assets/images/landing-5.png" alt="Robot ALTEC" class="hero-robot-img" />
+            <div class="robot-glow"></div>
           </div>
         </div>
-      </div>
 
-      <!-- Venta a mayoristas -->
-      <div class="col">
-        <div class="card service-card h-100 text-white">
-          <img src="assets/images/import.jpg" class="card-img service-img" alt="Venta a mayoristas">
-          <div class="card-img-overlay d-flex flex-column justify-content-end p-3 gradient-mask">
-            <h3 class="h5 fw-bold mb-1">Venta a Mayoristas</h3>
-            <p class="mb-0 small opacity-75">Precios especiales y stock para distribuidores.</p>
-          </div>
-        </div>
       </div>
-
     </div>
   </section>
 
-  <footer class="mt-5 small text-secondary">© 2025 ALTEC. Todos los derechos reservados.</footer>
-  <!-- 🔹 WhatsApp contacto -->
+  <!-- 🛠️ Servicios Section -->
+  <section class="services-section">
+    <div class="container">
+
+      <!-- Título sección -->
+      <div class="section-header text-center mb-5">
+        <h2 class="section-title">
+          Nuestros <span class="text-gradient">Servicios</span>
+        </h2>
+        <p class="section-subtitle">Soluciones tecnológicas de vanguardia</p>
+      </div>
+
+      <!-- Grid de servicios -->
+      <div class="services-grid">
+
+        <!-- Servicio: Impresión 3D -->
+        <div class="service-card">
+          <div class="service-image-wrapper">
+            <img src="assets/images/3d.jpg" class="service-image" alt="Impresión 3D">
+            <div class="service-overlay">
+              <div class="service-icon">
+                <i class="bi bi-printer-fill"></i>
+              </div>
+              <h3 class="service-title">Impresión 3D</h3>
+              <p class="service-description">Prototipos, piezas funcionales y carcasas personalizadas con tecnología de última generación</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Servicio: Proyectos -->
+        <div class="service-card">
+          <div class="service-image-wrapper">
+            <img src="assets/images/project.jpg" class="service-image" alt="Proyectos">
+            <div class="service-overlay">
+              <div class="service-icon">
+                <i class="bi bi-cpu-fill"></i>
+              </div>
+              <h3 class="service-title">Proyectos de Electrónica</h3>
+              <p class="service-description">Diseño, desarrollo y acompañamiento de proyectos de electrónica, robótica y tesis de principio a fin</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Servicio: Mayoristas -->
+        <div class="service-card">
+          <div class="service-image-wrapper">
+            <img src="assets/images/import.jpg" class="service-image" alt="Mayoristas">
+            <div class="service-overlay">
+              <div class="service-icon">
+                <i class="bi bi-box-seam-fill"></i>
+              </div>
+              <h3 class="service-title">Venta a Mayoristas</h3>
+              <p class="service-description">Precios especiales y stock garantizado para distribuidores y revendedores</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 🦶 Footer -->
+  <footer class="landing-footer">
+    <div class="container">
+      <p class="footer-text">
+        © 2025 ALTEC Mecatrónica. Todos los derechos reservados. | Powered by <strong class="brand-purple">SwiFt©</strong>
+      </p>
+    </div>
+  </footer>
+
+  <!-- 💬 WhatsApp Float -->
   <a href="https://api.whatsapp.com/send?phone=593995159078&text=Hola%20ALTEC%2C%20necesito%20más%20información."
      target="_blank"
      class="whatsapp-float"
-     aria-label="WhatsApp">
+     aria-label="Contactar por WhatsApp">
     <i class="bi bi-whatsapp"></i>
+    <span class="whatsapp-tooltip">¿Necesitas ayuda?</span>
   </a>
 
 </div>
