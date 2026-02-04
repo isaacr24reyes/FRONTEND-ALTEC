@@ -1,197 +1,458 @@
 <app-loader></app-loader>
 
-<form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="product-quote-form">
-  <div class="text-center">
-    <h1 class="store-title">
-      {{
-        isDistribuidor
-          ? ('Hola ' + distribuidorName + '!')
-          : isCliente
-            ? ('Hola ' + clienteName + '!')
-            : '¡Bienvenid@ a nuestra Tienda!'
-      }}
-    </h1>
+<!-- 🎨 HERO SECTION MODERNO -->
+<div class="store-hero position-relative" #storeHero [class.hero-compact]="isSearching">
+  <!-- 🧠 Canvas de neuronas animadas -->
+  <canvas #neuronCanvas class="neuron-canvas-store"></canvas>
 
-    <h2 class="store-subtitle">
-      {{
-        isDistribuidor
-          ? 'Explora tus productos exclusivos con precios mayoristas'
-          : isCliente
-            ? 'Ya eres Cliente acumula Altec-puntos'
-            : 'Echa un vistazo a nuestros productos y disfruta de la compra Online'
-      }}
-    </h2>
+  <div class="hero-background"></div>
+  <div class="container position-relative">
+    <div class="row justify-content-center" [class.py-5]="!isSearching" [class.py-3]="isSearching">
+      <div class="col-12 col-lg-10 text-center">
 
+        <!-- Saludo personalizado con animación (se oculta al buscar) -->
+        <div class="hero-greeting mb-3" *ngIf="!isSearching">
+          <h1 class="display-4 fw-bold text-white mb-2 animate-fade-in">
+            <span *ngIf="isDistribuidor">¡Hola, {{ distribuidorName }}! 👋</span>
+            <span *ngIf="isCliente && !isDistribuidor">¡Hola, {{ clienteName }}! 🎉</span>
+            <span *ngIf="!isDistribuidor && !isCliente">
+              ¡Bienvenido a la tienda de ALTEC!
+              <i class="bi bi-lightning-charge-fill text-warning ms-2 icon-pulse"></i>
+            </span>
+          </h1>
 
-  </div>
+          <p class="lead text-white-50 mb-4 animate-fade-in-delay">
+            {{
+              isDistribuidor
+                ? 'Accede a precios exclusivos mayoristas y productos premium'
+                : isCliente
+                  ? 'Continúa acumulando Altec-Puntos con cada compra'
+                  : 'Descubre tecnología de calidad para tus proyectos'
+            }}
+          </p>
 
-  <div class="container mt-3">
-    <div class="d-flex justify-content-center gap-2">
-      <input
-        type="search"
-        class="form-control"
-        placeholder="Buscar producto..."
-        aria-label="Search"
-        formControlName="searchTerm"
-        (input)="onSearchChange()"
-        style="max-width: 700px"
-      />
+          <!-- Badge de rol -->
+          @if (isDistribuidor) {
+            <span class="badge bg-gradient-purple px-4 py-2 rounded-pill mb-4">
+              <i class="bi bi-star-fill me-2"></i>Distribuidor Premium
+            </span>
+          } @else if (isCliente) {
+            <span class="badge bg-gradient-blue px-4 py-2 rounded-pill mb-4">
+              <i class="bi bi-award-fill me-2"></i>Cliente Verificado
+            </span>
+          }
+        </div>
 
-      <button
-        type="button"
-        class="btn btn-outline-light d-inline-flex d-md-none align-items-center"
-        data-bs-toggle="offcanvas"
-        data-bs-target="#filtersOffcanvas"
-        aria-controls="filtersOffcanvas">
-        <i class="bi bi-funnel"></i><span class="ms-2">Filtros</span>
-      </button>
+        <!-- Título compacto cuando hay búsqueda -->
+        <div class="hero-search-title mb-2" *ngIf="isSearching">
+          <h3 class="h5 text-white fw-bold mb-0">
+            <i class="bi bi-search me-2"></i>Buscando en ALTEC Store
+          </h3>
+        </div>
+
+        <!-- Barra de búsqueda mejorada -->
+        <form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+          <div class="search-container mx-auto">
+            <div class="input-group input-group-lg shadow-lg">
+              <span class="input-group-text bg-dark border-0">
+                <i class="bi bi-search text-primary"></i>
+              </span>
+              <input
+                type="search"
+                class="form-control form-control-lg border-0 bg-dark text-white"
+                placeholder="Buscar productos, categorías, códigos..."
+                aria-label="Buscar productos"
+                formControlName="searchTerm"
+                (input)="onSearchChange()"
+                spellcheck="false"
+                autocomplete="off"
+                autocapitalize="off"
+              />
+              <button
+                type="button"
+                class="btn btn-primary d-none d-md-inline-flex align-items-center gap-2"
+                (click)="onSearchChange()">
+                <i class="bi bi-search"></i>
+                <span>Buscar</span>
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-light d-inline-flex d-md-none align-items-center gap-2"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#filtersOffcanvas"
+                aria-controls="filtersOffcanvas">
+                <i class="bi bi-funnel"></i>
+                <span>Filtros</span>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Stats rápidas (se ocultan al buscar) -->
+        <div class="row g-3 mt-4 d-none d-lg-flex" *ngIf="!isSearching">
+          <div class="col-4">
+            <div class="stat-card">
+              <i class="bi bi-box-seam text-primary fs-3 mb-2"></i>
+              <h3 class="h5 text-white mb-0">{{ totalCount }}+</h3>
+              <p class="text-white-50 small mb-0">Productos</p>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="stat-card">
+              <i class="bi bi-lightning-charge text-warning fs-3 mb-2"></i>
+              <h3 class="h5 text-white mb-0">Envío Rápido</h3>
+              <p class="text-white-50 small mb-0">24-48 horas</p>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="stat-card">
+              <i class="bi bi-shield-check text-success fs-3 mb-2"></i>
+              <h3 class="h5 text-white mb-0">Garantía</h3>
+              <p class="text-white-50 small mb-0">Calidad asegurada</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
-</form>
+</div>
 
-<div class="container-fluid w-90 mt-4">
-  <div class="row g-3">
-    <aside class="col-md-3 d-none d-md-block">
-      <div class="card shadow-sm" style="background:#121a20;border:1px solid rgba(255,255,255,0.08);color:#e6f1f6;border-radius:16px;position:sticky;top:88px;">
-        <div class="card-body">
-          <!-- Título -->
-          <h5 class="mb-3 d-flex align-items-center">
-            <i class="bi bi-funnel me-2"></i> Filtros
-          </h5>
+<!-- 🛍️ CONTENEDOR PRINCIPAL DE LA TIENDA -->
+<div class="container-fluid store-container py-4">
+  <div class="row g-4">
 
-          <!-- ✅ BOTONES AL PRINCIPIO -->
-          <div class="d-grid gap-2 mb-3">
-            <button class="btn btn-secondary" type="button" (click)="clearFilters()">Limpiar filtros</button>
-          </div>
+    <!-- 📂 SIDEBAR DE FILTROS (Desktop) -->
+    <aside class="col-lg-3 d-none d-lg-block">
+      <div class="filters-sidebar sticky-top">
+        <div class="card border-0 shadow-lg">
+          <div class="card-body p-4">
 
-          <!-- Categorías -->
-          <div class="mb-2 text-uppercase" style="font-size:.85rem;color:#9bb9c9;letter-spacing:.3px;">Categorías</div>
-          <div class="d-grid gap-2">
-            <label *ngFor="let cat of categories" class="d-flex align-items-center gap-2 p-2 rounded"
-                   style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
-              <input
-                type="checkbox"
-                [value]="cat"
-                [checked]="selectedCategories.includes(cat)"
-                (change)="onCategoryChange($event)"
-              />
-              <span>{{ cat }}</span>
-            </label>
+            <!-- Header de filtros -->
+            <div class="d-flex align-items-center justify-content-between mb-4">
+              <h5 class="mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-funnel-fill text-primary"></i>
+                <span class="fw-bold">Filtros</span>
+              </h5>
+              <span class="badge bg-primary rounded-pill">{{ selectedCategories.length }}</span>
+            </div>
+
+            <!-- Botón limpiar filtros -->
+            <button
+              class="btn btn-outline-secondary w-100 mb-4 d-flex align-items-center justify-content-center gap-2"
+              type="button"
+              (click)="clearFilters()"
+              [disabled]="selectedCategories.length === 0">
+              <i class="bi bi-x-circle"></i>
+              <span>Limpiar filtros</span>
+            </button>
+
+            <!-- Categorías -->
+            <div class="filter-section">
+              <h6 class="filter-title text-uppercase mb-3">
+                <i class="bi bi-grid-3x3-gap me-2"></i>
+                Categorías
+              </h6>
+
+              <div class="categories-list">
+                <label
+                  *ngFor="let cat of categories"
+                  class="category-item">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    [value]="cat"
+                    [checked]="selectedCategories.includes(cat)"
+                    (change)="onCategoryChange($event)"
+                  />
+                  <span class="category-label">{{ cat }}</span>
+                  <i class="bi bi-chevron-right category-arrow"></i>
+                </label>
+              </div>
+            </div>
+
+            <!-- Info adicional -->
+            <div class="filter-info mt-4 p-3 rounded">
+              <i class="bi bi-info-circle text-primary me-2"></i>
+              <small class="text-white-50">
+                Selecciona categorías para filtrar productos
+              </small>
+            </div>
+
           </div>
         </div>
       </div>
     </aside>
 
-
-    <div class="offcanvas offcanvas-start bg-dark text-white d-md-none" tabindex="-1" id="filtersOffcanvas">
+    <!-- 📱 OFFCANVAS DE FILTROS (Mobile) -->
+    <div class="offcanvas offcanvas-start offcanvas-modern" tabindex="-1" id="filtersOffcanvas">
       <div class="offcanvas-header">
-        <h5 class="offcanvas-title"><i class="bi bi-funnel me-2"></i>Filtros</h5>
+        <h5 class="offcanvas-title d-flex align-items-center gap-2">
+          <i class="bi bi-funnel-fill text-primary"></i>
+          <span class="fw-bold">Filtros de Búsqueda</span>
+          @if (selectedCategories.length > 0) {
+            <span class="badge bg-primary rounded-pill">{{ selectedCategories.length }}</span>
+          }
+        </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
 
       <div class="offcanvas-body">
-        <!-- ✅ BOTONES AL PRINCIPIO -->
-        <div class="d-grid gap-2 mb-3">
-          <button class="btn btn-secondary" type="button" (click)="clearFilters()">Limpiar filtros</button>
-          <button class="btn btn-primary" type="button" data-bs-dismiss="offcanvas" (click)="applyFilter()">Aplicar</button>
+        <!-- Botones de acción destacados -->
+        <div class="filter-actions-mobile mb-4">
+          <button
+            class="btn btn-outline-danger w-100 mb-2 d-flex align-items-center justify-content-center gap-2"
+            type="button"
+            (click)="clearFilters()"
+            [disabled]="selectedCategories.length === 0">
+            <i class="bi bi-x-circle-fill"></i>
+            <span>Limpiar todos los filtros</span>
+          </button>
+          <button
+            class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+            type="button"
+            data-bs-dismiss="offcanvas"
+            (click)="applyFilter()">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Aplicar filtros ({{ selectedCategories.length }})</span>
+          </button>
         </div>
 
-        <!-- CATEGORÍAS -->
-        <div class="mb-2 text-uppercase" style="font-size:.85rem;color:#9bb9c9;letter-spacing:.3px;">Categorías</div>
-        <div class="d-grid gap-2">
-          <label *ngFor="let cat of categories" class="d-flex align-items-center gap-2 p-2 rounded"
-                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
-            <input
-              type="checkbox"
-              [value]="cat"
-              [checked]="selectedCategories.includes(cat)"
-              (change)="onCategoryChange($event)"
-            />
-            <span>{{ cat }}</span>
-          </label>
+        <!-- Info de ayuda -->
+        <div class="alert alert-info d-flex align-items-start gap-2 mb-4" role="alert">
+          <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+          <small>Selecciona una o más categorías para filtrar los productos mostrados</small>
+        </div>
+
+        <!-- Categorías móvil -->
+        <div class="filter-section-mobile">
+          <h6 class="filter-title-mobile mb-3">
+            <i class="bi bi-grid-3x3-gap-fill me-2"></i>
+            Categorías disponibles
+          </h6>
+
+          <div class="categories-list-mobile">
+            <label
+              *ngFor="let cat of categories"
+              class="category-item-mobile">
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  [id]="'mobile-cat-' + cat"
+                  [value]="cat"
+                  [checked]="selectedCategories.includes(cat)"
+                  (change)="onCategoryChange($event)"
+                />
+                <label class="form-check-label w-100" [for]="'mobile-cat-' + cat">
+                  <span class="category-name">{{ cat }}</span>
+                  <i class="bi bi-chevron-right category-arrow"></i>
+                </label>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Botón aplicar fijo al final -->
+        <div class="filter-actions-bottom mt-4 pt-3 border-top">
+          <button
+            class="btn btn-lg btn-primary w-100 shadow-lg d-flex align-items-center justify-content-center gap-2"
+            type="button"
+            data-bs-dismiss="offcanvas"
+            (click)="applyFilter()">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Ver resultados</span>
+          </button>
         </div>
       </div>
     </div>
 
+    <!-- 🛍️ GRID DE PRODUCTOS -->
+    <section class="col-12 col-lg-9" #resultsSection>
 
-    <!-- GRID DE PRODUCTOS (4x4 en desktop, 2xN en móvil) -->
-    <section class="col-12 col-md-9">
-      <!-- g-4 para más aire entre cards -->
-      <div class="row row-cols-2 row-cols-lg-4 g-4">
+      <!-- Header de resultados -->
+      <div class="results-header mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div>
+            <h4 class="mb-1 text-white fw-bold">
+              @if (selectedCategories.length > 0) {
+                Resultados filtrados
+              } @else {
+                Todos los productos
+              }
+            </h4>
+            <p class="text-white-50 mb-0">
+              <i class="bi bi-box-seam me-1"></i>
+              Mostrando {{ products.length }} de {{ totalCount }} productos
+            </p>
+          </div>
+
+          <!-- Controles de vista (opcional para futuro) -->
+          <div class="view-controls d-none d-md-flex gap-2">
+            <button class="btn btn-sm btn-outline-light active">
+              <i class="bi bi-grid-3x3-gap"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-light">
+              <i class="bi bi-list"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de productos mejorado -->
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
         <div class="col" *ngFor="let product of products">
-          <div class="card product-card h-100 shadow-sm"
-               style="background:#0f151b;border:1px solid rgba(255,255,255,0.06);border-radius:16px;min-height:400px;">
-            <!-- IMAGEN MÁS GRANDE -->
-            <div class="product-img-container"
-                 style="background:#0c1116;height:220px;display:grid;place-items:center;border-bottom:1px solid rgba(255,255,255,0.06);border-top-left-radius:16px;border-top-right-radius:16px;overflow:hidden;">
+          <div class="product-card h-100">
+
+            <!-- Badge de categoría -->
+            @if (product.categoria) {
+              <div class="category-badge">
+                <i class="bi bi-tag-fill me-1"></i>
+                {{ product.categoria }}
+              </div>
+            }
+
+            <!-- Imagen del producto -->
+            <div class="product-image-wrapper">
               <ng-container *ngIf="product.foto && product.foto !== 'NOT-IMAGE'; else noImage">
-                <img [src]="product.foto"
-                     class="card-img-top product-img"
-                     [alt]="product.descripcion"
-                     style="max-height:100%;max-width:100%;object-fit:contain;">
+                <img
+                  [src]="product.foto"
+                  [alt]="product.descripcion"
+                  class="product-image">
               </ng-container>
               <ng-template #noImage>
-                <div class="no-image-text" style="color:#9bb9c9;font-size:1rem;">Sin imagen</div>
+                <div class="no-image-placeholder">
+                  <i class="bi bi-image"></i>
+                  <span>Sin imagen</span>
+                </div>
               </ng-template>
-            </div>
 
-            <div class="card-body d-flex flex-column justify-content-between">
-              <!-- TÍTULO MÁS GRANDE -->
-              <h5 class="card-title product-title"
-                  style="color:#e6f1f6;font-size:1.05rem;line-height:1.25;min-height:52px;">
-                {{ product.descripcion }}
-              </h5>
-
-              <p class="product-price mb-2" style="color:greenyellow;font-weight:800;font-size:1.75rem;">
-                {{ isDistribuidor ? ('$' + product.precioMayorista) : (product.pvp | currency:'USD') }}
-              </p>
-
-
-              <div
-                class="text-uppercase mb-1"
-                style="font-size:.75rem; color:#9bb9c9; letter-spacing:.3px; opacity:.9;">
-                {{ product.categoria || 'Sin categoría' }}
-              </div>
-              <div
-                class="text-uppercase mb-2"
-                style="font-size:.75rem; color:#9bb9c9; letter-spacing:.3px; opacity:.9;">
-                {{ product.codigo || 'N/A' }}
-              </div>
-
-              <div class="d-flex align-items-center gap-2 mt-auto">
-                <input
-                  type="number"
-                  class="form-control quantity-input"
-                  min="1"
-                  [(ngModel)]="product.cantidad"
-                  [ngModelOptions]="{standalone: true}"
-                  style="background:#0c1116;color:#e6f1f6;border:1px solid rgba(255,255,255,0.08);max-width:80px;">
-                <button class="btn btn-primary flex-grow-1" style="border-radius:12px;" (click)="addToCart(product)">
-                  <i class="bi bi-cart-plus"></i> Agregar
+              <!-- Quick view button (hover) -->
+              <div class="product-overlay">
+                <button class="btn btn-sm btn-light rounded-pill">
+                  <i class="bi bi-eye me-1"></i>
+                  Vista rápida
                 </button>
               </div>
+            </div>
+
+            <!-- Contenido del producto -->
+            <div class="product-body">
+
+              <!-- Título y código -->
+              <div class="product-header mb-3">
+                <h5 class="product-title mb-2">
+                  {{ product.descripcion }}
+                </h5>
+                @if (product.codigo) {
+                  <span class="product-code">
+                    <i class="bi bi-upc-scan me-1"></i>
+                    {{ product.codigo }}
+                  </span>
+                }
+              </div>
+
+              <!-- Precio destacado -->
+              <div class="product-price-section mb-3">
+                @if (isDistribuidor) {
+                  <div class="price-wrapper">
+                    <span class="price-label">Precio mayorista</span>
+                    <span class="price-value">${{ product.precioMayorista }}</span>
+                  </div>
+                } @else {
+                  <div class="price-wrapper">
+                    <span class="price-label">Precio</span>
+                    <span class="price-value">{{ product.pvp | currency:'USD' }}</span>
+                  </div>
+                }
+              </div>
+
+              <!-- Acciones del producto -->
+              <div class="product-actions">
+                <div class="quantity-selector">
+                  <button
+                    class="btn btn-sm btn-outline-secondary"
+                    (click)="decrementQuantity(product)">
+                    <i class="bi bi-dash"></i>
+                  </button>
+                  <input
+                    type="number"
+                    class="form-control form-control-sm text-center"
+                    min="1"
+                    [(ngModel)]="product.cantidad"
+                    [ngModelOptions]="{standalone: true}">
+                  <button
+                    class="btn btn-sm btn-outline-secondary"
+                    (click)="incrementQuantity(product)">
+                    <i class="bi bi-plus"></i>
+                  </button>
+                </div>
+
+                <button
+                  class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                  (click)="addToCart(product)">
+                  <i class="bi bi-cart-plus-fill"></i>
+                  <span>Agregar</span>
+                </button>
+              </div>
+
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Paginación (INTACTA) -->
-      <div class="d-flex justify-content-between align-items-center mt-3 px-2">
-        <p class="mb-0 fw-bold text-white">Total de productos: {{ totalCount }}</p>
-        <div>
-          <button class="btn btn-primary me-2" [disabled]="currentPage === 1" (click)="onPreviousPage()">Anterior</button>
-          <button class="btn btn-primary" [disabled]="currentPage === totalPages" (click)="onNextPage()">Siguiente</button>
+      <!-- Paginación mejorada -->
+      <div class="pagination-wrapper mt-5">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div class="pagination-info">
+            <span class="text-white">
+              Página <strong>{{ currentPage }}</strong> de <strong>{{ totalPages }}</strong>
+            </span>
+          </div>
+
+          <nav aria-label="Paginación de productos">
+            <ul class="pagination mb-0">
+              <li class="page-item" [class.disabled]="currentPage === 1">
+                <button
+                  class="page-link"
+                  (click)="onPreviousPage()"
+                  [disabled]="currentPage === 1">
+                  <i class="bi bi-chevron-left"></i>
+                  <span class="d-none d-sm-inline ms-1">Anterior</span>
+                </button>
+              </li>
+
+              <!-- Números de página (simplificado) -->
+              <li class="page-item active d-none d-md-block">
+                <span class="page-link">{{ currentPage }}</span>
+              </li>
+
+              <li class="page-item" [class.disabled]="currentPage === totalPages">
+                <button
+                  class="page-link"
+                  (click)="onNextPage()"
+                  [disabled]="currentPage === totalPages">
+                  <span class="d-none d-sm-inline me-1">Siguiente</span>
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
         </div>
       </div>
+
     </section>
   </div>
-
-  <div class="text-center mt-5">
-    <span class="text-white small-text">
-      Developed by <strong style="color:#8B50FB;">SwiFt©</strong> (2025).
-    </span>
-  </div>
 </div>
+
+<!-- Footer -->
+<footer class="store-footer text-center py-4 mt-5">
+  <div class="container">
+    <p class="text-white-50 mb-0">
+      Developed by <strong class="brand-purple">SwiFt©</strong> 2025
+    </p>
+  </div>
+</footer>
 <!-- MODAL PARA SELECCIÓN DE VALOR -->
 <div class="modal fade" id="resistorModal" tabindex="-1" aria-labelledby="resistorModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
