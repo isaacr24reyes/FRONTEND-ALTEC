@@ -1,78 +1,186 @@
 <app-loader></app-loader>
 
-<form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="product-quote-form">
-  <div class="container d-flex justify-content mb-3">
-    <button type="button" class="btn btn-outline-light mt-4" (click)="goBackToStore()">
-      <i class="bi bi-arrow-left"></i> Seguir Comprando
-    </button>
-
-  </div>
-  <!-- Título -->
-  <div class="text-center">
-    <h1 class="store-title fs-1 fs-sm-3 fs-md-2">🛍️ Detalle de tu compra</h1>
-
-    <h2 class="store-subtitle fs-md-2 fs-sm-3 fs-5">
-      Aquí puedes revisar los productos que agregaste al carrito
-    </h2>
-  </div>
-
-  <div class="container mt-4">
-    <div class="table-responsive">
-      <table class="table table-bordered table-striped table-hover bg-white">
-        <thead class="table-dark">
-        <tr>
-          <th>Imagen</th>
-          <th>Descripción</th>
-          <th>Cantidad</th>
-          <th>Precio Unitario</th>
-          <th>Subtotal</th>
-          <th>Eliminar</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let item of cart">
-          <td class="text-center align-middle">
-            <img *ngIf="item.foto && item.foto !== 'NOT-IMAGE'; else noImg" [src]="item.foto" width="60" height="60" class="img-fluid" />
-            <ng-template #noImg><span class="text-muted">Sin imagen</span></ng-template>
-          </td>
-
-          <td>{{ item.descripcion }}</td>
-          <td class="text-center align-middle">
-            <input
-              type="number"
-              [value]="item.cantidad"
-              (input)="onCantidadChange(item, $event)"
-              class="form-control text-center"
-              min="1"
-              style="max-width: 80px; margin: 0 auto;" />
-          </td>
-          <td class="text-center align-middle">{{ itemPrecioUnitario(item) | currency: 'USD' }}</td>
-          <td class="text-center align-middle">{{ itemPrecioUnitario(item) * item.cantidad | currency: 'USD' }}</td>
-          <td class="text-center align-middle">
-            <button class="btn btn-danger btn-sm" (click)="removeItem(item)">
-              <i class="bi bi-trash"></i>
-            </button>
-          </td>
-
-        </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="text-end mt-3">
-      <h4 class="no-inspect" style="color: #90ee90; font-size: 1.8rem;">
-        Total: {{ total | currency: 'USD' }}
-      </h4>
-
-
-
-
-      <button class="btn btn-success mt-2" (click)="finalizarCompra()">Finalizar compra</button>
-      <div class="text-center mt-5">
-    <span class="text-white small-text">
-      Developed by <strong style="color: #8B50FB;">SwiFt©</strong> (2025).
-    </span>
+<!-- 🛒 HERO SECTION DEL CARRITO -->
+<div class="cart-hero">
+  <div class="container position-relative py-4">
+    <div class="row align-items-center">
+      <div class="col-12 col-md-6">
+        <button type="button" class="btn btn-outline-light d-inline-flex align-items-center gap-2 mb-3 mb-md-0" (click)="goBackToStore()">
+          <i class="bi bi-arrow-left"></i>
+          <span>Seguir comprando</span>
+        </button>
+      </div>
+      <div class="col-12 col-md-6 text-md-end">
+        <div class="cart-summary-badge">
+          <i class="bi bi-cart-fill me-2"></i>
+          <span class="fw-bold me-2">{{ cart.length }}</span>productos en tu carrito
+        </div>
       </div>
     </div>
   </div>
-</form>
+</div>
+
+<!-- 🎨 CONTENEDOR PRINCIPAL -->
+<div class="cart-container">
+  <div class="container py-5">
+
+    <!-- Header del carrito -->
+    <div class="cart-header text-center mb-5">
+      <h1 class="display-5 fw-bold text-white mb-3">
+        <i class="bi bi-bag-check-fill text-primary me-3"></i>
+        Tu Carrito de Compras
+      </h1>
+      <p class="lead text-white-50">
+        Revisa y confirma los productos antes de finalizar tu compra
+      </p>
+    </div>
+
+    <!-- Contenido del carrito -->
+    <div class="row g-4">
+
+      <!-- 📦 PRODUCTOS DEL CARRITO -->
+      <div class="col-12 col-lg-8">
+        <div class="cart-items-container">
+
+          <!-- Item del carrito (card moderna) -->
+          <div class="cart-item-card" *ngFor="let item of cart">
+            <div class="row g-3 align-items-center">
+
+              <!-- Imagen -->
+              <div class="col-4 col-sm-3 col-lg-2">
+                <div class="cart-item-image">
+                  <img *ngIf="item.foto && item.foto !== 'NOT-IMAGE'; else noImg"
+                       [src]="item.foto"
+                       [alt]="item.descripcion"
+                       class="img-fluid">
+                  <ng-template #noImg>
+                    <div class="no-image-cart">
+                      <i class="bi bi-image"></i>
+                    </div>
+                  </ng-template>
+                </div>
+              </div>
+
+              <!-- Información del producto -->
+              <div class="col-8 col-sm-9 col-lg-4">
+                <h5 class="cart-item-title mb-2">{{ item.descripcion }}</h5>
+                <div class="cart-item-price">
+                  <span class="text-white-50 small d-block mb-1">Precio unitario</span>
+                  <span class="text-success fw-bold fs-5">{{ itemPrecioUnitario(item) | currency: 'USD' }}</span>
+                </div>
+              </div>
+
+              <!-- Cantidad -->
+              <div class="col-6 col-sm-4 col-lg-3">
+                <label class="form-label text-white fw-semibold small mb-2 d-block">Cantidad</label>
+                <div class="quantity-control-cart">
+                  <button type="button" class="btn btn-quantity" (click)="decrementQuantity(item)">
+                    <i class="bi bi-dash"></i>
+                  </button>
+                  <div class="quantity-display">
+                    {{ item.cantidad }}
+                  </div>
+                  <button type="button" class="btn btn-quantity" (click)="incrementQuantity(item)">
+                    <i class="bi bi-plus"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Subtotal -->
+              <div class="col-4 col-sm-4 col-lg-2">
+                <label class="form-label text-white fw-semibold small mb-2 d-block">Subtotal</label>
+                <p class="cart-item-subtotal mb-0">{{ itemPrecioUnitario(item) * item.cantidad | currency: 'USD' }}</p>
+              </div>
+
+              <!-- Eliminar -->
+              <div class="col-2 col-sm-4 col-lg-1 text-end">
+                <button type="button" class="btn btn-outline-danger btn-sm cart-item-delete" (click)="removeItem(item)" title="Eliminar producto">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Estado vacío -->
+          <div class="empty-cart text-center py-5" *ngIf="cart.length === 0">
+            <i class="bi bi-cart-x display-1 text-white-50 mb-3"></i>
+            <h3 class="text-white mb-3">Tu carrito está vacío</h3>
+            <p class="text-white-50 mb-4">Agrega productos desde la tienda</p>
+            <button type="button" class="btn btn-primary btn-lg" (click)="goBackToStore()">
+              <i class="bi bi-shop me-2"></i>
+              Ir a la tienda
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 💰 RESUMEN DE COMPRA -->
+      <div class="col-12 col-lg-4">
+        <div class="cart-summary-card sticky-top">
+          <div class="card-body p-4">
+
+            <h5 class="fw-bold text-white mb-4 d-flex align-items-center gap-2">
+              <i class="bi bi-receipt"></i>
+              Resumen de compra
+            </h5>
+
+            <!-- Desglose -->
+            <div class="summary-breakdown">
+              <div class="summary-row">
+                <span class="text-white-50">Productos ({{ cart.length }})</span>
+                <span class="text-white fw-semibold">{{ total | currency: 'USD' }}</span>
+              </div>
+              <div class="summary-row">
+                <span class="text-white-50">Envío</span>
+                <span class="text-success fw-semibold">Gratis</span>
+              </div>
+
+              <hr class="summary-divider">
+
+              <div class="summary-row summary-total">
+                <span class="text-white fw-bold">Total</span>
+                <span class="text-success fw-bold fs-4">{{ total | currency: 'USD' }}</span>
+              </div>
+            </div>
+
+            <!-- Botón finalizar -->
+            <button type="button"
+                    class="btn btn-success btn-lg w-100 mt-4 d-flex align-items-center justify-content-center gap-2"
+                    (click)="finalizarCompra()"
+                    [disabled]="cart.length === 0">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>Finalizar compra</span>
+            </button>
+
+            <!-- Info adicional -->
+            <div class="summary-info mt-4">
+              <div class="info-item">
+                <i class="bi bi-shield-check text-success"></i>
+                <span class="text-white-50 small">Compra 100% segura</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-truck text-primary"></i>
+                <span class="text-white-50 small">Envío rápido 24-48h</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-arrow-return-left text-info"></i>
+                <span class="text-white-50 small">Devoluciones fáciles</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="cart-footer text-center py-4">
+  <p class="text-white-50 small mb-0">
+    Powered by <strong class="brand-purple">SwiFt©</strong> 2025
+  </p>
+</footer>

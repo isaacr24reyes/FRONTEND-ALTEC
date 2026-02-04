@@ -121,6 +121,18 @@ export class DetailPurchaseComponent implements OnInit {
     this.router.navigate(['/store']);
   }
 
+  incrementQuantity(item: any): void {
+    item.cantidad++;
+    this.recalcularTotal();
+  }
+
+  decrementQuantity(item: any): void {
+    if (item.cantidad > 1) {
+      item.cantidad--;
+      this.recalcularTotal();
+    }
+  }
+
   onSubmit() {}
 }
 
