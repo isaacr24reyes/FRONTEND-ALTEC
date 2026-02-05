@@ -1,206 +1,392 @@
-<div *ngIf="!isLoading">
-  <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="product-quote-form">
-    <div class="text-center">
-      <h1>Realizar una Cotización</h1>
+<div *ngIf="!isLoading" class="modern-quote-page">
+
+  <form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+
+    <!-- 🎨 Hero Section -->
+    <div class="quote-hero">
+      <div class="container">
+        <h1 class="hero-title animate-fade-in">
+          <i class="bi bi-calculator-fill me-3"></i>
+          Cotización <span class="text-gradient">Rápida</span>
+        </h1>
+        <p class="hero-subtitle animate-fade-in-delay">
+          Busca productos y genera cotizaciones profesionales en segundos
+        </p>
+      </div>
     </div>
 
-    <div class="container mt-3">
-      <div class="row justify-content-center">
-        <div class="col-12 col-md-8">
+    <!-- 🔍 Barra de búsqueda moderna -->
+    <div class="search-section">
+      <div class="container">
+        <div class="search-wrapper">
+          <i class="bi bi-search search-icon"></i>
           <input
             type="search"
-            class="form-control"
-            placeholder="Buscar producto o código..."
-            aria-label="Search"
-            formControlName="searchControl">
-        </div>
-      </div>
-    </div>
-    <!-- 🔹 Filtros -->
-    <div class="row justify-content-center mt-4 mb-4">
-      <div class="col-12 col-md-10 d-flex flex-wrap justify-content-center gap-4">
-
-        <!-- Importación -->
-        <div class="form-check">
-          <input class="form-check-input"
-                 type="checkbox"
-                 id="importCheck"
-                 formControlName="importCheck"
-                 (change)="toggleImport()">
-          <label style="color:white;font-weight:bold;margin-left:8px">
-            Productos de importación
-          </label>
-        </div>
-
-        <!-- Stock bajo -->
-        <div class="form-check">
-          <input class="form-check-input"
-                 type="checkbox"
-                 id="lowStockCheck"
-                 formControlName="lowStockCheck"
-                 (change)="toggleLowStock()">
-          <label style="color:white;font-weight:bold;margin-left:8px">
-
-          Stock &lt; 5
-          </label>
-        </div>
-
-        <!-- Categorías -->
-        <div class="dropdown">
-          <button class="btn btn-outline-primary dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown">
-            Filtrar por categoría
+            class="search-input"
+            placeholder="Buscar por código o descripción del producto..."
+            formControlName="searchControl"
+            spellcheck="false">
+          <button type="button" class="search-clear" *ngIf="formGroup.get('searchControl')?.value">
+            <i class="bi bi-x-circle-fill"></i>
           </button>
-          <ul class="dropdown-menu">
-            <li>
-              <button class="dropdown-item" (click)="filtrarCategoria('')">
-                Todas
-              </button>
-            </li>
-            <li *ngFor="let cat of categories">
-              <button class="dropdown-item" (click)="filtrarCategoria(cat)">
-                {{ cat }}
-              </button>
-            </li>
-          </ul>
         </div>
-
       </div>
     </div>
 
-    <div class="container mt-5">
-      <div class="row justify-content-center">
-        <div class="col-12">
-          <div class="table-responsive">
-            <table class="table table-bordered text-center">
-              <thead>
+    <!-- 🔹 Filtros modernos -->
+    <div class="filters-section">
+      <div class="container">
+        <div class="filters-wrapper">
+
+          <!-- Filtro: Importación -->
+          <div class="filter-chip">
+            <input
+              class="filter-checkbox"
+              type="checkbox"
+              id="importCheck"
+              formControlName="importCheck"
+              (change)="toggleImport()">
+            <label class="filter-label" for="importCheck">
+              <i class="bi bi-globe-americas me-2"></i>
+              <span>Importación</span>
+              <span class="filter-badge" *ngIf="formGroup.get('importCheck')?.value">✓</span>
+            </label>
+          </div>
+
+          <!-- Filtro: Stock bajo -->
+          <div class="filter-chip">
+            <input
+              class="filter-checkbox"
+              type="checkbox"
+              id="lowStockCheck"
+              formControlName="lowStockCheck"
+              (change)="toggleLowStock()">
+            <label class="filter-label" for="lowStockCheck">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <span>Stock &lt; 5</span>
+              <span class="filter-badge" *ngIf="formGroup.get('lowStockCheck')?.value">✓</span>
+            </label>
+          </div>
+
+          <!-- Filtro: Categorías -->
+          <div class="dropdown filter-dropdown">
+            <button class="filter-dropdown-btn" type="button" data-bs-toggle="dropdown">
+              <i class="bi bi-funnel-fill me-2"></i>
+              <span>Categoría</span>
+              <i class="bi bi-chevron-down ms-2"></i>
+            </button>
+            <ul class="dropdown-menu modern-dropdown">
+              <li>
+                <button class="dropdown-item" type="button" (click)="filtrarCategoria('')">
+                  <i class="bi bi-check-circle-fill me-2"></i>
+                  Todas las categorías
+                </button>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li *ngFor="let cat of categories">
+                <button class="dropdown-item" type="button" (click)="filtrarCategoria(cat)">
+                  <i class="bi bi-tag-fill me-2"></i>
+                  {{ cat }}
+                </button>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- 🏷️ FILTROS ACTIVOS -->
+    <div class="active-filters-section" *ngIf="selectedCategory || onlyImport || onlyLowStock">
+      <div class="container">
+        <div class="active-filters-wrapper animate-fade-in">
+          <div class="active-filters-label">
+            <i class="bi bi-funnel-fill me-2"></i>
+            <span>Filtros activos:</span>
+          </div>
+
+          <div class="active-filters-chips">
+            <!-- Chip: Categoría -->
+            <div class="active-chip" *ngIf="selectedCategory">
+              <i class="bi bi-tag-fill"></i>
+              <span>{{ selectedCategory }}</span>
+              <button class="chip-remove" (click)="filtrarCategoria('')" title="Quitar filtro">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+
+            <!-- Chip: Importación -->
+            <div class="active-chip" *ngIf="onlyImport">
+              <i class="bi bi-globe"></i>
+              <span>Productos de importación</span>
+              <button class="chip-remove" (click)="toggleImport()" title="Quitar filtro">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+
+            <!-- Chip: Stock bajo -->
+            <div class="active-chip" *ngIf="onlyLowStock">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <span>Stock menor a 5</span>
+              <button class="chip-remove" (click)="toggleLowStock()" title="Quitar filtro">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+
+            <!-- Botón: Limpiar todos -->
+            <button class="clear-all-btn" (click)="clearAllFilters()" title="Limpiar todos los filtros">
+              <i class="bi bi-trash-fill me-2"></i>
+              Limpiar todo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📦 Grid de productos -->
+    <div class="products-section">
+      <div class="container">
+
+        <!-- Total productos ARRIBA -->
+        <div class="products-count">
+          <i class="bi bi-box-seam-fill me-2"></i>
+          <span>Total de productos: <strong>{{ totalCount }}</strong></span>
+        </div>
+
+        <!-- Desktop: Tabla -->
+        <div class="products-table d-none d-lg-block">
+          <table class="table modern-table">
+            <thead>
               <tr>
-                <th style="background-color: #08274F; color: white; font-weight: bold;">Código</th>
-                <th style="background-color: #08274F; color: white; font-weight: bold;">Descripción</th>
-                <th style="background-color: #08274F; color: white; font-weight: bold;">Foto</th>
+                <th><i class="bi bi-hash me-2"></i>Código</th>
+                <th><i class="bi bi-box-seam me-2"></i>Descripción</th>
+                <th><i class="bi bi-image me-2"></i>Imagen</th>
+                <th><i class="bi bi-cursor-fill me-2"></i>Acción</th>
               </tr>
-              </thead>
-              <tbody>
-              <tr *ngFor="let product of products" (click)="openProductModal(product)" style="cursor: pointer;">
-                <td style="vertical-align: middle;">{{ product.codigo }}</td>
-                <td class="text-break" style="vertical-align: middle;">{{ product.descripcion }}</td>
-                <td style="padding: 0;">
-                  <ng-container *ngIf="product.foto !== 'NOT-IMAGE'; else noImage">
-                    <img [src]="product.foto" alt="Producto" class="img-thumbnail" style="max-width: 200px;" />
-                  </ng-container>
-                  <ng-template #noImage>
-                    <span>Producto no contiene imagen</span>
-                  </ng-template>
+            </thead>
+            <tbody>
+              <tr *ngFor="let product of products" class="product-row" (click)="openProductModal(product)">
+                <td class="code-cell">{{ product.codigo }}</td>
+                <td class="desc-cell">{{ product.descripcion }}</td>
+                <td class="image-cell">
+                  <div class="product-image-wrapper">
+                    <img *ngIf="product.foto !== 'NOT-IMAGE'; else noImage"
+                         [src]="product.foto"
+                         alt="Producto"
+                         class="product-image">
+                    <ng-template #noImage>
+                      <div class="no-image">
+                        <i class="bi bi-image"></i>
+                      </div>
+                    </ng-template>
+                  </div>
+                </td>
+                <td class="action-cell">
+                  <button type="button" class="btn-add-quote">
+                    <i class="bi bi-plus-circle-fill"></i>
+                  </button>
                 </td>
               </tr>
-              </tbody>
-            </table>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile/Tablet: Cards -->
+        <div class="products-grid d-lg-none">
+          <div class="product-card" *ngFor="let product of products" (click)="openProductModal(product)">
+            <div class="card-image">
+              <img *ngIf="product.foto !== 'NOT-IMAGE'; else noImageCard"
+                   [src]="product.foto"
+                   alt="Producto">
+              <ng-template #noImageCard>
+                <div class="no-image-card">
+                  <i class="bi bi-image"></i>
+                </div>
+              </ng-template>
+            </div>
+            <div class="card-content">
+              <span class="card-code">{{ product.codigo }}</span>
+              <h3 class="card-title">{{ product.descripcion }}</h3>
+              <button type="button" class="card-btn">
+                <i class="bi bi-plus-circle-fill me-2"></i>
+                Agregar
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <hr class="styled-line">
-
-    <div class="container mt-5">
-      <div class="row justify-content-between align-items-center">
-        <div class="col-12 col-md-auto mb-2 mb-md-0">
-          <h4>Total de productos: {{ totalCount }}</h4>
-        </div>
-        <div class="col-12 col-md-auto">
-          <button class="btn btn-primary me-2" (click)="onPreviousPage()" [disabled]="currentPage === 1">Anterior</button>
-          <button class="btn btn-primary" (click)="onNextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
-        </div>
-      </div>
-    </div>
-
-    <hr class="styled-line">
-
-    <div *ngIf="cotizacion.length > 0" class="mt-5">
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3 gap-3">
-        <h5 class="fw-bold m-0">Resumen de cotización</h5>
-        <div class="d-flex gap-2 flex-wrap">
-          <button class="btn btn-outline-primary" (click)="incluirEnvio()">
-            <i class="fas fa-truck"></i> Incluir Envío
+        <!-- Paginación -->
+        <div class="pagination-wrapper" *ngIf="totalPages > 1">
+          <button type="button" class="btn-pagination" (click)="onPreviousPage()" [disabled]="currentPage === 1">
+            <i class="bi bi-chevron-left"></i>
+            <span class="d-none d-sm-inline">Anterior</span>
           </button>
-          <button class="btn btn-danger" (click)="descargarPDF()">
-            Descargar PDF
+          <span class="pagination-info">
+            Página <strong>{{ currentPage }}</strong> de <strong>{{ totalPages }}</strong>
+          </span>
+          <button type="button" class="btn-pagination" (click)="onNextPage()" [disabled]="currentPage === totalPages">
+            <span class="d-none d-sm-inline">Siguiente</span>
+            <i class="bi bi-chevron-right"></i>
           </button>
-          <button class="btn btn-outline-success" (click)="descargarExcelConImagenes()">
-            Descargar Excel
-          </button>
-
         </div>
-      </div>
 
-      <div class="table-responsive" #pdfCotizacion>
-        <table class="table table-bordered table-hover text-center">
-          <thead class="bg-success text-white">
-          <tr>
-            <th>Producto</th>
-            <th>Imagen</th>
-            <th>Cantidad</th>
-            <th>Precio unitario</th>
-            <th>Total</th>
-            <th>Eliminar</th>
-          </tr>
-          </thead>
-
-
-
-          <tbody>
-          <tr *ngFor="let item of cotizacion; let i = index">
-            <td class="text-break">{{ item.descripcion }}</td>
-            <td>
-              <img *ngIf="item.fotoBase64" [src]="item.fotoBase64" alt="Producto" style="max-height: 60px;">
-              <span *ngIf="!item.fotoBase64">—</span>
-            </td>
-            <td>{{ item.cantidad }}</td>
-            <td>{{ item.precio | currency }}</td>
-            <td>{{ item.total | currency }}</td>
-            <td>
-              <button class="btn btn-danger btn-sm" (click)="eliminarDeCotizacion(i)">X</button>
-            </td>
-          </tr>
-
-
-          </tbody>
-          <tfoot>
-          <tr>
-            <th colspan="4" class="text-end">Total general:</th>
-            <th>{{ totalCotizacion | currency }}</th>
-          </tr>
-          </tfoot>
-        </table>
       </div>
     </div>
 
-    <div class="text-center mt-5">
-      <span class="text-white small-text">
-        Developed by <strong style="color: #8B50FB;">SwiFt©</strong> (2025).
-      </span>
+    <!-- 📋 Resumen de cotización -->
+    <div class="quote-summary" *ngIf="cotizacion.length > 0">
+      <div class="container">
+
+        <div class="summary-header">
+          <h2 class="summary-title">
+            <i class="bi bi-clipboard-check-fill me-2"></i>
+            Resumen de Cotización
+          </h2>
+          <div class="summary-actions">
+            <button type="button" class="btn-summary btn-shipping" (click)="incluirEnvio()">
+              <i class="bi bi-truck me-2"></i>
+              <span class="d-none d-md-inline">Incluir </span>Envío
+            </button>
+            <button type="button" class="btn-summary btn-pdf" (click)="descargarPDF()">
+              <i class="bi bi-file-earmark-pdf-fill me-2"></i>
+              <span class="d-none d-md-inline">Descargar </span>PDF
+            </button>
+            <button type="button" class="btn-summary btn-excel" (click)="descargarExcelConImagenes()">
+              <i class="bi bi-file-earmark-excel-fill me-2"></i>
+              <span class="d-none d-md-inline">Descargar </span>Excel
+            </button>
+          </div>
+        </div>
+
+        <!-- Desktop: Tabla resumen -->
+        <div class="summary-table d-none d-md-block" #pdfCotizacion>
+          <table class="table modern-table-summary">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Imagen</th>
+                <th>Cantidad</th>
+                <th>Precio Unit.</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of cotizacion; let i = index" class="summary-row">
+                <td class="product-name">{{ item.descripcion }}</td>
+                <td class="product-thumb">
+                  <img *ngIf="item.fotoBase64" [src]="item.fotoBase64" alt="Producto">
+                  <span *ngIf="!item.fotoBase64" class="no-thumb">—</span>
+                </td>
+                <td class="quantity">
+                  <div class="quantity-controls">
+                    <button type="button" class="btn-quantity-minus" (click)="decrementarCantidad(i)">
+                      <i class="bi bi-dash"></i>
+                    </button>
+                    <span class="quantity-value">{{ item.cantidad }}</span>
+                    <button type="button" class="btn-quantity-plus" (click)="incrementarCantidad(i)">
+                      <i class="bi bi-plus"></i>
+                    </button>
+                  </div>
+                </td>
+                <td class="price">{{ item.precio | currency }}</td>
+                <td class="total">{{ item.total | currency }}</td>
+                <td class="delete">
+                  <button type="button" class="btn-delete" (click)="eliminarDeCotizacion(i)">
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="summary-total-row">
+                <td colspan="4" class="total-label">Total General:</td>
+                <td class="total-amount">{{ totalCotizacion | currency }}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Mobile: Cards resumen -->
+        <div class="summary-cards d-md-none">
+          <div class="summary-card" *ngFor="let item of cotizacion; let i = index">
+            <div class="summary-card-header">
+              <img *ngIf="item.fotoBase64" [src]="item.fotoBase64" alt="Producto" class="summary-card-image">
+              <div class="summary-card-info">
+                <h4 class="summary-card-title">{{ item.descripcion }}</h4>
+                <div class="summary-card-details">
+                  <div class="detail-item">
+                    <i class="bi bi-box me-1"></i>
+                    <div class="quantity-controls-mobile">
+                      <button type="button" class="btn-quantity-minus" (click)="decrementarCantidad(i)">
+                        <i class="bi bi-dash"></i>
+                      </button>
+                      <span class="quantity-value">{{ item.cantidad }}</span>
+                      <button type="button" class="btn-quantity-plus" (click)="incrementarCantidad(i)">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <span class="detail-item">
+                    <i class="bi bi-tag me-1"></i>
+                    {{ item.precio | currency }}
+                  </span>
+                </div>
+              </div>
+              <button type="button" class="summary-card-delete" (click)="eliminarDeCotizacion(i)">
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            </div>
+            <div class="summary-card-footer">
+              <span class="footer-label">Total:</span>
+              <span class="footer-amount">{{ item.total | currency }}</span>
+            </div>
+          </div>
+
+          <!-- Total móvil -->
+          <div class="summary-mobile-total">
+            <span class="mobile-total-label">Total General:</span>
+            <span class="mobile-total-amount">{{ totalCotizacion | currency }}</span>
+          </div>
+        </div>
+
+      </div>
     </div>
+
+    <!-- 🦶 Footer -->
+    <footer class="quote-footer">
+      <div class="container text-center">
+        <p class="footer-text">
+          Developed by <strong class="brand-purple">SwiFt©</strong> 2025
+        </p>
+      </div>
+    </footer>
+
   </form>
 
+  <!-- 🔲 Modal de producto -->
   <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="productModalLabel">Cotizador</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modern-modal">
+        <div class="modal-header modern-modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-cart-plus-fill me-2"></i>
+            Agregar a Cotización
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body">
-          <div *ngIf="isResistor" class="mb-3">
-            <label class="form-label fw-bold">Valor de la resistencia</label>
-            <select class="form-select" [(ngModel)]="selectedResistorValue">
+        <div class="modal-body modern-modal-body">
+          <div *ngIf="isResistor" class="resistor-selector">
+            <label class="resistor-label">
+              <i class="bi bi-lightning-charge-fill me-2"></i>
+              Valor de la resistencia
+            </label>
+            <select class="resistor-select" [(ngModel)]="selectedResistorValue">
               <option value="">-- Selecciona el valor --</option>
-              <option *ngFor="let r of resistorValues" [value]="r">
-                {{ r }}
-              </option>
+              <option *ngFor="let r of resistorValues" [value]="r">{{ r }}</option>
             </select>
           </div>
-
           <app-car-shop
             [product]="selectedProduct"
             (agregarCotizacion)="agregarACotizacion($event)">
@@ -209,4 +395,67 @@
       </div>
     </div>
   </div>
+
+  <!-- 🚚 Modal de Envío -->
+  <div class="modal fade" id="shippingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content modern-modal">
+        <div class="modal-header modern-modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-truck me-2"></i>
+            Costo de Envío
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body modern-modal-body">
+          <div class="shipping-form">
+            <label class="shipping-label">
+              <i class="bi bi-currency-dollar me-2"></i>
+              Ingrese el costo de envío
+            </label>
+            <div class="input-group-modern">
+              <span class="input-prefix">$</span>
+              <input
+                type="number"
+                class="shipping-input"
+                [(ngModel)]="shippingCost"
+                [ngModelOptions]="{standalone: true}"
+                placeholder="0.00"
+                min="0"
+                step="0.01">
+            </div>
+            <div class="shipping-info">
+              <i class="bi bi-info-circle me-2"></i>
+              <span>Se agregará al total de la cotización</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer modern-modal-footer">
+          <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">
+            Cancelar
+          </button>
+          <button type="button" class="btn-modal-confirm" (click)="confirmarEnvio()">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📥 Loader de Descarga -->
+  <div class="download-loader" *ngIf="isDownloading">
+    <div class="loader-backdrop"></div>
+    <div class="loader-content">
+      <div class="loader-spinner">
+        <i class="bi bi-file-earmark-arrow-down"></i>
+      </div>
+      <h3 class="loader-title">{{ downloadMessage }}</h3>
+      <p class="loader-subtitle">Por favor espera un momento...</p>
+      <div class="loader-progress">
+        <div class="progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
 </div>

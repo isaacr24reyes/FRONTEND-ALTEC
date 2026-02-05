@@ -1,50 +1,105 @@
-<div *ngIf="product" class="p-3">
-  <div class="text-center mb-4">
-    <h5 class="fw-bold">{{ product.descripcion }}</h5>
+<div *ngIf="product" class="modern-modal-content">
+  <!-- Título del producto -->
+  <div class="product-header">
+    <h5 class="product-title">{{ product.descripcion }}</h5>
   </div>
 
-  <div class="row align-items-center">
-    <!-- Imagen -->
-    <div class="col-md-6 text-center mb-3 mb-md-0">
-      <ng-container *ngIf="product.foto && product.foto !== 'NOT-IMAGE'; else noImage">
-        <img [src]="product.foto"
-             alt="Imagen del producto"
-             class="img-fluid rounded shadow"
-             style="max-height: 200px;" />
-
-      </ng-container>
-      <ng-template #noImage>
-        <div class="text-muted">Este producto no tiene imagen.</div>
-      </ng-template>
+  <div class="row align-items-start g-3">
+    <!-- Imagen del producto -->
+    <div class="col-md-5">
+      <div class="image-container">
+        <ng-container *ngIf="product.foto && product.foto !== 'NOT-IMAGE'; else noImage">
+          <img [src]="product.foto"
+               alt="Imagen del producto"
+               class="product-image" />
+        </ng-container>
+        <ng-template #noImage>
+          <div class="no-image-placeholder">
+            <i class="bi bi-image"></i>
+            <span>Sin imagen disponible</span>
+          </div>
+        </ng-template>
+      </div>
     </div>
 
-    <!-- Detalles + Input -->
-    <div class="col-md-6">
-      <ul class="list-group list-group-flush mb-3">
-        <li class="list-group-item"><strong>PVP:</strong> {{ product.pvp | currency }}</li>
-        <li class="list-group-item"><strong>Precio mayorista:</strong> {{ product.precioMayorista | currency }}</li>
-      </ul>
+    <!-- Información y controles -->
+    <div class="col-md-7">
+      <!-- Precios disponibles -->
+      <div class="prices-section">
+        <h6 class="section-label">
+          <i class="bi bi-tag-fill me-2"></i>
+          Precios Disponibles
+        </h6>
 
-      <!-- Checkbox para usar precio mayorista -->
-      <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" id="usarMayorista" [(ngModel)]="usarPrecioMayorista">
-        <label class="form-check-label" for="usarMayorista">
-          Usar precio mayorista
+        <div class="price-options">
+          <!-- Opción PVP -->
+          <div class="price-option" [class.active]="!usarPrecioMayorista">
+            <div class="form-check">
+              <input class="form-check-input"
+                     type="radio"
+                     name="priceType"
+                     id="usarPVP"
+                     [value]="false"
+                     [(ngModel)]="usarPrecioMayorista">
+              <label class="form-check-label" for="usarPVP">
+                <div class="price-label">
+                  <span class="price-type">Precio Público (PVP)</span>
+                  <span class="price-description">Precio estándar de venta</span>
+                </div>
+                <div class="price-value">{{ product.pvp | currency }}</div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Opción Precio Mayorista -->
+          <div class="price-option" [class.active]="usarPrecioMayorista">
+            <div class="form-check">
+              <input class="form-check-input"
+                     type="radio"
+                     name="priceType"
+                     id="usarMayorista"
+                     [value]="true"
+                     [(ngModel)]="usarPrecioMayorista">
+              <label class="form-check-label" for="usarMayorista">
+                <div class="price-label">
+                  <span class="price-type">Precio Mayorista</span>
+                  <span class="price-description">Para compras al por mayor</span>
+                </div>
+                <div class="price-value mayorista">{{ product.precioMayorista | currency }}</div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cantidad -->
+      <div class="quantity-section">
+        <label for="quantity" class="section-label">
+          <i class="bi bi-box-seam me-2"></i>
+          Cantidad a cotizar
         </label>
+        <input type="number"
+               min="1"
+               [(ngModel)]="cantidad"
+               class="quantity-input"
+               id="quantity"
+               placeholder="Ingrese la cantidad">
       </div>
 
-      <div class="mb-3">
-        <label for="quantity" class="form-label"><strong>Cantidad a cotizar:</strong></label>
-        <input type="number" min="1" [(ngModel)]="cantidad" class="form-control" id="quantity" placeholder="Ej. 10">
+      <!-- Total calculado -->
+      <div class="total-section">
+        <div class="total-label">Total a pagar:</div>
+        <div class="total-amount">
+          {{ cantidad * (usarPrecioMayorista ? product.precioMayorista : product.pvp) | currency }}
+        </div>
       </div>
 
-      <!-- Total dinámico -->
-      <div class="mb-3">
-        <strong>Total:</strong> {{ cantidad * (usarPrecioMayorista ? product.precioMayorista : product.pvp) | currency }}
-      </div>
-
-      <div class="text-end">
-        <button class="btn btn-primary" (click)="cotizar()">Agregar</button>
+      <!-- Botón agregar -->
+      <div class="action-section">
+        <button class="btn-add-to-quote" (click)="cotizar()">
+          <i class="bi bi-cart-plus-fill me-2"></i>
+          Agregar a Cotización
+        </button>
       </div>
     </div>
   </div>

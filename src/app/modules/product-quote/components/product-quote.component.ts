@@ -70,6 +70,11 @@ export class ProductQuoteComponent implements OnInit {
   isResistor: boolean = false;
   @ViewChild('pdfCotizacion', { static: false }) pdfCotizacion!: ElementRef;
 
+  // Variables para modal de envío y loader
+  shippingCost: number = 0;
+  isDownloading: boolean = false;
+  downloadMessage: string = '';
+
   constructor(
     private productService: ProductService,
     private fb: UntypedFormBuilder
@@ -109,6 +114,19 @@ export class ProductQuoteComponent implements OnInit {
 
   toggleLowStock() {
     this.onlyLowStock = this.formGroup.get('lowStockCheck')?.value;
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+
+  // Limpiar todos los filtros
+  clearAllFilters(): void {
+    this.selectedCategory = '';
+    this.onlyImport = false;
+    this.onlyLowStock = false;
+    this.formGroup.patchValue({
+      importCheck: false,
+      lowStockCheck: false
+    });
     this.currentPage = 1;
     this.applyFilter();
   }
@@ -380,13 +398,39 @@ export class ProductQuoteComponent implements OnInit {
     this.cotizacion.splice(index, 1);
   }
 
+  // Incrementar cantidad
+  incrementarCantidad(index: number): void {
+    this.cotizacion[index].cantidad++;
+    this.cotizacion[index].total = this.cotizacion[index].cantidad * this.cotizacion[index].precio;
+  }
+
+  // Decrementar cantidad
+  decrementarCantidad(index: number): void {
+    if (this.cotizacion[index].cantidad > 1) {
+      this.cotizacion[index].cantidad--;
+      this.cotizacion[index].total = this.cotizacion[index].cantidad * this.cotizacion[index].precio;
+    } else {
+      // Si la cantidad es 1, eliminar el producto
+      this.eliminarDeCotizacion(index);
+    }
+  }
+
   get totalCotizacion(): number {
     return this.cotizacion.reduce((acc, item) => acc + item.total, 0);
   }
 
-  descargarPDF() {
+  async descargarPDF() {
+    this.isDownloading = true;
+    this.downloadMessage = 'Generando PDF...';
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     const container = document.createElement('div');
     container.style.width = '100%';
+    container.style.padding = '20px';
+    container.style.backgroundColor = '#ffffff';
+    container.style.fontFamily = 'Arial, sans-serif';
+
     const now = new Date();
     const options: Intl.DateTimeFormatOptions = {
       timeZone: 'America/Guayaquil', year: 'numeric', month: 'long', day: 'numeric',
@@ -396,114 +440,161 @@ export class ProductQuoteComponent implements OnInit {
     const [fecha, hora] = fechaHoraFormateada.split(',');
 
     const header = `
-    <div style="display: flex; align-items: center; margin-bottom: 15px;">
-      <div style="flex: 0 0 auto; margin-right: 20px;">
-        <img src="assets/images/Logo-completo.jpeg" alt="Logo Empresa" style="max-height: 120px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #0C1E3A;">
+      <div style="flex: 0 0 auto;">
+        <img src="assets/images/Logo-completo.jpeg" alt="Logo ALTEC" style="max-height: 80px;">
       </div>
-      <div style="flex: 1; text-align: center;">
-        <h2 style="margin: 0 0 5px 0; font-size: 18px; font-weight: bold;">COTIZACIÓN</h2>
-        <div style="margin-bottom: 5px; font-size: 12px;">
-          <p style="margin: 2px 0;"><strong>Fecha:</strong> ${fecha.trim()} | <strong>Hora:</strong> ${hora.trim()} (hora de Quito)</p>
-          <p style="margin: 2px 0;"><strong>Ubicación:</strong> Quito, Villaflora, Rodrigo de Chávez. | <strong>WhatsApp:</strong> (099) 515-9078</p>
+      <div style="flex: 1; text-align: center; padding: 0 20px;">
+        <h1 style="margin: 0 0 10px 0; font-size: 24px; font-weight: bold; color: #0C1E3A;">COTIZACIÓN</h1>
+        <div style="font-size: 11px; color: #555;">
+          <p style="margin: 3px 0;"><strong>Fecha:</strong> ${fecha.trim()} | <strong>Hora:</strong> ${hora.trim()}</p>
+          <p style="margin: 3px 0;"><strong>Ubicación:</strong> Quito, Villaflora, Rodrigo de Chávez</p>
+          <p style="margin: 3px 0;"><strong>WhatsApp:</strong> (099) 515-9078</p>
         </div>
       </div>
       <div style="flex: 0 0 auto; width: 80px;"></div>
     </div>`;
 
-    const tableHeader = `
-    <table style="width:100%; border-collapse: collapse; font-size: 12px;">
-      <thead>
-        <tr style="background-color: #08274F; color: white;">
-          <th style="padding: 6px; border: 1px solid #198754;">Producto</th>
-          <th style="padding: 6px; border: 1px solid #198754;">Imagen</th>
-          <th style="padding: 6px; border: 1px solid #198754;">Cantidad</th>
-          <th style="padding: 6px; border: 1px solid #198754;">Precio unitario</th>
-          <th style="padding: 6px; border: 1px solid #198754;">Total</th>
-        </tr>
-      </thead>
-      <tbody>`;
-
-    let tableBody = '';
-    this.cotizacion.forEach(item => {
+    let tableRows = '';
+    this.cotizacion.forEach((item, index) => {
       const totalFormatted = new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' }).format(item.total);
       const precioFormatted = new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' }).format(item.precio || 0);
-      tableBody += `
-      <tr>
-        <td style="border: 1px solid #ddd; padding: 5px;">${item.descripcion}</td>
-        <td style="border: 1px solid #ddd; padding: 5px; text-align: center;">
-${item.fotoBase64
-        ? `<img src="${item.fotoBase64}" style="max-height: 60px;">`
-        : item.foto
-          ? `<img src="${item.foto}" style="max-height: 60px;">`
-          : '—'}
+      const bgColor = index % 2 === 0 ? '#f8f9fa' : '#ffffff';
 
+      tableRows += `
+      <tr style="background-color: ${bgColor};">
+        <td style="border: 1px solid #dee2e6; padding: 8px; font-size: 11px;">${item.descripcion}</td>
+        <td style="border: 1px solid #dee2e6; padding: 8px; text-align: center; font-size: 11px;">
+          ${item.fotoBase64 ? `<img src="${item.fotoBase64}" alt="Producto" style="max-height: 50px; max-width: 50px; object-fit: contain;">`
+            : item.foto ? `<img src="${item.foto}" alt="Producto" style="max-height: 50px; max-width: 50px; object-fit: contain;">`
+            : '—'}
         </td>
-        <td style="border: 1px solid #ddd; padding: 5px; text-align: center;">${item.cantidad}</td>
-        <td style="border: 1px solid #ddd; padding: 5px; text-align: center;">${precioFormatted}</td>
-        <td style="border: 1px solid #ddd; padding: 5px; text-align: center;">${totalFormatted}</td>
+        <td style="border: 1px solid #dee2e6; padding: 8px; text-align: center; font-size: 11px; font-weight: bold;">${item.cantidad}</td>
+        <td style="border: 1px solid #dee2e6; padding: 8px; text-align: right; font-size: 11px;">${precioFormatted}</td>
+        <td style="border: 1px solid #dee2e6; padding: 8px; text-align: right; font-size: 11px; font-weight: bold; color: #0C1E3A;">${totalFormatted}</td>
       </tr>`;
     });
 
-    const tableFooter = `
+    const table = `
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px;">
+      <thead>
+        <tr style="background: linear-gradient(135deg, #0C1E3A, #1a3a5c); color: white;">
+          <th style="padding: 10px; border: 1px solid #0C1E3A; text-align: left;">Producto</th>
+          <th style="padding: 10px; border: 1px solid #0C1E3A; width: 80px;">Imagen</th>
+          <th style="padding: 10px; border: 1px solid #0C1E3A; width: 80px;">Cantidad</th>
+          <th style="padding: 10px; border: 1px solid #0C1E3A; width: 100px; text-align: right;">Precio Unit.</th>
+          <th style="padding: 10px; border: 1px solid #0C1E3A; width: 100px; text-align: right;">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${tableRows}
       </tbody>
       <tfoot>
-        <tr>
-          <td colspan="4" style="text-align: right; font-weight: bold; background-color: #f8f9fa; border: 1px solid #ddd; padding: 5px;">Total general:</td>
-          <td style="font-weight: bold; background-color: #f8f9fa; border: 1px solid #ddd; padding: 5px;">
+        <tr style="background: linear-gradient(135deg, #10B981, #059669); color: white;">
+          <td colspan="4" style="text-align: right; font-weight: bold; padding: 12px; border: 1px solid #059669; font-size: 13px;">TOTAL GENERAL:</td>
+          <td style="font-weight: bold; padding: 12px; border: 1px solid #059669; text-align: right; font-size: 15px;">
             ${new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' }).format(this.totalCotizacion)}
           </td>
         </tr>
       </tfoot>
     </table>`;
 
-    const footerInfo = `
-    <div style="margin-top: 30px; padding: 10px 20px; border-top: 2px dashed #ccc; text-align: center;">
-      <h4 style="color: #198754; font-weight: bold; margin-bottom: 5px; font-size: 16px;">💵 Realiza tu pago a la siguiente cuenta</h4>
-      <p style="margin: 4px 0; font-size: 14px;"><strong style="color: #000;">ALTEC MECATRÓNICA</strong></p>
-      <p style="margin: 4px 0; font-size: 14px;">👤 <strong>JOSHUA ISAAC REYES HEREDIA</strong></p>
-      <p style="margin: 4px 0; font-size: 14px;">CI: 1718068578</p>
-      <p style="margin: 4px 0; font-size: 14px;">Cuenta Ahorros <strong>Banco PICHINCHA</strong></p>
-      <p style="margin: 4px 0; font-size: 18px; font-weight: bold; color: #0d6efd;">N° 2204742473</p>
+    const footer = `
+    <div style="margin-top: 25px; padding: 15px; border: 2px dashed #0C1E3A; border-radius: 8px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe);">
+      <h3 style="color: #0C1E3A; font-weight: bold; margin: 0 0 10px 0; font-size: 14px; text-align: center;">
+        💳 INFORMACIÓN DE PAGO
+      </h3>
+      <div style="text-align: center; font-size: 11px; color: #333;">
+        <p style="margin: 5px 0; font-weight: bold; font-size: 13px;">ALTEC MECATRÓNICA</p>
+        <p style="margin: 5px 0;"><strong>Titular:</strong> JOSHUA ISAAC REYES HEREDIA</p>
+        <p style="margin: 5px 0;"><strong>CI:</strong> 1718068578</p>
+        <p style="margin: 5px 0;"><strong>Banco:</strong> PICHINCHA - Cuenta de Ahorros</p>
+        <p style="margin: 5px 0; font-size: 16px; font-weight: bold; color: #0C1E3A;">N° 2204742473</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 15px; padding: 10px; text-align: center; font-size: 10px; color: #666; border-top: 1px solid #dee2e6;">
+      <p style="margin: 5px 0;">✨ Gracias por su preferencia ✨</p>
+      <p style="margin: 5px 0;">Cotización generada el ${fecha.trim()} a las ${hora.trim()}</p>
+      <p style="margin: 5px 0; font-weight: bold; color: #8B50FB;">Developed by SwiFt© 2025</p>
     </div>`;
 
-    container.innerHTML = header + tableHeader + tableBody + tableFooter + footerInfo;
+    container.innerHTML = header + table + footer;
 
     const opciones = {
-      margin: [0.5, 0.5, 0.5, 0.5],
-      filename: `cotizacion-${now.toISOString().slice(0, 10)}.pdf`,
+      margin: [10, 10, 10, 10],
+      filename: `ALTEC-Cotizacion-${now.toISOString().slice(0, 10)}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, logging: false, useCORS: true },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait', compress: true }
+      html2canvas: {
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        letterRendering: true
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: 'letter',
+        orientation: 'portrait'
+      },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
-    html2pdf().from(container).set(opciones).save();
+    try {
+      await html2pdf().from(container).set(opciones).save();
+      this.downloadMessage = '¡PDF descargado exitosamente!';
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      Notiflix.Notify.success('PDF descargado correctamente');
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      Notiflix.Notify.failure('Error al generar el PDF');
+    } finally {
+      this.isDownloading = false;
+    }
   }
 
   incluirEnvio() {
     const envioExistente = this.cotizacion.find(item => item.descripcion === 'Envío');
     if (envioExistente) {
-      const nuevoValor = prompt('El envío ya está incluido. Ingrese el nuevo valor:', envioExistente.precio.toString());
-      if (nuevoValor !== null) {
-        const valorNumerico = parseFloat(nuevoValor);
-        if (!isNaN(valorNumerico)) {
-          envioExistente.precio = valorNumerico;
-          envioExistente.total = valorNumerico;
-          this.updateTotal();
-        } else {
-          alert('Por favor ingrese un valor numérico válido');
-        }
-      }
+      this.shippingCost = envioExistente.precio;
     } else {
-      const valorEnvio = prompt('Ingrese el costo de envío:', '0');
-      if (valorEnvio !== null) {
-        const valorNumerico = parseFloat(valorEnvio);
-        if (!isNaN(valorNumerico)) {
-          this.cotizacion.push({ descripcion: 'Envío', cantidad: '', precio: '', total: valorNumerico });
-          this.updateTotal();
-        } else {
-          alert('Por favor ingrese un valor numérico válido');
-        }
+      this.shippingCost = 0;
+    }
+
+    const modalElement = document.getElementById('shippingModal');
+    if (modalElement) {
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+    }
+  }
+
+  confirmarEnvio() {
+    const envioExistente = this.cotizacion.find(item => item.descripcion === 'Envío');
+
+    if (this.shippingCost > 0) {
+      if (envioExistente) {
+        envioExistente.precio = this.shippingCost;
+        envioExistente.total = this.shippingCost;
+      } else {
+        this.cotizacion.push({
+          descripcion: 'Envío',
+          cantidad: 1,
+          precio: this.shippingCost,
+          total: this.shippingCost
+        });
       }
+      this.updateTotal();
+      Notiflix.Notify.success(`Envío de ${this.shippingCost.toFixed(2)} agregado correctamente`);
+    } else if (envioExistente) {
+      // Si el costo es 0, eliminar el envío
+      const index = this.cotizacion.indexOf(envioExistente);
+      this.cotizacion.splice(index, 1);
+      Notiflix.Notify.info('Envío eliminado de la cotización');
+    }
+
+    const modalElement = document.getElementById('shippingModal');
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      modal?.hide();
     }
   }
 
@@ -511,48 +602,110 @@ ${item.fotoBase64
     this.cotizacion = [...this.cotizacion];
   }
   async descargarExcelConImagenes() {
+    this.isDownloading = true;
+    this.downloadMessage = 'Generando Excel...';
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Cotización');
+    const worksheet = workbook.addWorksheet('Cotización ALTEC');
+
+    // Estilos del header
+    worksheet.mergeCells('A1:E1');
+    const titleCell = worksheet.getCell('A1');
+    titleCell.value = 'COTIZACIÓN - ALTEC MECATRÓNICA';
+    titleCell.font = { size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+    titleCell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF0C1E3A' }
+    };
+    titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+    worksheet.getRow(1).height = 30;
 
     // Cabeceras
-    worksheet.addRow(['Producto', 'Imagen', 'Cantidad']);
+    const headerRow = worksheet.addRow(['Producto', 'Imagen', 'Cantidad', 'Precio Unit.', 'Total']);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF1a3a5c' }
+    };
+    headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+    headerRow.height = 25;
 
     for (const item of this.cotizacion) {
-      const row = worksheet.addRow([item.descripcion, '', item.cantidad]);
+      const row = worksheet.addRow([
+        item.descripcion,
+        '',
+        item.cantidad,
+        item.precio || 0,
+        item.total
+      ]);
+
+      row.alignment = { vertical: 'middle', horizontal: 'left' };
+      row.height = 60;
 
       if (item.foto) {
         try {
-          // Cargar imagen desde URL
           const response = await fetch(item.foto);
           const blob = await response.blob();
           const buffer = await blob.arrayBuffer();
 
           const imageId = workbook.addImage({
             buffer: buffer,
-            extension: 'jpeg' // ajusta según tus imágenes
+            extension: 'jpeg'
           });
 
           worksheet.addImage(imageId, {
-            tl: { col: 1, row: row.number - 1 }, // columna B
-            ext: { width: 80, height: 60 }       // tamaño
+            tl: { col: 1, row: row.number - 1 },
+            ext: { width: 70, height: 50 }
           });
-
-          worksheet.getRow(row.number).height = 50; // aumentar alto fila
         } catch (err) {
           console.warn('No se pudo cargar la imagen:', err);
         }
       }
     }
 
+    // Fila de total
+    const totalRow = worksheet.addRow(['', '', '', 'TOTAL:', this.totalCotizacion]);
+    totalRow.font = { bold: true, size: 12 };
+    totalRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF10B981' }
+    };
+    totalRow.getCell(5).font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } };
+
     // Ajustar ancho de columnas
     worksheet.columns = [
-      { width: 40 },
-      { width: 20 },
+      { width: 50 },
+      { width: 15 },
+      { width: 12 },
+      { width: 15 },
       { width: 15 }
     ];
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    saveAs(new Blob([buffer]), `cotizacion-${new Date().toISOString().slice(0,10)}.xlsx`);
+    // Formatear como moneda
+    worksheet.eachRow((row: any, rowNumber: number) => {
+      if (rowNumber > 2) {
+        row.getCell(4).numFmt = '$#,##0.00';
+        row.getCell(5).numFmt = '$#,##0.00';
+      }
+    });
+
+    try {
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), `ALTEC-Cotizacion-${new Date().toISOString().slice(0,10)}.xlsx`);
+      this.downloadMessage = '¡Excel descargado exitosamente!';
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      Notiflix.Notify.success('Excel descargado correctamente');
+    } catch (error) {
+      console.error('Error al generar Excel:', error);
+      Notiflix.Notify.failure('Error al generar el Excel');
+    } finally {
+      this.isDownloading = false;
+    }
   }
 
 
