@@ -349,4 +349,19 @@ export class EditProductComponent implements OnInit {
     this.applyFilter();
   }
 
+  // Limpiar todos los filtros
+  clearAllFilters(): void {
+    this.selectedCategory = '';
+    this.onlyImport = false;
+    this.onlyLowStock = false;
+    this.onlyNoImage = false;
+    this.formGroup.patchValue({
+      importCheck: false,
+      lowStockCheck: false,
+      noImageCheck: false
+    });
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+
 }

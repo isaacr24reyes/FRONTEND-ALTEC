@@ -1,205 +1,450 @@
-<form class="login-form">
-  <div class="text-center">
-    <h1>👥 Administrador de Usuarios</h1>
+<div class="modern-user-admin">
+
+  <!-- 🎨 HERO SECTION -->
+  <div class="admin-hero">
+    <div class="container">
+      <div class="animate-fade-in">
+        <h1 class="hero-title">
+          <i class="bi bi-people-fill me-3"></i>
+          <span class="text-gradient">Administración </span> de Usuarios
+        </h1>
+        <p class="hero-subtitle">Gestiona clientes, balance de puntos y crea nuevos usuarios</p>
+      </div>
+    </div>
   </div>
 
-  <div class="container mt-4">
-    <!-- 🔹 Buscador -->
-    <div class="row justify-content-center mb-3">
-      <div class="col-12 col-md-6">
-        <input
-          type="search"
-          class="form-control"
-          placeholder="Buscar usuario por nombre..."
-          aria-label="Buscar"
-          name="searchTerm"
-          [(ngModel)]="searchTerm"
-          (input)="applyFilter()"
-          autocomplete="off">
-      </div>
-    </div>
+  <!-- 🔍 BÚSQUEDA Y CREAR USUARIO -->
+  <div class="search-section">
+    <div class="container">
+      <div class="search-actions-wrapper">
 
-    <!-- 🔹 Botón Crear Usuario -->
-    <div class="row justify-content-end mb-3">
-      <div class="col-12 col-md-4 text-end">
-        <button type="button"
-                class="btn btn-success"
-                data-bs-toggle="modal"
-                data-bs-target="#crearUsuarioModal">
-          <i class="bi bi-person-plus"></i> Crear Usuario
+        <!-- Búsqueda -->
+        <div class="search-wrapper animate-fade-in-delay">
+          <i class="bi bi-search search-icon"></i>
+          <input
+            type="search"
+            class="search-input"
+            placeholder="Buscar usuario..."
+            [(ngModel)]="searchTerm"
+            (input)="applyFilter()"
+            autocomplete="off">
+          <button
+            *ngIf="searchTerm"
+            type="button"
+            class="search-clear"
+            (click)="searchTerm = ''; applyFilter()">
+            <i class="bi bi-x-circle-fill"></i>
+          </button>
+        </div>
+
+        <!-- Botón Crear Usuario -->
+        <button
+          type="button"
+          class="btn-create-user animate-fade-in-delay"
+          data-bs-toggle="modal"
+          data-bs-target="#crearUsuarioModal">
+          <i class="bi bi-person-plus-fill me-2"></i>
+          <span>Crear Usuario</span>
         </button>
+
       </div>
     </div>
+  </div>
 
-    <!-- 🔹 Tabla Usuarios -->
-    <!-- 🔹 Tabla Usuarios -->
-    <div class="row">
-      <div class="col-12">
-        <div class="table-responsive shadow">
-          <table class="table table-dark table-hover text-center align-middle user-table">
-            <thead>
+  <!-- 📊 ESTADÍSTICAS -->
+  <div class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+
+        <!-- Total -->
+        <div class="stats-card stats-card-main">
+          <div class="stats-icon stats-icon-main">
+            <i class="bi bi-people-fill"></i>
+          </div>
+          <div class="stats-info">
+            <span class="stats-label">Total Usuarios</span>
+            <span class="stats-value">{{ filteredUsers.length }}</span>
+          </div>
+        </div>
+
+        <!-- Clientes -->
+        <div class="stats-card stats-card-secondary"
+             [class.stats-card-active]="activeRoleFilter === 'Cliente'"
+             (click)="filterByRole('Cliente')"
+             role="button"
+             title="Click para filtrar clientes">
+          <div class="stats-icon stats-icon-client">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          <div class="stats-info">
+            <span class="stats-label">Clientes</span>
+            <span class="stats-value-small">{{ clientesCount }}</span>
+          </div>
+        </div>
+
+        <!-- Distribuidores -->
+        <div class="stats-card stats-card-secondary"
+             [class.stats-card-active]="activeRoleFilter === 'Distribuidor'"
+             (click)="filterByRole('Distribuidor')"
+             role="button"
+             title="Click para filtrar distribuidores">
+          <div class="stats-icon stats-icon-distributor">
+            <i class="bi bi-star-fill"></i>
+          </div>
+          <div class="stats-info">
+            <span class="stats-label">Distribuidores</span>
+            <span class="stats-value-small">{{ distribuidoresCount }}</span>
+          </div>
+        </div>
+
+        <!-- Admins -->
+        <div class="stats-card stats-card-secondary"
+             [class.stats-card-active]="activeRoleFilter === 'Administrador'"
+             (click)="filterByRole('Administrador')"
+             role="button"
+             title="Click para filtrar administradores">
+          <div class="stats-icon stats-icon-admin">
+            <i class="bi bi-shield-fill-check"></i>
+          </div>
+          <div class="stats-info">
+            <span class="stats-label">Admins</span>
+            <span class="stats-value-small">{{ adminsCount }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 📊 TABLA DE USUARIOS -->
+  <div class="users-section">
+    <div class="container">
+
+
+      <!-- Tabla -->
+      <div class="table-wrapper">
+        <table class="modern-table-users">
+          <thead>
             <tr>
-              <th style="background-color: #08274F; color: white; font-weight: bold;">Nombre</th>
-              <th style="background-color: #08274F; color: white; font-weight: bold;">Username</th>
-              <th style="background-color: #08274F; color: white; font-weight: bold;">Celular</th>
-              <th style="background-color: #08274F; color: white; font-weight: bold;">Rol</th>
-              <th style="background-color: #08274F; color: white; font-weight: bold;">Balance</th>
-              <th style="background-color: #08274F; color: white; font-weight: bold;">Acciones</th>
+              <th>
+                <i class="bi bi-person-badge me-2"></i>
+                Nombre
+              </th>
+              <th>
+                <i class="bi bi-at me-2"></i>
+                Username
+              </th>
+              <th>
+                <i class="bi bi-phone me-2"></i>
+                Celular
+              </th>
+              <th>
+                <i class="bi bi-shield-check me-2"></i>
+                Rol
+              </th>
+              <th>
+                <i class="bi bi-currency-dollar me-2"></i>
+                Balance
+              </th>
+              <th>
+                <i class="bi bi-gear-fill me-2"></i>
+                Acciones
+              </th>
             </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let user of filteredUsers | slice:(currentPage-1)*pageSize:(currentPage*pageSize)">
-              <td data-label="Nombre">{{ user.name }}</td>
-              <td data-label="Username">{{ user.username }}</td>
-              <td data-label="Celular">{{ user.telefono }}</td>
-              <td data-label="Rol">{{ user.role }}</td>
-              <td data-label="Balance">${{ user.altec_Points ?? 0 }}</td>
-              <td data-label="Acciones">
-                <button class="btn btn-outline-success btn-sm"
-                        (click)="abrirConsumirModal(user)"
-                        aria-label="Acreditar / Consumir">
-                  <i class="bi bi-plus-lg"></i>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let user of filteredUsers | slice:(currentPage-1)*pageSize:(currentPage*pageSize)"
+              class="user-row">
+              <td class="user-name-cell">
+                <div class="user-avatar">
+                  {{ user.name?.charAt(0)?.toUpperCase() || 'U' }}
+                </div>
+                <span>{{ user.name }}</span>
+              </td>
+              <td class="username-cell">
+                <span class="username-badge">{{ user.username }}</span>
+              </td>
+              <td class="phone-cell">
+                <i class="bi bi-phone me-2"></i>
+                {{ user.telefono }}
+              </td>
+              <td class="role-cell">
+                <span class="role-badge"
+                      [class.role-distribuidor]="user.role === 'Distribuidor'"
+                      [class.role-admin]="user.role === 'Administrador'">
+                  <i class="bi"
+                     [class.bi-star-fill]="user.role === 'Distribuidor'"
+                     [class.bi-shield-fill-check]="user.role === 'Administrador'"
+                     [class.bi-person-fill]="user.role === 'Cliente'"></i>
+                  {{ user.role }}
+                </span>
+              </td>
+              <td class="balance-cell">
+                <span class="balance-amount">
+                  ${{ (user.altec_Points ?? 0).toFixed(2) }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button
+                  class="btn-action-consume"
+                  (click)="abrirConsumirModal(user)"
+                  title="Acreditar / Consumir puntos">
+                  <i class="bi bi-plus-circle-fill"></i>
                 </button>
               </td>
             </tr>
             <tr *ngIf="filteredUsers.length === 0">
-              <td colspan="6" class="text-muted">No hay usuarios registrados.</td>
+              <td colspan="6" class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <p>No hay usuarios registrados</p>
+              </td>
             </tr>
-            </tbody>
-          </table>
-        </div>
+          </tbody>
+        </table>
       </div>
-    </div>
 
+      <!-- Paginación -->
+      <div class="pagination-wrapper">
+        <button
+          type="button"
+          class="btn-pagination"
+          [disabled]="currentPage === 1"
+          (click)="currentPage = currentPage - 1">
+          <i class="bi bi-chevron-left me-2"></i>
+          Anterior
+        </button>
 
-    <hr class="styled-line">
-
-    <!-- 🔹 Paginación -->
-    <div class="container mt-4">
-      <div class="row justify-content-between align-items-center">
-        <div class="col-12 col-md-auto mb-2 mb-md-0">
-          <h5>Total de usuarios: {{ filteredUsers.length }}</h5>
+        <div class="pagination-info">
+          Página <strong>{{ currentPage }}</strong> de <strong>{{ totalPages }}</strong>
         </div>
-        <div class="col-12 col-md-auto">
-          <button class="btn btn-primary me-2"
-                  (click)="currentPage = currentPage - 1"
-                  [disabled]="currentPage === 1">
-            Anterior
-          </button>
-          <button class="btn btn-primary"
-                  (click)="currentPage = currentPage + 1"
-                  [disabled]="currentPage >= totalPages">
-            Siguiente
-          </button>
-        </div>
+
+        <button
+          type="button"
+          class="btn-pagination"
+          [disabled]="currentPage >= totalPages"
+          (click)="currentPage = currentPage + 1">
+          Siguiente
+          <i class="bi bi-chevron-right ms-2"></i>
+        </button>
       </div>
-    </div>
 
-    <div class="text-center mt-4">
-      <span class="text-white small-text">
-        Developed by <strong style="color: #8B50FB;">SwiFt©</strong> (2025).
-      </span>
     </div>
   </div>
-</form>
-<!-- Modal Crear Usuario -->
-<div class="modal fade" id="crearUsuarioModal" tabindex="-1" aria-labelledby="crearUsuarioModalLabel" aria-hidden="true">
+
+  <!-- 🎨 FOOTER -->
+  <div class="admin-footer">
+    <div class="container">
+      <p class="footer-text">
+        Developed by <span class="brand-purple">SwiFt©</span> 2025
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<!-- 🔲 MODAL CREAR USUARIO -->
+<div class="modal fade" id="crearUsuarioModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-dark text-white">
-      <div class="modal-header border-0">
-        <h5 class="modal-title w-100" id="crearUsuarioModalLabel">➕ Crear Nuevo Usuario</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+    <div class="modal-content modern-modal">
+      <div class="modal-header modern-modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-person-plus-fill me-2"></i>
+          Crear Nuevo Usuario
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-        <form autocomplete="off">
+
+      <div class="modal-body modern-modal-body">
+        <form class="create-user-form" autocomplete="off">
+
           <!-- Nombre -->
-          <div class="mb-3">
-            <label for="name" class="form-label">Nombre</label>
-            <input id="name" type="text" class="form-control" placeholder="Ej: Juan Pérez"
-                   [(ngModel)]="newUser.name" name="name" autocomplete="off">
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-person-badge me-2"></i>
+              Nombre Completo
+            </label>
+            <input
+              type="text"
+              class="form-input-modern"
+              placeholder="Ej: Juan Pérez"
+              [(ngModel)]="newUser.name"
+              name="name"
+              autocomplete="off">
           </div>
 
           <!-- Celular -->
-          <div class="mb-3">
-            <label for="phone" class="form-label">Celular</label>
-            <input id="phone" type="text" class="form-control" placeholder="Ej: 0987654321"
-                   [(ngModel)]="newUser.telefono" name="telefono" autocomplete="off">
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-phone me-2"></i>
+              Número de Celular
+            </label>
+            <input
+              type="text"
+              class="form-input-modern"
+              placeholder="Ej: 0987654321"
+              [(ngModel)]="newUser.telefono"
+              name="telefono"
+              autocomplete="off">
           </div>
 
           <!-- Rol -->
-          <div class="mb-3">
-            <label for="role" class="form-label">Rol</label>
-            <select id="role" class="form-select" [(ngModel)]="newUser.role" name="role">
-              <option value="Cliente" selected>Cliente</option>
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-shield-check me-2"></i>
+              Rol del Usuario
+            </label>
+            <select class="form-select-modern" [(ngModel)]="newUser.role" name="role">
+              <option value="Cliente">Cliente</option>
               <option value="Distribuidor">Distribuidor</option>
             </select>
           </div>
 
-          <!-- Botón Guardar -->
-          <div class="d-grid gap-2">
-            <button type="button"
-                    class="btn btn-primary"
-                    (click)="createUser()"
-                    data-bs-dismiss="modal">
-              <i class="bi bi-check-circle"></i> Guardar
-            </button>
-          </div>
         </form>
+      </div>
+
+      <div class="modal-footer modern-modal-footer">
+        <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-2"></i>
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn-modal-confirm"
+          (click)="createUser()"
+          data-bs-dismiss="modal">
+          <i class="bi bi-check-circle-fill me-2"></i>
+          Crear Usuario
+        </button>
       </div>
     </div>
   </div>
 </div>
-<!-- Modal Consumir Puntos -->
-<!-- Modal Consumir Puntos -->
-<div class="modal fade" id="consumirModal" tabindex="-1" aria-labelledby="consumirModalLabel" aria-hidden="true">
+
+<!-- 🔲 MODAL CONSUMIR PUNTOS -->
+<div class="modal fade" id="consumirModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-dark text-white">
-      <div class="modal-header">
-        <h5 class="modal-title" id="consumirModalLabel">💳 Consumir Puntos</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+    <div class="modal-content modern-modal">
+      <div class="modal-header modern-modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-wallet2 me-2"></i>
+          Consumir Puntos
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-        <form [formGroup]="consumirForm">
+
+      <div class="modal-body modern-modal-body">
+        <form [formGroup]="consumirForm" class="consume-form">
+
+          <!-- Info del usuario -->
+          <div class="user-info-card" *ngIf="selectedUser">
+            <div class="user-info-header">
+              <div class="user-avatar-large">
+                {{ selectedUser.name?.charAt(0)?.toUpperCase() || 'U' }}
+              </div>
+              <div class="user-info-details">
+                <h6 class="user-info-name">{{ selectedUser.name }}</h6>
+                <p class="user-info-username">{{ '&#64;' + selectedUser.username }}</p>
+              </div>
+            </div>
+            <div class="user-balance-info">
+              <span class="balance-label">Balance actual:</span>
+              <span class="balance-value">${{ (selectedUser.altec_Points ?? 0).toFixed(2) }}</span>
+            </div>
+          </div>
+
           <!-- Venta -->
-          <div class="mb-3">
-            <label for="venta" class="form-label">Venta</label>
-            <input id="venta" type="number" min="0" step="0.01" class="form-control"
-                   formControlName="venta" (input)="calcularDiferencia()">
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-cart-check me-2"></i>
+              Total de la Venta
+            </label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                class="form-input-modern with-prefix"
+                formControlName="venta"
+                (input)="calcularDiferencia()"
+                placeholder="0.00">
+            </div>
           </div>
 
           <!-- Diferencia -->
-          <div class="mb-3">
-            <label for="diferencia" class="form-label">Diferencia</label>
-            <input id="diferencia" type="number" class="form-control bg-secondary text-white"
-                   formControlName="diferencia" readonly>
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-calculator me-2"></i>
+              Diferencia a Pagar
+            </label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input
+                type="number"
+                class="form-input-modern with-prefix disabled-input"
+                formControlName="diferencia"
+                readonly>
+            </div>
           </div>
 
-          <!-- 👇 Efectivo recibido + indicador de vuelto/falta -->
-          <div class="mb-3">
-            <label for="efectivo" class="form-label">Efectivo recibido</label>
-            <input id="efectivo" type="number" min="0" step="0.01" class="form-control"
-                   formControlName="efectivo" (input)="onEfectivoInput()">
+          <!-- Efectivo recibido -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-cash me-2"></i>
+              Efectivo Recibido
+            </label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                class="form-input-modern with-prefix"
+                formControlName="efectivo"
+                (input)="onEfectivoInput()"
+                placeholder="0.00">
+            </div>
           </div>
 
-          <div class="mt-2">
+          <!-- Calculadora de vuelto/falta -->
+          <div class="change-calculator">
             <ng-container *ngIf="(consumirForm.get('efectivo')?.value || 0) >= (consumirForm.get('diferencia')?.value || 0); else faltaTpl">
-              <div class="alert alert-success py-2 mb-0">
-                Vuelto: <strong>${{ ((consumirForm.get('efectivo')?.value || 0) - (consumirForm.get('diferencia')?.value || 0)) | number:'1.2-2' }}</strong>
+              <div class="change-card change-success">
+                <i class="bi bi-check-circle-fill"></i>
+                <div class="change-info">
+                  <span class="change-label">Vuelto:</span>
+                  <span class="change-amount">
+                    ${{ ((consumirForm.get('efectivo')?.value || 0) - (consumirForm.get('diferencia')?.value || 0)) | number:'1.2-2' }}
+                  </span>
+                </div>
               </div>
             </ng-container>
             <ng-template #faltaTpl>
-              <div class="alert alert-warning py-2 mb-0">
-                Falta: <strong>${{ ((consumirForm.get('diferencia')?.value || 0) - (consumirForm.get('efectivo')?.value || 0)) | number:'1.2-2' }}</strong>
+              <div class="change-card change-warning">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <div class="change-info">
+                  <span class="change-label">Falta:</span>
+                  <span class="change-amount">
+                    ${{ ((consumirForm.get('diferencia')?.value || 0) - (consumirForm.get('efectivo')?.value || 0)) | number:'1.2-2' }}
+                  </span>
+                </div>
               </div>
             </ng-template>
           </div>
-          <!-- 👆 fin calculadora simple -->
+
         </form>
       </div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" (click)="confirmarCompra()">Comprar</button>
+      <div class="modal-footer modern-modal-footer">
+        <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-2"></i>
+          Cancelar
+        </button>
+        <button type="button" class="btn-modal-confirm" (click)="confirmarCompra()">
+          <i class="bi bi-check-circle-fill me-2"></i>
+          Confirmar Compra
+        </button>
       </div>
     </div>
   </div>

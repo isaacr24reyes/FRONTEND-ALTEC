@@ -18,6 +18,7 @@ export class UserAdminComponent implements OnInit {
   users: any[] = [];
   filteredUsers: any[] = [];
   searchTerm: string = '';
+  activeRoleFilter: string = ''; // Filtro activo por rol
   consumirForm!: FormGroup;
   selectedUser: any;
   pageSize = 6;
@@ -56,12 +57,34 @@ export class UserAdminComponent implements OnInit {
 
   applyFilter(): void {
     const term = this.searchTerm.trim().toLowerCase();
-    this.filteredUsers = !term
-      ? [...this.users]
-      : this.users.filter(user =>
+    let result = [...this.users];
+
+    // Filtrar por término de búsqueda
+    if (term) {
+      result = result.filter(user =>
         (user.name?.toLowerCase() ?? '').includes(term)
       );
+    }
+
+    // Filtrar por rol si hay un filtro activo
+    if (this.activeRoleFilter) {
+      result = result.filter(user => user.role === this.activeRoleFilter);
+    }
+
+    this.filteredUsers = result;
     this.currentPage = 1;
+  }
+
+  // Filtrar por rol al hacer click en las cards
+  filterByRole(role: string): void {
+    if (this.activeRoleFilter === role) {
+      // Si ya está activo, desactivar filtro
+      this.activeRoleFilter = '';
+    } else {
+      // Activar filtro
+      this.activeRoleFilter = role;
+    }
+    this.applyFilter();
   }
 
   // 🔹 Crear usuario
@@ -170,5 +193,22 @@ export class UserAdminComponent implements OnInit {
   }
   get totalPages(): number {
     return Math.ceil(this.filteredUsers.length / this.pageSize);
+  }
+
+  // Métodos para contar usuarios por rol
+  countByRole(role: string): number {
+    return this.filteredUsers.filter(user => user.role === role).length;
+  }
+
+  get clientesCount(): number {
+    return this.countByRole('Cliente');
+  }
+
+  get distribuidoresCount(): number {
+    return this.countByRole('Distribuidor');
+  }
+
+  get adminsCount(): number {
+    return this.countByRole('Administrador');
   }
 }
