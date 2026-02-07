@@ -1,191 +1,423 @@
-<div class="login-form">
 
-  <div class="text-center mb-4">
-    <h1>💲Módulo de ventas</h1>
-  </div>
+<!-- 🎨 POS PREMIUM CONTAINER -->
+<div class="pos-container">
 
-  <div class="container">
-    <div class="row">
-
-
-      <div class="col-12 col-lg-7 mb-4">
-        <div class="card bg-dark text-white p-3 mb-3">
-          <h5>👤 Datos del Cliente</h5>
-
-          <div class="mb-3">
-            <label class="form-label">Nombre</label>
-            <input
-              type="text"
-              class="form-control"
-              placeholder="Nombre del cliente"
-              [(ngModel)]="cliente.nombre"
-            />
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Celular</label>
-            <input
-              type="tel"
-              class="form-control"
-              placeholder="Ej: 0999999999"
-              [(ngModel)]="cliente.celular"
-            />
-          </div>
-
-          <!-- Rol -->
-          <div>
-            <label class="form-label">Tipo de cliente</label>
-            <select
-              class="form-select"
-              [(ngModel)]="cliente.rol">
-              <option value="cliente">Cliente</option>
-              <option value="distribuidor">Distribuidor</option>
-            </select>
-          </div>
+  <!-- 📱 HEADER / TÍTULO -->
+  <header class="pos-header">
+    <div class="container-fluid">
+      <div class="header-content">
+        <div class="header-left">
+          <h1 class="pos-title">
+            <i class="bi bi-bag-check"></i> MÓDULO DE VENTAS
+            <span class="premium-crown">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.5 16h19v2.5h-19V16zm0 3h19v1.5h-19V19z" fill="url(#goldGradient)"/>
+                <path d="M12 2l2.5 5 5.5.5-4 4 1 5.5-5-3-5 3 1-5.5-4-4 5.5-.5L12 2z" fill="url(#goldGradient)"/>
+                <circle cx="12" cy="9" r="1.2" fill="#FFD700"/>
+                <circle cx="7" cy="11" r="1" fill="#FFD700"/>
+                <circle cx="17" cy="11" r="1" fill="#FFD700"/>
+                <defs>
+                  <linearGradient id="goldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </span>
+          </h1>
+          <p class="header-subtitle">Sistema de Punto de Venta Premium</p>
+          <p class="powered-by">Powered by <span class="swift-brand">Swift</span></p>
         </div>
+        <div class="header-right d-flex align-items-center gap-2">
+          <span class="cart-counter d-lg-none" *ngIf="cartItems.length > 0">
+            <i class="bi bi-cart-fill"></i> {{ cartItems.length }}
+          </span>
+          <button
+            class="btn btn-premium btn-sm d-lg-none"
+            (click)="toggleCart()"
+            [class.active]="!cartCollapsed">
+            <i class="bi bi-cart4"></i> Ver Carrito
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
 
+  <!-- 🎯 MAIN CONTENT -->
+  <main class="pos-main">
+    <div class="container-fluid">
+      <div class="row g-3">
 
-        <div class="card bg-dark text-white p-3" [formGroup]="formGroup">
-          <h5>🔍 Buscar producto</h5>
+        <!-- 👈 COLUMNA IZQUIERDA: BÚSQUEDA Y PRODUCTOS -->
+        <div class="col-12 col-lg-8" [class.collapsed]="cartCollapsed">
 
-          <input
-            type="search"
-            class="form-control mt-2 mb-3"
-            placeholder="Código, nombre o escáner..."
-            formControlName="searchControl"
-          />
-          <div class="table-responsive" *ngIf="products.length > 0">
-            <table class="table table-dark table-hover align-middle mb-0">
-              <tbody>
-              <tr
-                *ngFor="let product of products"
-                style="cursor:pointer"
-                (click)="addProductToCart(product)"
-              >
-                <td style="width:70px">
+          <!-- 📝🔍 DOS COLUMNAS: CLIENTE | BÚSQUEDA -->
+          <div class="row g-3 mb-3">
+
+            <!-- COLUMNA 1: DATOS DEL CLIENTE -->
+            <div class="col-12 col-md-6">
+              <div class="section-card client-section">
+                <div class="section-header">
+                  <h5>
+                    <i class="bi bi-person-circle"></i> Datos del Cliente
+                  </h5>
+                </div>
+
+                <div [formGroup]="formGroup">
+                  <!-- ROW 1: Nombre y Teléfono en 2 columnas -->
+                  <div class="row g-2 mb-3">
+                    <div class="col-6">
+                      <label class="form-label small fw-600">
+                        <i class="bi bi-person"></i> Nombre
+                      </label>
+                      <input
+                        type="text"
+                        class="form-control form-control-sm"
+                        placeholder="Ej: Juan Pérez"
+                        formControlName="clientName" />
+                    </div>
+
+                    <div class="col-6">
+                      <label class="form-label small fw-600">
+                        <i class="bi bi-telephone"></i> Teléfono
+                      </label>
+                      <input
+                        type="tel"
+                        class="form-control form-control-sm"
+                        placeholder="Ej: 0987654321"
+                        formControlName="clientPhone" />
+                    </div>
+                  </div>
+
+                  <!-- ROW 2: Cédula/RUC sola -->
+                  <div class="mb-0">
+                    <label class="form-label small fw-600">
+                      <i class="bi bi-credit-card"></i> Cédula / RUC
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      placeholder="Ej: 1234567890"
+                      formControlName="clientDocument"
+                      maxlength="13" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- COLUMNA 2: BÚSQUEDA DE PRODUCTOS -->
+            <div class="col-12 col-md-6">
+              <div class="section-card search-section">
+                <div class="section-header">
+                  <h5>
+                    <i class="bi bi-search"></i> Buscar Productos
+                  </h5>
+                </div>
+
+                <div class="search-wrapper" [formGroup]="formGroup">
+                  <label class="form-label small fw-600 mb-2">
+                    Busca por código o nombre
+                  </label>
+                  <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-transparent border-end-0">
+                      <i class="bi bi-search"></i>
+                    </span>
+                    <input
+                      type="text"
+                      class="form-control form-control-lg border-start-0"
+                      placeholder="Ej: laptop, teclado..."
+                      formControlName="searchControl"
+                      (focus)="onSearchFocus()"
+                      autocomplete="off" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 📦 GRILLA DE PRODUCTOS -->
+          <div class="section-card products-section">
+            <div class="section-header">
+              <h5>
+                <i class="bi bi-boxes"></i> Productos Disponibles
+              </h5>
+              <span class="badge bg-primary">{{ products.length }} resultados</span>
+            </div>
+
+            <!-- SKELETON LOADING (si necesario) -->
+            <div *ngIf="products.length === 0" class="alert alert-info text-center p-5">
+              <i class="bi bi-inbox"></i>
+              <p class="mt-3 mb-0">No se encontraron productos. Prueba con otra búsqueda.</p>
+            </div>
+
+            <!-- GRID DE PRODUCTOS -->
+            <div class="products-grid">
+              <div
+                *ngFor="let product of products; let i = index"
+                class="product-card">
+
+                <!-- IMAGE REAL O PLACEHOLDER -->
+                <div class="product-image">
                   <img
                     *ngIf="product.foto && product.foto !== 'NOT-IMAGE'"
                     [src]="product.foto"
-                    class="img-thumbnail"
-                    style="width:60px;height:45px;object-fit:cover"
-                  />
-                  <span *ngIf="!product.foto || product.foto === 'NOT-IMAGE'">
-              📦
-            </span>
-                </td>
+                    [alt]="product.descripcion"
+                    class="product-img"
+                    loading="lazy" />
+                  <div class="placeholder-image" *ngIf="!product.foto || product.foto === 'NOT-IMAGE'">
+                    <i class="bi bi-box-seam"></i>
+                  </div>
+                  <div class="product-badge" *ngIf="product.stock > 0">
+                    <small class="text-uppercase fw-600">Disponible</small>
+                  </div>
+                  <div class="product-badge badge-out" *ngIf="product.stock === 0">
+                    <small class="text-uppercase fw-600">Sin Stock</small>
+                  </div>
+                </div>
 
-                <td class="text-start">
-                  <div class="fw-bold">{{ product.descripcion }}</div>
+                <!-- PRODUCT INFO -->
+                <div class="product-info">
+                  <h6 class="product-name">{{ product.descripcion }}</h6>
 
-                  <div class="d-flex gap-3">
-                    <small class="text-white-50">Código: {{ product.codigo }}</small>
-                    <small
-                      [ngClass]="{
-                        'text-success': product.stock > 5,
-                        'text-warning': product.stock > 0 && product.stock <= 5,
-                        'text-danger': product.stock === 0
-                        }">
-                      Stock: {{ product.stock }}
+                  <div class="product-meta">
+                    <small class="text-muted" *ngIf="product.codigo">
+                      <i class="bi bi-upc-scan"></i> {{ product.codigo }}
+                    </small>
+                    <small class="stock-info"
+                      [class.text-success]="product.stock > 10"
+                      [class.text-warning]="product.stock > 0 && product.stock <= 10"
+                      [class.text-danger]="product.stock === 0">
+                      <i class="bi bi-box"></i> Stock: {{ product.stock || 0 }}
                     </small>
                   </div>
-                </td>
 
+                  <div class="product-footer">
+                    <div class="price-section">
+                      <span class="price-label">Precio</span>
+                      <span class="price-value">${{ product.pvp | number: '1.2-2' }}</span>
+                    </div>
 
-                <td class="fw-bold text-success text-end">
-                  {{ product.pvp | currency }}
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div *ngIf="products.length === 0" class="text-muted text-center mt-2">
-            No hay productos para mostrar
-          </div>
-        </div>
-
-
-      </div>
-
-
-      <div class="col-12 col-lg-5">
-
-        <div class="card bg-dark text-white p-3">
-
-          <h5 class="mb-3">🧾 Detalle de Venta</h5>
-
-          <div class="table-responsive">
-            <table class="table table-dark table-bordered text-center align-middle">
-              <thead>
-              <tr>
-                <th>Producto</th>
-                <th style="width: 110px;">Cantidad</th>
-                <th>PVP</th>
-                <th>Total</th>
-                <th></th>
-              </tr>
-              </thead>
-
-              <tbody>
-              <tr *ngFor="let item of cartItems; let i = index">
-                <td class="text-start">{{ item.descripcion }}</td>
-
-                <td>
-                  <input
-                    type="number"
-                    min="1"
-                    class="form-control text-center"
-                    [(ngModel)]="item.cantidad"
-                    (ngModelChange)="recalculate()"
-                  />
-                </td>
-
-                <td>{{ item.pvp | currency }}</td>
-
-                <td class="fw-bold text-success">
-                  {{ item.pvp * item.cantidad | currency }}
-                </td>
-                <td>
-                  <button
-                    class="btn btn-sm btn-danger"
-                    (click)="removeItem(i)">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </td>
-              </tr>
-
-              <tr *ngIf="cartItems.length === 0">
-                <td colspan="5" class="text-muted">
-                  No hay productos agregados
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-
-
-          <div class="total-box mt-4">
-            <span class="total-label">TOTAL</span>
-            <div class="total-value">
-              <i class="bi bi-currency-dollar"></i>
-              {{ getTotal() | number:'1.2-2' }}
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-add-to-cart"
+                      (click)="addProductToCart(product); $event.stopPropagation()"
+                      [disabled]="product.stock === 0"
+                      title="Agregar al carrito">
+                      <i class="bi bi-plus-circle-fill"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="d-flex gap-3 mt-4">
-            <button
-              class="btn btn-success btn-lg w-100"
-              [disabled]="cartItems.length === 0"
-              (click)="confirmVenta()">
-              Vender
-            </button>
+        </div>
 
+        <!-- 🌑 BACKDROP MÓVIL (solo visible cuando carrito abierto) -->
+        <div class="cart-backdrop d-lg-none"
+             [class.show]="!cartCollapsed"
+             (click)="toggleCart()"></div>
 
-            <button
-              class="btn btn-danger btn-lg w-100"
-              (click)="clearCart()">
-              CANCELAR
-            </button>
+        <!-- 👉 COLUMNA DERECHA: CARRITO (Desktop) O OFFCANVAS (Mobile) -->
+        <div class="col-12 col-lg-4">
+          <div class="cart-sidebar" [class.collapsed]="cartCollapsed">
+
+            <!-- 🛒 ENCABEZADO CARRITO -->
+            <div class="cart-header">
+              <h5>
+                <i class="bi bi-cart-fill"></i> Carrito de Compras
+              </h5>
+              <button
+                type="button"
+                class="btn btn-sm btn-link text-light"
+                (click)="toggleCart()"
+                *ngIf="cartItems.length > 0">
+                Cerrar
+              </button>
+            </div>
+
+            <!-- 📋 LISTA DE ITEMS EN CARRITO -->
+            <div class="cart-items-container">
+
+              <!-- EMPTY CART MESSAGE -->
+              <div *ngIf="cartItems.length === 0" class="empty-cart">
+                <i class="bi bi-bag-x"></i>
+                <p>El carrito está vacío</p>
+                <small>Agrega productos para comenzar</small>
+              </div>
+
+              <!-- CART ITEMS -->
+              <div *ngFor="let item of cartItems; let idx = index" class="cart-item">
+                <div class="item-header">
+                  <h6 class="item-name">{{ item.descripcion }}</h6>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-close-light"
+                    (click)="removeItem(idx)"
+                    title="Eliminar producto">
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+                </div>
+
+                <div class="item-price-info">
+                  <small class="text-muted">${{ item.pvp | number: '1.2-2' }}</small>
+                  <span class="item-subtotal">${{ item.subtotal | number: '1.2-2' }}</span>
+                </div>
+
+                <!-- QUANTITY CONTROLS -->
+                <div class="quantity-controls">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-light"
+                    (click)="decrementQuantity(idx)"
+                    [disabled]="item.cantidad <= 1">
+                    <i class="bi bi-dash-circle"></i>
+                  </button>
+
+                  <span class="quantity-display">{{ item.cantidad }}</span>
+
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-light"
+                    (click)="incrementQuantity(idx)">
+                    <i class="bi bi-plus-circle"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 💳 RESUMEN DE COMPRA -->
+            <div class="cart-summary" *ngIf="cartItems.length > 0">
+              <div class="summary-row">
+                <span class="summary-label">Subtotal</span>
+                <span class="summary-value">${{ subtotal | number: '1.2-2' }}</span>
+              </div>
+
+              <div class="summary-row tax-row">
+                <span class="summary-label">IVA (15%)</span>
+                <span class="summary-value">${{ taxAmount | number: '1.2-2' }}</span>
+              </div>
+
+              <div class="summary-row total-row">
+                <span class="summary-label fw-700">Total</span>
+                <span class="summary-value total-amount">${{ total | number: '1.2-2' }}</span>
+              </div>
+            </div>
+
+            <!-- 💰 MÉTODOS DE PAGO -->
+            <div class="payment-methods" *ngIf="cartItems.length > 0">
+              <label class="small fw-600 d-block mb-2">Método de Pago</label>
+              <div class="payment-buttons">
+                <button
+                  *ngFor="let method of paymentMethods"
+                  type="button"
+                  class="payment-btn"
+                  [class.active]="selectedPaymentMethod === method.id"
+                  (click)="selectPaymentMethod(method.id)"
+                  [title]="method.label">
+                  <i [class]="'bi bi-' + method.icon"></i>
+                  <small>{{ method.label }}</small>
+                </button>
+              </div>
+            </div>
+
+            <!-- 💵 CALCULADORA DE CAMBIO (solo para Efectivo) -->
+            <div class="calculadora-cambio" *ngIf="showCalculadoraCambio">
+              <div class="calc-header">
+                <h6>
+                  <i class="bi bi-calculator"></i> Calculadora de Cambio
+                </h6>
+                <button type="button" class="btn-close-calc" (click)="cerrarCalculadora()">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+
+              <div class="calc-body">
+                <!-- Total a Pagar -->
+                <div class="calc-row total-row">
+                  <span class="calc-label">Total a Pagar:</span>
+                  <span class="calc-value total-value">${{ total | number: '1.2-2' }}</span>
+                </div>
+
+                <!-- Monto Recibido -->
+                <div class="calc-row mb-3">
+                  <label class="calc-label">Recibido del Cliente:</label>
+                  <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input
+                      type="number"
+                      class="form-control form-control-lg text-end"
+                      [(ngModel)]="montoRecibido"
+                      (ngModelChange)="calcularCambio()"
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01" />
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger"
+                      (click)="limpiarMonto()"
+                      title="Limpiar monto">
+                      <i class="bi bi-x-circle"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Botones Rápidos -->
+                <div class="calc-quick-buttons mb-3">
+                  <button type="button" class="btn btn-outline-light btn-sm" (click)="agregarMonto(5)">+ $5</button>
+                  <button type="button" class="btn btn-outline-light btn-sm" (click)="agregarMonto(10)">+ $10</button>
+                  <button type="button" class="btn btn-outline-light btn-sm" (click)="agregarMonto(20)">+ $20</button>
+                  <button type="button" class="btn btn-outline-light btn-sm" (click)="agregarMonto(50)">+ $50</button>
+                  <button type="button" class="btn btn-outline-warning btn-sm" (click)="setMontoExacto()">
+                    <i class="bi bi-check2"></i> Exacto
+                  </button>
+                </div>
+
+                <!-- Cambio/Vuelto -->
+                <div class="calc-row cambio-row" [class.negative]="cambio < 0">
+                  <span class="calc-label">{{ cambio >= 0 ? 'Cambio a Devolver:' : 'Falta:' }}</span>
+                  <span class="calc-value cambio-value">
+                    ${{ (cambio >= 0 ? cambio : -cambio) | number: '1.2-2' }}
+                  </span>
+                </div>
+
+                <!-- Botón Confirmar -->
+                <button
+                  type="button"
+                  class="btn btn-success btn-lg w-100 mt-3"
+                  (click)="procesarCobroEfectivo()"
+                  [disabled]="montoRecibido < total">
+                  <i class="bi bi-cash-coin"></i> Guardar en Caja y Finalizar
+                </button>
+              </div>
+            </div>
+
+            <!-- 🎯 BOTONES DE ACCIÓN -->
+            <div class="cart-actions" *ngIf="!showCalculadoraCambio">
+              <button
+                type="button"
+                class="btn btn-danger btn-sm w-100 mb-2"
+                (click)="clearCart()"
+                *ngIf="cartItems.length > 0">
+                <i class="bi bi-trash"></i> Limpiar Carrito
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-success btn-lg w-100"
+                (click)="confirmVenta()"
+                [disabled]="cartItems.length === 0">
+                <i class="bi bi-check-circle"></i> Finalizar Venta
+              </button>
+            </div>
+
           </div>
         </div>
+
       </div>
+    </div>
+  </main>
+
+</div>
