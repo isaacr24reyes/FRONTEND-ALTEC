@@ -3,6 +3,32 @@
   background: linear-gradient(135deg, #0D1117, #161B22, #0D1117);
   min-height: 100vh;
 }
+
+// Scrollbar personalizada oscura global
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a1929;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #60A5FA, #8B50FB);
+  border-radius: 10px;
+  border: 2px solid #0a1929;
+
+  &:hover {
+    background: linear-gradient(135deg, #8B50FB, #60A5FA);
+  }
+}
+
+::-webkit-scrollbar-corner {
+  background: #0a1929;
+}
+
 .quote-hero {
   background: linear-gradient(135deg, #0C1E3A, #020617);
   padding: 1.25rem 0;

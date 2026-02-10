@@ -1,17 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder } from '@angular/forms';
 import { ProductService } from '../../services/warehouse.service';
+import { SalesService } from 'src/app/services/sales.service';
+import { SaleDto } from 'src/app/models/sale.dto';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import Notiflix from "notiflix";
 declare var bootstrap: any;
 import jsPDF from "jspdf";
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-inventario',
   templateUrl: './inventario.component.html',
   styleUrls: ['./inventario.component.scss']
 })
-export class InventarioComponent implements OnInit {
+export class InventarioComponent implements OnInit, OnDestroy {
   public formGroup!: UntypedFormGroup;
   allProducts: any[] = [];
   products: any[] = [];
@@ -48,7 +51,8 @@ export class InventarioComponent implements OnInit {
   ];
   constructor(
     private productService: ProductService,
-    private fb: UntypedFormBuilder
+    private fb: UntypedFormBuilder,
+    private salesService: SalesService // Inyectar el servicio de ventas
   ) {}
 
   ngOnInit(): void {
@@ -64,6 +68,103 @@ export class InventarioComponent implements OnInit {
         this.currentPage = 1;
         this.applyFilter();
       });
+
+    // Inicializar neuronas animadas
+    setTimeout(() => this.initNeurons(), 100);
+  }
+
+  ngOnDestroy(): void {
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+    }
+  }
+
+  private animationId?: number;
+
+  private initNeurons(): void {
+    const canvas = document.getElementById('neuronCanvas') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const isMobile = window.innerWidth < 768;
+    const neuronsCount = isMobile ? 15 : 45; // Reducido 3 veces en móvil
+    const neurons: any[] = [];
+
+    class Neuron {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      radius: number;
+
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.vx = (Math.random() - 0.5) * 0.5;
+        this.vy = (Math.random() - 0.5) * 0.5;
+        this.radius = Math.random() * 2 + 1;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+      }
+
+      draw() {
+        if (!ctx) return;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(139, 80, 251, 0.8)';
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < neuronsCount; i++) {
+      neurons.push(new Neuron());
+    }
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      neurons.forEach((neuron: any) => {
+        neuron.update();
+        neuron.draw();
+      });
+
+      for (let i = 0; i < neurons.length; i++) {
+        for (let j = i + 1; j < neurons.length; j++) {
+          const dx = neurons[i].x - neurons[j].x;
+          const dy = neurons[i].y - neurons[j].y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < 150) {
+            ctx.beginPath();
+            ctx.moveTo(neurons[i].x, neurons[i].y);
+            ctx.lineTo(neurons[j].x, neurons[j].y);
+            ctx.strokeStyle = `rgba(139, 80, 251, ${0.2 * (1 - distance / 150)})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+
+      this.animationId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
   }
   filtrarCategoria(categoria: string, event?: Event) {
     if (event) event.preventDefault();
@@ -403,5 +504,78 @@ export class InventarioComponent implements OnInit {
       img.onerror = reject;
       img.src = url;
     });
+  }
+
+  // Ejemplo de método para guardar una venta
+  guardarVentaEjemplo() {
+    const venta: SaleDto = {
+      invoiceNumber: 'INV-001',
+      customerID: 1,
+      employeeID: 2,
+      productID: 3,
+      saleDate: new Date().toISOString(),
+      quantity: 1,
+      unitPrice: 100,
+      taxAmount: 12,
+      totalAmount: 112,
+      paymentMethod: 'Efectivo',
+      status: 'Completada'
+    };
+    this.salesService.createSale(venta).subscribe({
+      next: (saleId) => {
+        Notiflix.Notify.success('Venta guardada con ID: ' + saleId);
+      },
+      error: (err) => {
+        Notiflix.Notify.failure('Error al guardar venta');
+        console.error('Error al guardar venta', err);
+      }
+    });
+  }
+
+  /**
+   * Guarda todas las ventas de los productos seleccionados bajo la misma factura (invoiceNumber).
+   * Llama al servicio tantas veces como productos haya, pero con el mismo invoiceNumber.
+   * Úsalo en 'guardar en caja' o 'finalizar'.
+   * @param cartProducts Array de productos a vender
+   * @param customerID ID del cliente
+   * @param employeeID ID del empleado
+   * @param paymentMethod Método de pago
+   */
+  saveSale(cartProducts: any[], customerID: number, employeeID: number, paymentMethod: string) {
+    if (!cartProducts || cartProducts.length === 0) {
+      Notiflix.Notify.failure('No hay productos seleccionados para vender.');
+      return;
+    }
+    const invoiceNumber = this.generateInvoiceNumber();
+    const saleObservables = cartProducts.map(product => {
+      const venta: SaleDto = {
+        invoiceNumber: invoiceNumber,
+        customerID: customerID,
+        employeeID: employeeID,
+        productID: product.id || product.productID || product.codigo || 0,
+        saleDate: new Date().toISOString(),
+        quantity: product.quantity || 1,
+        unitPrice: product.unitPrice || product.pvp || 0,
+        taxAmount: product.taxAmount || 0,
+        totalAmount: (product.unitPrice || product.pvp || 0) * (product.quantity || 1) + (product.taxAmount || 0),
+        paymentMethod: paymentMethod,
+        status: 'Completada'
+      };
+      return this.salesService.createSale(venta);
+    });
+    forkJoin(saleObservables).subscribe({
+      next: (saleIds) => {
+        Notiflix.Notify.success('Venta guardada correctamente. Factura: ' + invoiceNumber);
+      },
+      error: (err) => {
+        Notiflix.Notify.failure('Error al guardar la venta');
+        console.error('Error al guardar venta', err);
+      }
+    });
+  }
+
+  // Generador simple de número de factura (puedes mejorar esto según tu lógica de negocio)
+  private generateInvoiceNumber(): string {
+    return 'INV-' + Date.now();
   }
 }

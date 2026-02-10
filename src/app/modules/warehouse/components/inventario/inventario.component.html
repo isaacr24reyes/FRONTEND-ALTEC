@@ -1,146 +1,240 @@
-<div *ngIf="!isLoading">
-  <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="login-form">
-    <div class="text-center">
-      <h1>Consultar en bodega</h1>
-    </div>
-    <div class="container mt-3">
+<div *ngIf="!isLoading" class="inventory-container">
+  <!-- Neuronas animadas de fondo -->
+  <canvas id="neuronCanvas" class="neuron-canvas"></canvas>
 
-      <!-- 🔹 Buscador -->
+  <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="inventory-form">
+    <!-- Header con título -->
+    <div class="text-center mb-4">
+      <h1 class="main-title">
+        <i class="bi bi-box-seam me-2"></i>
+        Consultar Inventario
+      </h1>
+      <p class="subtitle">Gestiona y consulta productos de bodega</p>
+    </div>
+
+    <div class="container">
+      <!-- Buscador moderno -->
       <div class="row justify-content-center mb-4">
-        <div class="col-12 col-md-8">
-          <input
-            type="search"
-            class="form-control"
-            placeholder="Buscar producto o código..."
-            aria-label="Search"
-            formControlName="searchControl">
+        <div class="col-12 col-lg-8">
+          <div class="search-wrapper">
+            <i class="bi bi-search search-icon"></i>
+            <input
+              type="search"
+              class="form-control modern-search"
+              placeholder="Buscar producto o código..."
+              aria-label="Search"
+              formControlName="searchControl">
+          </div>
         </div>
       </div>
 
-      <!-- 🔹 Filtros -->
+      <!-- Filtros activos (chips) -->
+      <div class="row justify-content-center mb-3" *ngIf="selectedCategory || onlyImport || onlyLowStock">
+        <div class="col-12 col-lg-10">
+          <div class="d-flex flex-wrap gap-2 justify-content-center">
+            <span class="filter-chip" *ngIf="selectedCategory">
+              <i class="bi bi-tag-fill me-1"></i>
+              {{ selectedCategory }}
+              <button type="button" class="btn-close-chip" (click)="filtrarCategoria('')">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>
+            <span class="filter-chip" *ngIf="onlyImport">
+              <i class="bi bi-globe me-1"></i>
+              Importación
+              <button type="button" class="btn-close-chip" (click)="formGroup.get('importCheck')?.setValue(false); toggleImport()">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>
+            <span class="filter-chip" *ngIf="onlyLowStock">
+              <i class="bi bi-exclamation-triangle-fill me-1"></i>
+              Stock Bajo
+              <button type="button" class="btn-close-chip" (click)="formGroup.get('lowStockCheck')?.setValue(false); toggleLowStock()">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controles de filtros -->
       <div class="row justify-content-center mb-4">
-        <div class="col-12 col-md-10 d-flex flex-wrap justify-content-center gap-4">
+        <div class="col-12 col-lg-10">
+          <div class="filters-container">
+            <!-- Checkbox importación -->
+            <div class="filter-item">
+              <input class="form-check-input modern-checkbox"
+                     type="checkbox"
+                     id="importCheck"
+                     formControlName="importCheck"
+                     (change)="toggleImport()">
+              <label class="form-check-label" for="importCheck">
+                <i class="bi bi-globe me-1"></i>
+                Importación
+              </label>
+            </div>
 
-          <!-- Checkbox importación -->
-          <div class="form-check">
-            <input class="form-check-input"
-                   type="checkbox"
-                   id="importCheck"
-                   formControlName="importCheck"
-                   (change)="toggleImport()">
-            <label class="form-check-label text-white fw-bold ms-2" for="importCheck">
-              Productos de importación
-            </label>
-          </div>
+            <!-- Checkbox stock bajo -->
+            <div class="filter-item">
+              <input class="form-check-input modern-checkbox"
+                     type="checkbox"
+                     id="lowStockCheck"
+                     formControlName="lowStockCheck"
+                     (change)="toggleLowStock()">
+              <label class="form-check-label" for="lowStockCheck">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                Stock < 5
+              </label>
+            </div>
 
-          <!-- Checkbox stock bajo -->
-          <div class="form-check">
-            <input class="form-check-input"
-                   type="checkbox"
-                   id="lowStockCheck"
-                   formControlName="lowStockCheck"
-                   (change)="toggleLowStock()">
-            <label class="form-check-label text-white fw-bold ms-2" for="lowStockCheck">
-              Stock &lt; 5
-            </label>
-          </div>
+            <!-- Dropdown categorías -->
+            <div class="dropdown">
+              <button class="btn btn-filter dropdown-toggle" type="button" id="dropdownCategorias" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-funnel me-1"></i>
+                Categorías
+              </button>
+              <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownCategorias">
+                <li>
+                  <button class="dropdown-item" (click)="filtrarCategoria('')">
+                    <i class="bi bi-grid-3x3-gap me-2"></i>Todas
+                  </button>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li *ngFor="let cat of categories">
+                  <button class="dropdown-item" [class.active]="selectedCategory === cat" (click)="filtrarCategoria(cat)">
+                    <i class="bi bi-tag me-2"></i>{{ cat }}
+                  </button>
+                </li>
+              </ul>
+            </div>
 
-          <!-- Dropdown categorías -->
-          <div class="dropdown">
-            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownCategorias" data-bs-toggle="dropdown" aria-expanded="false">
-              Filtrar por categoría
+            <!-- Botón catálogo -->
+            <button type="button"
+                    class="btn btn-catalog"
+                    data-bs-toggle="modal"
+                    data-bs-target="#inventarioModal">
+              <i class="bi bi-file-earmark-pdf me-1"></i>
+              Catálogo
             </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownCategorias">
-              <li>
-                <button class="dropdown-item" (click)="filtrarCategoria('')">Todas</button>
-              </li>
-              <li *ngFor="let cat of categories">
-                <button class="dropdown-item" (click)="filtrarCategoria(cat)">{{ cat }}</button>
-              </li>
-            </ul>
           </div>
         </div>
       </div>
-      <!-- 🔹 Botón catálogo -->
-      <div class="row justify-content-center mb-4">
-        <div class="col-12 col-md-10 text-end">
-          <button type="button"
-                  class="btn btn-success"
-                  data-bs-toggle="modal"
-                  data-bs-target="#inventarioModal">
-            <i class="bi bi-box-arrow-down"></i> Generar catálogo
-          </button>
+
+      <!-- Información de resultados -->
+      <div class="row justify-content-center mb-3">
+        <div class="col-12 col-lg-10">
+          <div class="results-info">
+            <span class="total-badge">
+              <i class="bi bi-box me-1"></i>
+              {{ totalCount }} producto{{ totalCount !== 1 ? 's' : '' }} encontrado{{ totalCount !== 1 ? 's' : '' }}
+            </span>
+            <span class="page-info">
+              Página {{ currentPage }} de {{ totalPages }}
+            </span>
+          </div>
         </div>
       </div>
 
-
-    </div>
-
-
-
-    <div class="container mt-5">
+      <!-- Tabla de productos moderna -->
       <div class="row justify-content-center">
-        <div class="col-12">
-          <div class="table-responsive">
-            <table class="table table-bordered text-center">
-              <thead>
-              <tr>
-                <th style="width: 10%; background-color: #08274F; color: white; font-weight: bold;">Código</th>
-                <th style="width: 40%; background-color: #08274F; color: white; font-weight: bold;">Descripción</th>
-                <th style="width: 10%; background-color: #08274F; color: white; font-weight: bold;">PVP</th>
-                <th style="width: 10%; background-color: #08274F; color: white; font-weight: bold;">Foto</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr *ngFor="let product of products" (click)="openProductModal(product)" style="cursor: pointer;">
-                <td style="vertical-align: middle;">{{ product.codigo }}</td>
-                <td class="text-break" style="vertical-align: middle;">{{ product.descripcion }}</td>
-                <td style="vertical-align: middle;">{{ product.pvp | currency }}</td>
-                <td style="padding: 0;">
-                  <ng-container *ngIf="product.foto !== 'NOT-IMAGE'; else noImage">
-                    <img [src]="product.foto" alt="Producto" class="img-thumbnail" style="max-width: 100px; max-height: 80px;" />
-                  </ng-container>
-                  <ng-template #noImage>
-                    <span>Producto no contiene imagen</span>
-                  </ng-template>
-                </td>
-              </tr>
-              </tbody>
-            </table>
+        <div class="col-12 col-lg-10">
+          <div class="table-modern-wrapper">
+            <div class="table-responsive">
+              <table class="table table-modern">
+                <thead>
+                  <tr>
+                    <th class="col-code">Código</th>
+                    <th class="col-desc">Descripción</th>
+                    <th class="col-price">PVP</th>
+                    <th class="col-stock">Stock</th>
+                    <th class="col-image">Imagen</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let product of products" (click)="openProductModal(product)" class="product-row">
+                    <td class="code-cell">
+                      <span class="code-badge">{{ product.codigo }}</span>
+                    </td>
+                    <td class="desc-cell">
+                      <div class="product-desc">
+                        {{ product.descripcion }}
+                        <span class="badge bg-warning text-dark ms-2" *ngIf="product.isImport">
+                          <i class="bi bi-globe"></i> Import
+                        </span>
+                      </div>
+                    </td>
+                    <td class="price-cell">
+                      <span class="price-tag">{{ product.pvp | currency }}</span>
+                    </td>
+                    <td class="stock-cell">
+                      <span class="stock-badge" [class.low-stock]="product.stock < 5">
+                        {{ product.stock }}
+                      </span>
+                    </td>
+                    <td class="image-cell">
+                      <ng-container *ngIf="product.foto !== 'NOT-IMAGE'; else noImage">
+                        <img [src]="product.foto" alt="Producto" class="product-img" />
+                      </ng-container>
+                      <ng-template #noImage>
+                        <div class="no-image">
+                          <i class="bi bi-image"></i>
+                        </div>
+                      </ng-template>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <hr class="styled-line">
+      <!-- Paginación moderna -->
+      <div class="row justify-content-center mt-4 mb-4">
+        <div class="col-12 col-lg-10">
+          <div class="pagination-container">
+            <button class="btn btn-pagination"
+                    (click)="onPreviousPage()"
+                    [disabled]="currentPage === 1">
+              <i class="bi bi-chevron-left"></i>
+              Anterior
+            </button>
 
-    <div class="container mt-5">
-      <div class="row justify-content-between align-items-center">
-        <div class="col-12 col-md-auto mb-2 mb-md-0">
-          <h4>Total de productos: {{ totalCount }}</h4>
-        </div>
-        <div class="col-12 col-md-auto">
-          <button class="btn btn-primary me-2" (click)="onPreviousPage()" [disabled]="currentPage === 1">Anterior</button>
-          <button class="btn btn-primary" (click)="onNextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
+            <div class="pagination-info">
+              <span class="current-page">{{ currentPage }}</span>
+              <span class="separator">/</span>
+              <span class="total-pages">{{ totalPages }}</span>
+            </div>
+
+            <button class="btn btn-pagination"
+                    (click)="onNextPage()"
+                    [disabled]="currentPage === totalPages">
+              Siguiente
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <hr class="styled-line">
-
-    <div class="text-center mt-5">
-      <span class="text-white small-text">
-        Developed by <strong style="color: #8B50FB;">SwiFt©</strong> (2025).
-      </span>
+      <!-- Footer -->
+      <div class="text-center mt-5 pb-4">
+        <span class="footer-text">
+          Developed by <strong class="swift-brand">SwiFt©</strong> (2025).
+        </span>
+      </div>
     </div>
   </form>
 
+  <!-- Modal de detalles del producto -->
   <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
+      <div class="modal-content modal-dark">
         <div class="modal-header">
-          <h5 class="modal-title" id="productModalLabel">Información detallada del producto</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          <h5 class="modal-title">
+            <i class="bi bi-info-circle me-2"></i>
+            Detalles del Producto
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <app-extra-product-info [product]="selectedProduct"></app-extra-product-info>
@@ -148,29 +242,37 @@
       </div>
     </div>
   </div>
-</div>
-<!-- Modal -->
-<div class="modal fade" id="inventarioModal" tabindex="-1" aria-labelledby="inventarioModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-dark text-white">
-      <div class="modal-header border-0">
-        <h5 class="modal-title w-100" id="inventarioModalLabel">¿Cómo deseas descargar tu catálogo?</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
 
-        <!-- ComboBox: Catálogo para -->
-        <div class="mb-4 text-start">
-          <label for="tipoInventario" class="form-label">Catálogo para:</label>
-          <select id="tipoInventario" class="form-select bg-secondary text-white" [(ngModel)]="tipoInventario">
-            <option value="estudiante">Estudiante</option>
-            <option value="importador">Mayorista</option>
-            <option value="admin">Admin</option>
-          </select>
+  <!-- Modal de catálogo -->
+  <div class="modal fade" id="inventarioModal" tabindex="-1" aria-labelledby="inventarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal-dark">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-file-earmark-pdf me-2"></i>
+            Generar Catálogo PDF
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
+        <div class="modal-body">
+          <div class="mb-4">
+            <label for="tipoInventario" class="form-label">
+              <i class="bi bi-people me-1"></i>
+              Tipo de catálogo:
+            </label>
+            <select id="tipoInventario" class="form-select modern-select" [(ngModel)]="tipoInventario">
+              <option value="estudiante">📚 Estudiante</option>
+              <option value="importador">🏢 Mayorista</option>
+              <option value="admin">⚙️ Admin</option>
+            </select>
+          </div>
 
-        <div class="d-grid gap-2 col-8 mx-auto">
-          <button class="btn btn-danger" (click)="descargarPDF()">📄 Descargar PDF</button>
+          <div class="d-grid">
+            <button class="btn btn-download" (click)="descargarPDF()" data-bs-dismiss="modal">
+              <i class="bi bi-download me-2"></i>
+              Descargar PDF
+            </button>
+          </div>
         </div>
       </div>
     </div>

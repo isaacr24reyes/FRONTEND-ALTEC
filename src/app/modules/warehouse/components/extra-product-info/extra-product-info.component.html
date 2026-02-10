@@ -1,39 +1,116 @@
-<div *ngIf="product">
-  <div class="text-center mb-4">
-    <h4 class="fw-bold">{{ product.descripcion }}</h4>
+<div *ngIf="product" class="product-detail-container">
+  <!-- Título del producto -->
+  <div class="product-header text-center mb-4">
+    <h3 class="product-title">{{ product.descripcion }}</h3>
   </div>
 
-  <div class="row">
-    <!-- Imagen -->
-    <div class="col-md-6 text-center">
-      <ng-container *ngIf="product.foto && product.foto !== 'NOT-IMAGE'; else noImage">
-        <img [src]="product.foto" alt="Producto" style="max-width: 100%; height: auto;" />
-
-      </ng-container>
-      <ng-template #noImage>
-        <div class="text-muted">Este producto no tiene imagen.</div>
-      </ng-template>
+  <div class="row g-4">
+    <!-- Imagen del producto -->
+    <div class="col-md-6">
+      <div class="product-image-section">
+        <ng-container *ngIf="product.foto && product.foto !== 'NOT-IMAGE'; else noImage">
+          <div class="image-wrapper">
+            <img [src]="product.foto" alt="Producto" class="product-image" />
+          </div>
+        </ng-container>
+        <ng-template #noImage>
+          <div class="no-image-display">
+            <i class="bi bi-image"></i>
+            <p>Sin imagen disponible</p>
+          </div>
+        </ng-template>
+      </div>
     </div>
 
-    <!-- Info extra -->
+    <!-- Información del producto -->
     <div class="col-md-6">
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item">
-          <i class="bi bi-person-fill me-2" style="color: #0d6efd;"></i>
-          <strong>Creado por:</strong> {{ product.createdBy }}
-        </li>
-        <li class="list-group-item"><strong>Categoría:</strong> {{ product.categoria }}</li>
-        <li class="list-group-item"><strong>Código:</strong> {{ product.codigo }}</li>
-        <li class="list-group-item"><strong>PVP:</strong> {{ product.pvp | currency }}</li>
-        <li class="list-group-item"><strong>Precio mayorista:</strong> {{ product.precioMayorista | currency }}</li>
-        <li class="list-group-item"><strong>Precio importación:</strong> {{ product.precioImportacion | currency }}</li>
-        <li class="list-group-item">
-          <strong [ngClass]="{ 'text-danger text-decoration-underline': product.stock <= 5 }">Stock:</strong> {{ product.stock }}
-        </li>
+      <div class="product-info-section">
+        <!-- Creado por -->
+        <div class="info-item">
+          <div class="info-label">
+            <i class="bi bi-person-fill me-2"></i>
+            Creado por
+          </div>
+          <div class="info-value">{{ product.createdBy }}</div>
+        </div>
 
+        <!-- Categoría -->
+        <div class="info-item info-item-category">
+          <div class="info-label">
+            <i class="bi bi-tag-fill me-2"></i>
+            Categoría
+          </div>
+          <div class="info-value info-value-wrap">
+            <span class="badge-category">{{ product.categoria }}</span>
+          </div>
+        </div>
 
-        <!-- Agrega más campos si tienes más -->
-      </ul>
+        <!-- Código -->
+        <div class="info-item">
+          <div class="info-label">
+            <i class="bi bi-upc-scan me-2"></i>
+            Código
+          </div>
+          <div class="info-value">
+            <span class="code-badge">{{ product.codigo }}</span>
+          </div>
+        </div>
+
+        <!-- PVP -->
+        <div class="info-item">
+          <div class="info-label">
+            <i class="bi bi-cash-coin me-2"></i>
+            PVP
+          </div>
+          <div class="info-value price-value">{{ product.pvp | currency }}</div>
+        </div>
+
+        <!-- Precio mayorista -->
+        <div class="info-item">
+          <div class="info-label">
+            <i class="bi bi-building me-2"></i>
+            Precio mayorista
+          </div>
+          <div class="info-value price-value-secondary">{{ product.precioMayorista | currency }}</div>
+        </div>
+
+        <!-- Precio importación -->
+        <div class="info-item">
+          <div class="info-label">
+            <i class="bi bi-globe me-2"></i>
+            Precio importación
+          </div>
+          <div class="info-value price-value-secondary">{{ product.precioImportacion | currency }}</div>
+        </div>
+
+        <!-- Ganancia -->
+        <div class="info-item info-item-profit">
+          <div class="info-label">
+            <i class="bi bi-graph-up-arrow me-2"></i>
+            Ganancia
+          </div>
+          <div class="info-value price-value-profit">
+            {{ (product.pvp - product.precioImportacion) | currency }}
+            <span class="profit-percentage" *ngIf="product.precioImportacion > 0">
+              ({{ ((product.pvp - product.precioImportacion) / product.precioImportacion * 100) | number:'1.0-2' }}%)
+            </span>
+          </div>
+        </div>
+
+        <!-- Stock -->
+        <div class="info-item">
+          <div class="info-label">
+            <i class="bi bi-box-seam me-2"></i>
+            Stock
+          </div>
+          <div class="info-value">
+            <span class="stock-badge" [class.low-stock]="product.stock <= 5">
+              <i class="bi" [ngClass]="product.stock <= 5 ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill'"></i>
+              {{ product.stock }} unidades
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
