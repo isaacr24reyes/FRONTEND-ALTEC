@@ -2,27 +2,18 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-export interface SaleDto {
-  invoiceNumber: string;
-  customerID: number;
-  employeeID: number;
-  productID: number;
-  saleDate: string; // ISO string
-  quantity: number;
-  unitPrice: number;
-  taxAmount: number;
-  totalAmount: number;
-  paymentMethod: string;
-  status: string;
-}
+import { environment } from '../../environments/environment';
+
+import { SaleDto } from '../models/sale.dto';
+export { SaleDto };
 
 @Injectable({
   providedIn: 'root'
 })
 export class SalesService {
-  private apiUrl = '/api/Sales';
+  private apiUrl = `${environment.apiALTEC}/api/Sales`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   createSale(sale: SaleDto): Observable<number> {
     return this.http.post<number>(this.apiUrl, sale);

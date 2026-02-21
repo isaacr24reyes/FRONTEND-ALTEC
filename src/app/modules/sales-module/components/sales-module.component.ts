@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ProductService } from '../../warehouse/services/warehouse.service';
+import { SalesService, SaleDto } from '../../../services/sales.service';
+import { forkJoin } from 'rxjs';
 import Notiflix from 'notiflix';
 
 interface CartItem {
@@ -71,8 +73,9 @@ export class SalesModuleComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private productService: ProductService
-  ) {}
+    private productService: ProductService,
+    private salesService: SalesService
+  ) { }
 
   ngOnInit(): void {
     this.formGroup = this.fb.group({
@@ -136,28 +139,54 @@ export class SalesModuleComponent implements OnInit {
   }
 
   realizarVenta(): void {
+    if (this.cartItems.length === 0) {
+      Notiflix.Notify.warning('El carrito está vacío');
+      return;
+    }
+
     Notiflix.Loading.standard('Procesando venta...');
 
-    const ventaData = {
-      cliente: this.formGroup.get('clientName')?.value || 'Cliente General',
-      documento: this.formGroup.get('clientDocument')?.value || '',
-      celular: this.formGroup.get('clientPhone')?.value || '',
-      items: this.cartItems,
-      subtotal: this.subtotal,
-      impuesto: this.taxAmount,
-      total: this.total,
-      metodoPago: this.selectedPaymentMethod,
-      fecha: new Date().toISOString()
-    };
+    const invoiceNumber = `INV-${Date.now()}`;
+    const saleDate = new Date().toISOString();
+    const paymentMethod = this.selectedPaymentMethod;
 
-    // Simular API call
-    setTimeout(() => {
-      Notiflix.Loading.remove();
-      Notiflix.Notify.success('✓ Venta realizada con éxito');
+    // TODO: Ajustar employeeID real cuando exista autenticación
+    const employeeID = null; // Enviar null si no hay ninguno.
 
-      // 🔄 Reiniciar formulario
-      this.limpiarVenta();
-    }, 1200);
+    // Crear un arreglo de peticiones concurrentes para cada item del carrito
+    const salesObservables = this.cartItems.map(item => {
+      const subtotalItem = item.pvp * item.cantidad;
+      const taxItem = subtotalItem * this.TAX_RATE;
+
+      const sale: SaleDto = {
+        invoiceNumber: invoiceNumber,
+        employeeID: employeeID,
+        productID: item.id || '', // El backend espera un GUID como string.
+        saleDate: saleDate,
+        profit: 0, // TODO: Calcular la ganancia real (PVP - Costo)
+        quantity: item.cantidad,
+        unitPrice: item.pvp,
+        taxAmount: taxItem,
+        totalAmount: subtotalItem + taxItem,
+        paymentMethod: paymentMethod,
+        status: 'Completed'
+      };
+
+      return this.salesService.createSale(sale);
+    });
+
+    forkJoin(salesObservables).subscribe({
+      next: (results) => {
+        Notiflix.Loading.remove();
+        Notiflix.Notify.success('✓ Venta realizada con éxito');
+        this.limpiarVenta();
+      },
+      error: (err) => {
+        Notiflix.Loading.remove();
+        console.error('Error procesando la venta:', err);
+        Notiflix.Notify.failure('Error al procesar la venta');
+      }
+    });
   }
 
   limpiarVenta(): void {
@@ -288,7 +317,7 @@ export class SalesModuleComponent implements OnInit {
       existing.cantidad++;
     } else {
       this.cartItems.push({
-        id: product.id || Math.random().toString(),
+        id: product.idProducto?.toString() || product.id?.toString() || '0',
         descripcion: product.descripcion,
         pvp: product.pvp || 0,
         cantidad: 1

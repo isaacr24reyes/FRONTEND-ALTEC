@@ -53,7 +53,7 @@ export class InventarioComponent implements OnInit, OnDestroy {
     private productService: ProductService,
     private fb: UntypedFormBuilder,
     private salesService: SalesService // Inyectar el servicio de ventas
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formGroup = this.fb.group({
@@ -349,7 +349,7 @@ export class InventarioComponent implements OnInit, OnDestroy {
     return score;
   }
 
-  onSubmit() {}
+  onSubmit() { }
   async descargarPDF() {
     if (!this.allProducts || this.allProducts.length === 0) {
       console.warn("No hay productos en allProducts");
@@ -478,8 +478,7 @@ export class InventarioComponent implements OnInit, OnDestroy {
     }
 
     doc.save(
-      `${this.tipoInventario === "importador" ? "catalogo-mayorista" : "catalogo-estudiantes"}-${
-        new Date().toISOString().slice(0, 10)
+      `${this.tipoInventario === "importador" ? "catalogo-mayorista" : "catalogo-estudiantes"}-${new Date().toISOString().slice(0, 10)
       }.pdf`
     );
 
@@ -487,7 +486,7 @@ export class InventarioComponent implements OnInit, OnDestroy {
   }
 
 
-// 🔹 Convierte URL a Base64
+  // 🔹 Convierte URL a Base64
   private loadImageAsBase64(url: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -510,10 +509,10 @@ export class InventarioComponent implements OnInit, OnDestroy {
   guardarVentaEjemplo() {
     const venta: SaleDto = {
       invoiceNumber: 'INV-001',
-      customerID: 1,
-      employeeID: 2,
-      productID: 3,
+      employeeID: null,
+      productID: '3',
       saleDate: new Date().toISOString(),
+      profit: 0,
       quantity: 1,
       unitPrice: 100,
       taxAmount: 12,
@@ -537,11 +536,10 @@ export class InventarioComponent implements OnInit, OnDestroy {
    * Llama al servicio tantas veces como productos haya, pero con el mismo invoiceNumber.
    * Úsalo en 'guardar en caja' o 'finalizar'.
    * @param cartProducts Array de productos a vender
-   * @param customerID ID del cliente
    * @param employeeID ID del empleado
    * @param paymentMethod Método de pago
    */
-  saveSale(cartProducts: any[], customerID: number, employeeID: number, paymentMethod: string) {
+  saveSale(cartProducts: any[], employeeID: number | null, paymentMethod: string) {
     if (!cartProducts || cartProducts.length === 0) {
       Notiflix.Notify.failure('No hay productos seleccionados para vender.');
       return;
@@ -550,10 +548,10 @@ export class InventarioComponent implements OnInit, OnDestroy {
     const saleObservables = cartProducts.map(product => {
       const venta: SaleDto = {
         invoiceNumber: invoiceNumber,
-        customerID: customerID,
         employeeID: employeeID,
-        productID: product.id || product.productID || product.codigo || 0,
+        productID: String(product.id || product.productID || product.codigo || ''),
         saleDate: new Date().toISOString(),
+        profit: 0, // Ajustar a la ganancia real calcular el profit
         quantity: product.quantity || 1,
         unitPrice: product.unitPrice || product.pvp || 0,
         taxAmount: product.taxAmount || 0,
