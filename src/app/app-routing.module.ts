@@ -1,16 +1,16 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import {AppBlankComponent} from "./layouts/blank/blank.component";
-import {FullComponent} from "./layouts/full/full.component";
+import { AppBlankComponent } from "./layouts/blank/blank.component";
+import { FullComponent } from "./layouts/full/full.component";
 import {
   R_404, R_ALTEC_POINTS,
   R_AUTHENTICATION,
   R_DASHBOARD,
-  R_PRODUCT_QUOTE, R_SALES_MODULE,
+  R_PRODUCT_QUOTE, R_SALES_MODULE, R_HISTORIC_SALES,
   R_STORE, R_USER_ADMIN,
   R_WAREHOUSE
 } from "./constants/route.constants";
-import {RoleGuard} from "./core/guard/role.guard";
+import { RoleGuard } from "./core/guard/role.guard";
 
 const routes: Routes = [
   {
@@ -36,7 +36,7 @@ const routes: Routes = [
     component: AppBlankComponent,
     loadChildren: () => import('./modules/authentication/authentication.module').then(mod => mod.AuthenticationModule)
   },
-//  { path: '', redirectTo: `${R_DASHBOARD}`, pathMatch: 'full' },
+  //  { path: '', redirectTo: `${R_DASHBOARD}`, pathMatch: 'full' },
   { path: '**', redirectTo: `${R_AUTHENTICATION}/${R_404}` }
   ,
   {
@@ -67,6 +67,12 @@ const routes: Routes = [
     component: FullComponent,
     canActivate: [RoleGuard],
     loadChildren: () => import('./modules/sales-module/sales-module.module').then(mod => mod.SalesModuleModule)
+  },
+  {
+    path: R_HISTORIC_SALES,
+    component: FullComponent,
+    canActivate: [RoleGuard],
+    loadChildren: () => import('./modules/historic-sales-module/historic-sales-module.module').then(mod => mod.HistoricSalesModuleModule)
   }
 ];
 

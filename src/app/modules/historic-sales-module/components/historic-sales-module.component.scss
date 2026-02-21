@@ -1,0 +1,259 @@
+// ============================================
+// 🎨 PALETA DE COLORES PROFESIONAL
+// ============================================
+
+$primary-color: #6c5ce7;
+$primary-light: #a29bfe;
+$secondary-color: #00b894;
+$secondary-light: #55efc4;
+$danger-color: #d63031;
+$dark-bg: #1a1a2e;
+$card-bg: #16213e;
+$text-primary: #ffffff;
+$text-secondary: #b8bec3;
+$border-color: #2d3561;
+
+// ============================================
+// 🎯 CONTAINER PRINCIPAL
+// ============================================
+
+.historic-container {
+    background: linear-gradient(135deg, $dark-bg 0%, #0f3460 100%);
+    min-height: 100vh;
+    color: $text-primary;
+    font-family: 'Montserrat', -apple-system, sans-serif;
+}
+
+// ============================================
+// 📱 HEADER
+// ============================================
+
+.historic-header {
+    background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+    padding: 1.5rem 0;
+    box-shadow: 0 8px 32px rgba(108, 92, 231, 0.2);
+    border-bottom: 3px solid $secondary-color;
+    margin-bottom: 2rem;
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .historic-title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+
+        i {
+            font-size: 2rem;
+        }
+    }
+
+    .header-subtitle {
+        font-size: 0.85rem;
+        opacity: 0.9;
+        margin: 0.3rem 0 0.2rem 0;
+    }
+}
+
+// ============================================
+// 🎴 SECTION CARDS
+// ============================================
+
+.section-card {
+    background: $card-bg;
+    border: 1px solid $border-color;
+    border-radius: 14px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+
+    &:hover {
+        box-shadow: 0 8px 32px rgba(108, 92, 231, 0.15);
+        border-color: $primary-color;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid $border-color;
+
+        h5 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+
+            i {
+                color: $primary-color;
+                margin-right: 0.5rem;
+            }
+        }
+    }
+}
+
+// ============================================
+// 🔍 FILTERS
+// ============================================
+
+.filters-section {
+    input {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid $border-color;
+        color: $text-primary;
+        transition: all 0.3s ease;
+
+        &:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: $primary-color;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+            color: $text-primary;
+        }
+    }
+
+    .input-group-text {
+        border: 1px solid $border-color;
+        color: $secondary-color;
+    }
+}
+
+// ============================================
+// 📊 CUSTOM CHART
+// ============================================
+
+.custom-chart {
+    height: 250px;
+    padding-top: 2rem;
+
+    .chart-bars {
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-end;
+        height: 100%;
+        border-bottom: 2px solid $border-color;
+        padding-bottom: 0.5rem;
+
+        .bar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            width: 40px;
+            height: 100%;
+            position: relative;
+            cursor: pointer;
+
+            &:hover .bar-fill {
+                background: linear-gradient(180deg, $secondary-light 0%, $secondary-color 100%);
+                box-shadow: 0 0 15px rgba(0, 184, 148, 0.4);
+            }
+
+            &:hover .bar-value {
+                opacity: 1;
+                transform: translateY(-5px);
+            }
+
+            .bar-value {
+                font-size: 0.7rem;
+                font-weight: 700;
+                color: $text-primary;
+                opacity: 0;
+                transition: all 0.3s ease;
+                margin-bottom: 0.5rem;
+            }
+
+            .bar-fill {
+                width: 100%;
+                background: linear-gradient(180deg, $primary-light 0%, $primary-color 100%);
+                border-radius: 4px 4px 0 0;
+                transition: height 1s ease-out, background 0.3s ease;
+            }
+
+            .bar-label {
+                font-size: 0.65rem;
+                color: $text-secondary;
+                margin-top: 0.5rem;
+                font-weight: 600;
+            }
+        }
+    }
+}
+
+// ============================================
+// 📋 TABLE
+// ============================================
+
+.history-table-container {
+    max-height: 600px;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+    }
+}
+
+.custom-table {
+    background: transparent !important;
+    margin-bottom: 0;
+
+    thead th {
+        background: rgba(255, 255, 255, 0.05);
+        border-bottom: 2px solid $border-color;
+        color: $text-secondary;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        padding: 1rem;
+        white-space: nowrap;
+    }
+
+    tbody {
+        tr {
+            transition: all 0.2s ease;
+            cursor: pointer;
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.03);
+                transform: scale(1.01);
+            }
+        }
+
+        td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            color: $text-primary;
+            font-size: 0.9rem;
+            background: transparent !important;
+        }
+    }
+
+    .text-muted {
+        color: #a29bfe !important; // Un lila claro para que sea legible pero secundario
+    }
+
+    .invoice-badge {
+        background: rgba(108, 92, 231, 0.2);
+        color: $primary-light;
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-family: monospace;
+        font-weight: 600;
+    }
+}

@@ -18,4 +18,8 @@ export class SalesService {
   createSale(sale: SaleDto): Observable<number> {
     return this.http.post<number>(this.apiUrl, sale);
   }
+
+  getHistoricSales(pageNumber: number, pageSize: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}?pageNumber=${pageNumber}&pageSize=${pageSize}`);
+  }
 }

@@ -1,0 +1,145 @@
+<!-- 🎨 HISTORIC PREMIUM CONTAINER -->
+<div class="historic-container">
+
+    <!-- 📱 HEADER / TÍTULO -->
+    <header class="historic-header">
+        <div class="container-fluid">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="historic-title">
+                        <i class="bi bi-clock-history"></i> HISTORIAL DE VENTAS
+                    </h1>
+                    <p class="header-subtitle">Analiza tus ventas mensuales y rentabilidad</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 🎯 MAIN CONTENT -->
+    <main class="historic-main">
+        <div class="container-fluid">
+            <div class="row g-3">
+
+                <!-- 📊 COLUMNA IZQUIERDA: GRÁFICA & FILTROS -->
+                <div class="col-12 col-lg-4">
+
+                    <!-- FILTROS -->
+                    <div class="section-card filters-section mb-3">
+                        <div class="section-header">
+                            <h5><i class="bi bi-funnel-fill"></i> Filtros de Búsqueda</h5>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label class="form-label small fw-600">Fecha Inicio</label>
+                            <input type="date" class="form-control form-control-sm" [(ngModel)]="startDate"
+                                (change)="filterSales()" />
+                        </div>
+                        <div class="form-group mb-2">
+                            <label class="form-label small fw-600">Fecha Fin</label>
+                            <input type="date" class="form-control form-control-sm" [(ngModel)]="endDate"
+                                (change)="filterSales()" />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label small fw-600">Buscar por Factura</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-transparent border-end-0"><i
+                                        class="bi bi-search"></i></span>
+                                <input type="text" class="form-control border-start-0" placeholder="Ej: INV-123..."
+                                    [(ngModel)]="searchQuery" (input)="filterSales()" />
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm w-100" (click)="clearFilters()">
+                            <i class="bi bi-x-circle"></i> Limpiar Filtros
+                        </button>
+                    </div>
+
+                    <!-- GRÁFICA MENSUAL (PURA CSS) -->
+                    <div class="section-card chart-section">
+                        <div class="section-header">
+                            <h5><i class="bi bi-bar-chart-line-fill"></i> Rendimiento Mensual</h5>
+                        </div>
+
+                        <div class="custom-chart" *ngIf="monthlyData.length > 0">
+                            <div class="chart-bars">
+                                <div class="bar-item" *ngFor="let m of monthlyData"
+                                    [title]="'Mes: ' + m.month + ' | Ventas: $' + m.amount + ' | Profit: $' + m.profit">
+                                    <div class="bar-value">${{ m.amount | number:'1.0-0' }}</div>
+                                    <div class="bar-fill" [style.height.%]="m.height"></div>
+                                    <div class="bar-label">{{ m.month }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- EMPTY CHART MESSAGE -->
+                        <div *ngIf="monthlyData.length === 0" class="empty-state text-center p-4">
+                            <i class="bi bi-graph-down text-muted fs-1"></i>
+                            <p class="mt-2 mb-0 small text-muted">No hay datos para mostrar en este rango.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 📋 COLUMNA DERECHA: TABLA HISTÓRICA -->
+                <div class="col-12 col-lg-8">
+                    <div class="section-card history-section">
+                        <div class="section-header">
+                            <h5><i class="bi bi-receipt"></i> Registro de Facturas</h5>
+                            <span class="badge bg-primary">{{ filteredSales.length }} resultados</span>
+                        </div>
+
+                        <!-- TABLA DE VENTAS -->
+                        <div class="table-responsive history-table-container">
+                            <table class="table table-dark table-hover align-middle custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Factura</th>
+                                        <th>Subtotales</th>
+                                        <th>Ganancia</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let sale of filteredSales">
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold">{{ sale.date | date:'mediumDate' }}</span>
+                                                <small class="text-muted">{{ sale.date | date:'shortTime' }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="invoice-badge">{{ sale.invoiceNumber }}</span>
+                                            <small class="d-block text-muted mt-1">{{ sale.itemCount }} artíc.</small>
+                                        </td>
+                                        <td>
+                                            <span class="text-success fw-bold">${{ sale.totalAmount | number:'1.2-2'
+                                                }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="text-warning fw-bold">${{ sale.totalProfit | number:'1.2-2'
+                                                }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success"><i class="bi bi-check-circle"></i>
+                                                Completado</span>
+                                        </td>
+                                    </tr>
+
+                                    <!-- SKELETON LOADING / EMPTY -->
+                                    <tr *ngIf="filteredSales.length === 0">
+                                        <td colspan="5" class="text-center p-5 text-muted">
+                                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                            No se encontraron facturas en el rango seleccionado.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+</div>

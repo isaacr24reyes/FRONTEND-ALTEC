@@ -539,7 +539,7 @@ export class InventarioComponent implements OnInit, OnDestroy {
    * @param employeeID ID del empleado
    * @param paymentMethod Método de pago
    */
-  saveSale(cartProducts: any[], employeeID: number | null, paymentMethod: string) {
+  saveSale(cartProducts: any[], employeeID: string | null, paymentMethod: string) {
     if (!cartProducts || cartProducts.length === 0) {
       Notiflix.Notify.failure('No hay productos seleccionados para vender.');
       return;

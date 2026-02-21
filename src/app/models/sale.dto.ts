@@ -1,6 +1,6 @@
 export interface SaleDto {
   invoiceNumber: string;
-  employeeID: number | null;
+  employeeID: string | null;
   productID: string;
   saleDate: string; // ISO string
   profit: number;
