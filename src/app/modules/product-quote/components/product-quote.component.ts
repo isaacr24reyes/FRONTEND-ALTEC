@@ -7,6 +7,8 @@ import Notiflix from "notiflix";
 declare var bootstrap: any;
 import ExcelJS from 'exceljs/dist/exceljs.min.js';
 import { saveAs } from 'file-saver';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 
 
@@ -77,7 +79,8 @@ export class ProductQuoteComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
-    private fb: UntypedFormBuilder
+    private fb: UntypedFormBuilder,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -146,25 +149,6 @@ export class ProductQuoteComponent implements OnInit {
     }
   }
 
-  confirmAddResistor(): void {
-    if (!this.selectedResistorValue) {
-      Notiflix.Notify.warning('Selecciona un valor de resistencia');
-      return;
-    }
-
-    const item = {
-      ...this.selectedProduct,
-      descripcion: `${this.selectedProduct.descripcion} - ${this.selectedResistorValue}`
-    };
-
-    this.agregarACotizacion(item);
-
-    const modal = bootstrap.Modal.getInstance(
-      document.getElementById('resistorModal')
-    );
-    modal?.hide();
-  }
-
   getProducts(): void {
     if (this.isFirstLoad) {
       Notiflix.Loading.standard('Cargando productos...');
@@ -212,7 +196,7 @@ export class ProductQuoteComponent implements OnInit {
 
     // 🔹 Importación
     if (this.onlyImport) {
-      filtered = filtered.filter(p => p.isImport === true || p.isImport === 1);
+      filtered = filtered.filter(p => p.isImport);
     }
 
     // 🔹 Stock bajo
@@ -519,7 +503,13 @@ export class ProductQuoteComponent implements OnInit {
       <p style="margin: 5px 0; font-weight: bold; color: #8B50FB;">Developed by SwiFt© 2025</p>
     </div>`;
 
-    container.innerHTML = header + table + footer;
+    // Add quotation number to the PDF
+    const pdfHeader = `
+    <div style="text-align: center; margin-bottom: 20px;">
+      <h2 style="color: #0C1E3A; font-weight: bold;">Cotización N°: {{ quotationNumber }}</h2>
+    </div>`;
+
+    container.innerHTML = pdfHeader + header + table + footer;
 
     const opciones = {
       margin: [10, 10, 10, 10],
@@ -544,6 +534,30 @@ export class ProductQuoteComponent implements OnInit {
       this.downloadMessage = '¡PDF descargado exitosamente!';
       await new Promise(resolve => setTimeout(resolve, 1000));
       Notiflix.Notify.success('PDF descargado correctamente');
+
+      // Llamar al endpoint para guardar la cotización
+      const quotationNumber = this.generateQuotationNumber(); // Generar un número único para la cotización
+      const quotationDetails = this.cotizacion.map(product => ({
+        productId: product.id,
+        quantity: product.cantidad,
+        unitPrice: product.precio // Assuming 'precio' is the unit price of the product
+      }));
+
+      const quotationPayload = {
+        quotationNumber: quotationNumber,
+        quotationDetails: quotationDetails
+      };
+
+      this.http.post(`${environment.apiALTEC}/api/cotizaciones`, quotationPayload).subscribe(
+        response => {
+          console.log('Cotización guardada exitosamente:', response);
+          Notiflix.Notify.success('¡Cotización guardada exitosamente!');
+        },
+        error => {
+          console.error('Error al guardar la cotización:', error);
+          Notiflix.Notify.failure('Error al guardar la cotización');
+        }
+      );
     } catch (error) {
       console.error('Error al generar PDF:', error);
       Notiflix.Notify.failure('Error al generar el PDF');
@@ -708,5 +722,38 @@ export class ProductQuoteComponent implements OnInit {
     }
   }
 
+  async saveQuotation() {
+    const quotationNumber = `Q-${Date.now()}`;
+    const quotationDetails = this.cotizacion.map(item => ({
+      productId: item.productId,
+      quantity: item.cantidad,
+      unitPrice: item.precio
+    }));
 
+    const quotationPayload = {
+      quotationNumber,
+      quotationDetails
+    };
+
+    try {
+      await this.http.post(`${environment.apiALTEC}/api/cotizaciones`, quotationPayload).toPromise();
+      console.log('Cotización guardada con éxito');
+    } catch (error) {
+      console.error('Error al guardar la cotización:', error);
+    }
+  }
+
+
+  private generateQuotationNumber(): string {
+    // Generate a unique quotation number (e.g., using a timestamp or UUID)
+    return `Q-${Date.now()}`;
+  }
+
+  private getSelectedProducts(): { id: string; quantity: number; unitPrice: number }[] {
+    return this.selectedProduct.map((product: any) => ({
+      id: product.id,
+      quantity: product.quantity,
+      unitPrice: product.unitPrice
+    }));
+  }
 }
