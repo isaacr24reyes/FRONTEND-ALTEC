@@ -155,15 +155,21 @@ export class SalesModuleComponent implements OnInit {
 
     // Crear un arreglo de peticiones concurrentes para cada item del carrito
     const salesObservables = this.cartItems.map(item => {
+      const product = this.allProducts.find(p => p.id === item.id);
+      const precioImportacion = product?.precioImportacion || 0; // Obtener precioImportacion del producto
+
       const subtotalItem = item.pvp * item.cantidad;
       const taxItem = subtotalItem * this.TAX_RATE;
+
+      // Calcular ganancia total (PVP - precioImportacion) * cantidad
+      const profit = (item.pvp - precioImportacion) * item.cantidad;
 
       const sale: SaleDto = {
         invoiceNumber: invoiceNumber,
         employeeID: employeeID,
         productID: item.id || '', // El backend espera un GUID como string.
         saleDate: saleDate,
-        profit: 0, // TODO: Calcular la ganancia real (PVP - Costo)
+        profit: profit,
         quantity: item.cantidad,
         unitPrice: item.pvp,
         taxAmount: taxItem,
