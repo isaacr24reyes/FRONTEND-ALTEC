@@ -32,16 +32,16 @@ export class ProductQuoteComponent implements OnInit {
   isLoading: boolean = true;
   cotizacion: any[] = [];
   resistorValues: string[] = [
-    '1Ω','8.2Ω','10Ω','20Ω','22Ω','27Ω','47Ω','56Ω','62Ω','68Ω','75Ω','82Ω',
-    '100Ω','110Ω','120Ω','200Ω','220Ω','240Ω','270Ω','300Ω','330Ω','360Ω',
-    '390Ω','470Ω','510Ω','560Ω','680Ω','820Ω',
+    '1Ω', '8.2Ω', '10Ω', '20Ω', '22Ω', '27Ω', '47Ω', '56Ω', '62Ω', '68Ω', '75Ω', '82Ω',
+    '100Ω', '110Ω', '120Ω', '200Ω', '220Ω', '240Ω', '270Ω', '300Ω', '330Ω', '360Ω',
+    '390Ω', '470Ω', '510Ω', '560Ω', '680Ω', '820Ω',
 
-    '1kΩ','1.2kΩ','1.8kΩ','2kΩ','2.2kΩ','2.7kΩ','3.3kΩ','3.9kΩ','4.7kΩ',
-    '5.1kΩ','5.6kΩ','6.2kΩ','6.8kΩ','8.2kΩ','10kΩ','12kΩ','15kΩ','16kΩ',
-    '20kΩ','22kΩ','27kΩ','39kΩ','47kΩ','56kΩ','68kΩ','82kΩ','100kΩ',
-    '120kΩ','150kΩ','220kΩ','270kΩ','330kΩ','470kΩ','560kΩ','750kΩ','820kΩ',
+    '1kΩ', '1.2kΩ', '1.8kΩ', '2kΩ', '2.2kΩ', '2.7kΩ', '3.3kΩ', '3.9kΩ', '4.7kΩ',
+    '5.1kΩ', '5.6kΩ', '6.2kΩ', '6.8kΩ', '8.2kΩ', '10kΩ', '12kΩ', '15kΩ', '16kΩ',
+    '20kΩ', '22kΩ', '27kΩ', '39kΩ', '47kΩ', '56kΩ', '68kΩ', '82kΩ', '100kΩ',
+    '120kΩ', '150kΩ', '220kΩ', '270kΩ', '330kΩ', '470kΩ', '560kΩ', '750kΩ', '820kΩ',
 
-    '1MΩ','2.2MΩ','10MΩ'
+    '1MΩ', '2.2MΩ', '10MΩ'
   ];
   selectedCategory: string = '';
   onlyImport: boolean = false;
@@ -70,7 +70,7 @@ export class ProductQuoteComponent implements OnInit {
 
   selectedResistorValue = '';
   isResistor: boolean = false;
-  @ViewChild('pdfCotizacion', { static: false }) pdfCotizacion!: ElementRef;
+  @ViewChild('pdfCotizacion', {static: false}) pdfCotizacion!: ElementRef;
 
   // Variables para modal de envío y loader
   shippingCost: number = 0;
@@ -81,7 +81,8 @@ export class ProductQuoteComponent implements OnInit {
     private productService: ProductService,
     private fb: UntypedFormBuilder,
     private http: HttpClient
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     this.formGroup = this.fb.group({
@@ -103,6 +104,7 @@ export class ProductQuoteComponent implements OnInit {
         this.applyFilter();
       });
   }
+
   filtrarCategoria(categoria: string) {
     this.selectedCategory = categoria;
     this.currentPage = 1;
@@ -134,7 +136,9 @@ export class ProductQuoteComponent implements OnInit {
     this.applyFilter();
   }
 
-  onSubmit() {}
+  onSubmit() {
+  }
+
   openProductModal(product: any): void {
     this.selectedProduct = product;
 
@@ -183,6 +187,7 @@ export class ProductQuoteComponent implements OnInit {
       }
     });
   }
+
   applyFilter(): void {
     const raw = this.formGroup.get('searchControl')!.value || '';
     const tokens = this.tokenize(raw);
@@ -216,7 +221,7 @@ export class ProductQuoteComponent implements OnInit {
           );
 
           const score = matchesAll ? this.scoreMatch(normDesc, normCode, tokens) : -1;
-          return { p, score };
+          return {p, score};
         })
         .filter(x => x.score >= 0)
         .sort((a, b) => b.score - a.score)
@@ -335,7 +340,7 @@ export class ProductQuoteComponent implements OnInit {
       };
     }
 
-    const nuevoItem = { ...item };
+    const nuevoItem = {...item};
     nuevoItem.foto = item.foto;
 
     if (item.foto) {
@@ -441,8 +446,11 @@ export class ProductQuoteComponent implements OnInit {
 
     let tableRows = '';
     this.cotizacion.forEach((item, index) => {
-      const totalFormatted = new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' }).format(item.total);
-      const precioFormatted = new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' }).format(item.precio || 0);
+      const totalFormatted = new Intl.NumberFormat('es-EC', {style: 'currency', currency: 'USD'}).format(item.total);
+      const precioFormatted = new Intl.NumberFormat('es-EC', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(item.precio || 0);
       const bgColor = index % 2 === 0 ? '#f8f9fa' : '#ffffff';
 
       tableRows += `
@@ -450,8 +458,8 @@ export class ProductQuoteComponent implements OnInit {
         <td style="border: 1px solid #dee2e6; padding: 8px; font-size: 11px;">${item.descripcion}</td>
         <td style="border: 1px solid #dee2e6; padding: 8px; text-align: center; font-size: 11px;">
           ${item.fotoBase64 ? `<img src="${item.fotoBase64}" alt="Producto" style="max-height: 50px; max-width: 50px; object-fit: contain;">`
-            : item.foto ? `<img src="${item.foto}" alt="Producto" style="max-height: 50px; max-width: 50px; object-fit: contain;">`
-            : '—'}
+        : item.foto ? `<img src="${item.foto}" alt="Producto" style="max-height: 50px; max-width: 50px; object-fit: contain;">`
+          : '—'}
         </td>
         <td style="border: 1px solid #dee2e6; padding: 8px; text-align: center; font-size: 11px; font-weight: bold;">${item.cantidad}</td>
         <td style="border: 1px solid #dee2e6; padding: 8px; text-align: right; font-size: 11px;">${precioFormatted}</td>
@@ -477,7 +485,7 @@ export class ProductQuoteComponent implements OnInit {
         <tr style="background: linear-gradient(135deg, #10B981, #059669); color: white;">
           <td colspan="4" style="text-align: right; font-weight: bold; padding: 12px; border: 1px solid #059669; font-size: 13px;">TOTAL GENERAL:</td>
           <td style="font-weight: bold; padding: 12px; border: 1px solid #059669; text-align: right; font-size: 15px;">
-            ${new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' }).format(this.totalCotizacion)}
+            ${new Intl.NumberFormat('es-EC', {style: 'currency', currency: 'USD'}).format(this.totalCotizacion)}
           </td>
         </tr>
       </tfoot>
@@ -503,67 +511,58 @@ export class ProductQuoteComponent implements OnInit {
       <p style="margin: 5px 0; font-weight: bold; color: #8B50FB;">Developed by SwiFt© 2025</p>
     </div>`;
 
-    // Add quotation number to the PDF
-    const pdfHeader = `
-    <div style="text-align: center; margin-bottom: 20px;">
-      <h2 style="color: #0C1E3A; font-weight: bold;">Cotización N°: {{ quotationNumber }}</h2>
-    </div>`;
+    // Generate a unique quotation number
+    const quotationNumber = this.generateQuotationNumber(); // Generar un número único para la cotización
+    const quotationDetails = this.cotizacion.map(product => ({
+      productId: product.id,
+      quantity: product.cantidad,
+      unitPrice: product.precio // Assuming 'precio' is the unit price of the product
+    }));
 
-    container.innerHTML = pdfHeader + header + table + footer;
-
-    const opciones = {
-      margin: [10, 10, 10, 10],
-      filename: `ALTEC-Cotizacion-${now.toISOString().slice(0, 10)}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        logging: false,
-        useCORS: true,
-        letterRendering: true
-      },
-      jsPDF: {
-        unit: 'mm',
-        format: 'letter',
-        orientation: 'portrait'
-      },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    const quotationPayload = {
+      quotationNumber: quotationNumber,
+      quotationDetails: quotationDetails
     };
 
-    try {
-      await html2pdf().from(container).set(opciones).save();
-      this.downloadMessage = '¡PDF descargado exitosamente!';
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      Notiflix.Notify.success('PDF descargado correctamente');
+    // Save the quotation first
+    this.http.post(`${environment.apiALTEC}/api/cotizaciones`, quotationPayload).subscribe(
+      response => {
+        console.log('Cotización guardada exitosamente:', response);
+        Notiflix.Notify.success('¡Cotización guardada exitosamente!');
 
-      // Llamar al endpoint para guardar la cotización
-      const quotationNumber = this.generateQuotationNumber(); // Generar un número único para la cotización
-      const quotationDetails = this.cotizacion.map(product => ({
-        productId: product.id,
-        quantity: product.cantidad,
-        unitPrice: product.precio // Assuming 'precio' is the unit price of the product
-      }));
+        // Add quotation number to the PDF
+        const pdfHeader = `
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h2 style="color: #0C1E3A; font-weight: bold;">Cotización N°: ${quotationNumber}</h2>
+        </div>`;
 
-      const quotationPayload = {
-        quotationNumber: quotationNumber,
-        quotationDetails: quotationDetails
-      };
+        container.innerHTML = pdfHeader + header + table + footer;
 
-      this.http.post(`${environment.apiALTEC}/api/cotizaciones`, quotationPayload).subscribe(
-        response => {
-          console.log('Cotización guardada exitosamente:', response);
-          Notiflix.Notify.success('¡Cotización guardada exitosamente!');
-        },
-        error => {
-          console.error('Error al guardar la cotización:', error);
-          Notiflix.Notify.failure('Error al guardar la cotización');
-        }
-      );
-    } catch (error) {
-      console.error('Error al generar PDF:', error);
-      Notiflix.Notify.failure('Error al generar el PDF');
-    } finally {
-      this.isDownloading = false;
-    }
+        const opciones = {
+          margin: [10, 10, 10, 10],
+          filename: `ALTEC-Cotizacion-${now.toISOString().slice(0, 10)}.pdf`,
+          image: {type: 'jpeg', quality: 0.98},
+          html2canvas: {
+            scale: 2,
+            logging: false,
+            useCORS: true,
+            letterRendering: true
+          },
+          jsPDF: {
+            unit: 'mm',
+            format: 'letter',
+            orientation: 'portrait'
+          },
+          pagebreak: {mode: ['avoid-all', 'css', 'legacy']}
+        };
+
+        html2pdf().from(container).set(opciones).save();
+      },
+      error => {
+        console.error('Error al guardar la cotización:', error);
+        Notiflix.Notify.failure('Error al guardar la cotización');
+      }
+    );
   }
 
   incluirEnvio() {
@@ -615,6 +614,7 @@ export class ProductQuoteComponent implements OnInit {
   updateTotal() {
     this.cotizacion = [...this.cotizacion];
   }
+
   async descargarExcelConImagenes() {
     this.isDownloading = true;
     this.downloadMessage = 'Generando Excel...';
@@ -628,24 +628,24 @@ export class ProductQuoteComponent implements OnInit {
     worksheet.mergeCells('A1:E1');
     const titleCell = worksheet.getCell('A1');
     titleCell.value = 'COTIZACIÓN - ALTEC MECATRÓNICA';
-    titleCell.font = { size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+    titleCell.font = {size: 16, bold: true, color: {argb: 'FFFFFFFF'}};
     titleCell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FF0C1E3A' }
+      fgColor: {argb: 'FF0C1E3A'}
     };
-    titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+    titleCell.alignment = {vertical: 'middle', horizontal: 'center'};
     worksheet.getRow(1).height = 30;
 
     // Cabeceras
     const headerRow = worksheet.addRow(['Producto', 'Imagen', 'Cantidad', 'Precio Unit.', 'Total']);
-    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.font = {bold: true, color: {argb: 'FFFFFFFF'}};
     headerRow.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FF1a3a5c' }
+      fgColor: {argb: 'FF1a3a5c'}
     };
-    headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+    headerRow.alignment = {vertical: 'middle', horizontal: 'center'};
     headerRow.height = 25;
 
     for (const item of this.cotizacion) {
@@ -657,7 +657,7 @@ export class ProductQuoteComponent implements OnInit {
         item.total
       ]);
 
-      row.alignment = { vertical: 'middle', horizontal: 'left' };
+      row.alignment = {vertical: 'middle', horizontal: 'left'};
       row.height = 60;
 
       if (item.foto) {
@@ -672,8 +672,8 @@ export class ProductQuoteComponent implements OnInit {
           });
 
           worksheet.addImage(imageId, {
-            tl: { col: 1, row: row.number - 1 },
-            ext: { width: 70, height: 50 }
+            tl: {col: 1, row: row.number - 1},
+            ext: {width: 70, height: 50}
           });
         } catch (err) {
           console.warn('No se pudo cargar la imagen:', err);
@@ -683,21 +683,21 @@ export class ProductQuoteComponent implements OnInit {
 
     // Fila de total
     const totalRow = worksheet.addRow(['', '', '', 'TOTAL:', this.totalCotizacion]);
-    totalRow.font = { bold: true, size: 12 };
+    totalRow.font = {bold: true, size: 12};
     totalRow.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FF10B981' }
+      fgColor: {argb: 'FF10B981'}
     };
-    totalRow.getCell(5).font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } };
+    totalRow.getCell(5).font = {bold: true, size: 14, color: {argb: 'FFFFFFFF'}};
 
     // Ajustar ancho de columnas
     worksheet.columns = [
-      { width: 50 },
-      { width: 15 },
-      { width: 12 },
-      { width: 15 },
-      { width: 15 }
+      {width: 50},
+      {width: 15},
+      {width: 12},
+      {width: 15},
+      {width: 15}
     ];
 
     // Formatear como moneda
@@ -710,7 +710,7 @@ export class ProductQuoteComponent implements OnInit {
 
     try {
       const buffer = await workbook.xlsx.writeBuffer();
-      saveAs(new Blob([buffer]), `ALTEC-Cotizacion-${new Date().toISOString().slice(0,10)}.xlsx`);
+      saveAs(new Blob([buffer]), `ALTEC-Cotizacion-${new Date().toISOString().slice(0, 10)}.xlsx`);
       this.downloadMessage = '¡Excel descargado exitosamente!';
       await new Promise(resolve => setTimeout(resolve, 1000));
       Notiflix.Notify.success('Excel descargado correctamente');
@@ -722,38 +722,12 @@ export class ProductQuoteComponent implements OnInit {
     }
   }
 
-  async saveQuotation() {
-    const quotationNumber = `Q-${Date.now()}`;
-    const quotationDetails = this.cotizacion.map(item => ({
-      productId: item.productId,
-      quantity: item.cantidad,
-      unitPrice: item.precio
-    }));
-
-    const quotationPayload = {
-      quotationNumber,
-      quotationDetails
-    };
-
-    try {
-      await this.http.post(`${environment.apiALTEC}/api/cotizaciones`, quotationPayload).toPromise();
-      console.log('Cotización guardada con éxito');
-    } catch (error) {
-      console.error('Error al guardar la cotización:', error);
-    }
+  private generateTableHTML() {
+    // Implementation of the method to generate table HTML for the PDF.
+    return '<table><tr><td>Sample Data</td></tr></table>'; // Replace with actual implementation.
   }
-
 
   private generateQuotationNumber(): string {
-    // Generate a unique quotation number (e.g., using a timestamp or UUID)
     return `Q-${Date.now()}`;
-  }
-
-  private getSelectedProducts(): { id: string; quantity: number; unitPrice: number }[] {
-    return this.selectedProduct.map((product: any) => ({
-      id: product.id,
-      quantity: product.quantity,
-      unitPrice: product.unitPrice
-    }));
   }
 }
