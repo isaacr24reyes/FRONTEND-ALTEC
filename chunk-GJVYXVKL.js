@@ -1,0 +1,1 @@
+var e={loading:"Loading..."},o={defaultLang:"es"},i={confirmMassageBoxTitle:"Confirmaci\xF3n",alertMessageBoxTile:"Alerta",successNotifier:"Exito",errorNotifier:"Error",warningNotifier:"Alerta",notifyNotifier:"Notificaci\xF3n",messageNotifier:"Informaci\xF3n",cancelMessageBoxLabel:"Cancelar",okMessageBoxLabel:"OK"};export{e as a,o as b,i as c};
