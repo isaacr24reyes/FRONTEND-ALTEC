@@ -151,7 +151,7 @@ export class StoreComponent implements OnInit, AfterViewInit, OnDestroy {
     private fb: UntypedFormBuilder,
     private loaderService: LoaderService,
     private cartService: CartService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.isDistribuidor = sessionStorage.getItem('isDistribuidor') === 'true';
@@ -287,6 +287,18 @@ export class StoreComponent implements OnInit, AfterViewInit, OnDestroy {
     const modalElement = document.getElementById('ledModal');
     const modalInstance = (window as any).bootstrap.Modal.getInstance(modalElement);
     modalInstance?.hide();
+  }
+
+
+  /**
+   * Retorna true ÚNICAMENTE si el stock del producto es exactamente 0.
+   * Soporta el valor como number o string, y maneja undefined/null como "hay stock".
+   */
+  isOutOfStock(product: any): boolean {
+    if (!product) return false;
+    const rawStock = product.stock !== undefined ? product.stock : product.Stock;
+    if (rawStock === undefined || rawStock === null || rawStock === '') return false;
+    return Number(rawStock) === 0;
   }
 
 

@@ -23,23 +23,23 @@
 
           <p class="lead text-white-50 mb-4 animate-fade-in-delay">
             {{
-              isDistribuidor
-                ? 'Accede a precios exclusivos mayoristas y productos premium'
-                : isCliente
-                  ? 'Continúa acumulando Altec-Puntos con cada compra'
-                  : 'Descubre tecnología de calidad para tus proyectos'
+            isDistribuidor
+            ? 'Accede a precios exclusivos mayoristas y productos premium'
+            : isCliente
+            ? 'Continúa acumulando Altec-Puntos con cada compra'
+            : 'Descubre tecnología de calidad para tus proyectos'
             }}
           </p>
 
           <!-- Badge de rol -->
           @if (isDistribuidor) {
-            <span class="badge bg-gradient-purple px-4 py-2 rounded-pill mb-4">
-              <i class="bi bi-star-fill me-2"></i>Distribuidor Premium
-            </span>
+          <span class="badge bg-gradient-purple px-4 py-2 rounded-pill mb-4">
+            <i class="bi bi-star-fill me-2"></i>Distribuidor Premium
+          </span>
           } @else if (isCliente) {
-            <span class="badge bg-gradient-blue px-4 py-2 rounded-pill mb-4">
-              <i class="bi bi-award-fill me-2"></i>Cliente Verificado
-            </span>
+          <span class="badge bg-gradient-blue px-4 py-2 rounded-pill mb-4">
+            <i class="bi bi-award-fill me-2"></i>Cliente Verificado
+          </span>
           }
         </div>
 
@@ -57,30 +57,17 @@
               <span class="input-group-text bg-dark border-0">
                 <i class="bi bi-search text-primary"></i>
               </span>
-              <input
-                type="search"
-                class="form-control form-control-lg border-0 bg-dark text-white"
-                placeholder="Buscar productos, categorías, códigos..."
-                aria-label="Buscar productos"
-                formControlName="searchTerm"
-                (input)="onSearchChange()"
-                spellcheck="false"
-                autocomplete="off"
-                autocapitalize="off"
-              />
-              <button
-                type="button"
-                class="btn btn-primary d-none d-md-inline-flex align-items-center gap-2"
+              <input type="search" class="form-control form-control-lg border-0 bg-dark text-white"
+                placeholder="Buscar productos, categorías, códigos..." aria-label="Buscar productos"
+                formControlName="searchTerm" (input)="onSearchChange()" spellcheck="false" autocomplete="off"
+                autocapitalize="off" />
+              <button type="button" class="btn btn-primary d-none d-md-inline-flex align-items-center gap-2"
                 (click)="onSearchChange()">
                 <i class="bi bi-search"></i>
                 <span>Buscar</span>
               </button>
-              <button
-                type="button"
-                class="btn btn-outline-light d-inline-flex d-md-none align-items-center gap-2"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#filtersOffcanvas"
-                aria-controls="filtersOffcanvas">
+              <button type="button" class="btn btn-outline-light d-inline-flex d-md-none align-items-center gap-2"
+                data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">
                 <i class="bi bi-funnel"></i>
                 <span>Filtros</span>
               </button>
@@ -138,11 +125,8 @@
             </div>
 
             <!-- Botón limpiar filtros -->
-            <button
-              class="btn btn-outline-secondary w-100 mb-4 d-flex align-items-center justify-content-center gap-2"
-              type="button"
-              (click)="clearFilters()"
-              [disabled]="selectedCategories.length === 0">
+            <button class="btn btn-outline-secondary w-100 mb-4 d-flex align-items-center justify-content-center gap-2"
+              type="button" (click)="clearFilters()" [disabled]="selectedCategories.length === 0">
               <i class="bi bi-x-circle"></i>
               <span>Limpiar filtros</span>
             </button>
@@ -155,16 +139,9 @@
               </h6>
 
               <div class="categories-list">
-                <label
-                  *ngFor="let cat of categories"
-                  class="category-item">
-                  <input
-                    type="checkbox"
-                    class="form-check-input"
-                    [value]="cat"
-                    [checked]="selectedCategories.includes(cat)"
-                    (change)="onCategoryChange($event)"
-                  />
+                <label *ngFor="let cat of categories" class="category-item">
+                  <input type="checkbox" class="form-check-input" [value]="cat"
+                    [checked]="selectedCategories.includes(cat)" (change)="onCategoryChange($event)" />
                   <span class="category-label">{{ cat }}</span>
                   <i class="bi bi-chevron-right category-arrow"></i>
                 </label>
@@ -191,7 +168,7 @@
           <i class="bi bi-funnel-fill text-primary"></i>
           <span class="fw-bold">Filtros de Búsqueda</span>
           @if (selectedCategories.length > 0) {
-            <span class="badge bg-primary rounded-pill">{{ selectedCategories.length }}</span>
+          <span class="badge bg-primary rounded-pill">{{ selectedCategories.length }}</span>
           }
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -200,19 +177,13 @@
       <div class="offcanvas-body">
         <!-- Botones de acción destacados -->
         <div class="filter-actions-mobile mb-4">
-          <button
-            class="btn btn-outline-danger w-100 mb-2 d-flex align-items-center justify-content-center gap-2"
-            type="button"
-            (click)="clearFilters()"
-            [disabled]="selectedCategories.length === 0">
+          <button class="btn btn-outline-danger w-100 mb-2 d-flex align-items-center justify-content-center gap-2"
+            type="button" (click)="clearFilters()" [disabled]="selectedCategories.length === 0">
             <i class="bi bi-x-circle-fill"></i>
             <span>Limpiar todos los filtros</span>
           </button>
-          <button
-            class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
-            type="button"
-            data-bs-dismiss="offcanvas"
-            (click)="applyFilter()">
+          <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" type="button"
+            data-bs-dismiss="offcanvas" (click)="applyFilter()">
             <i class="bi bi-check-circle-fill"></i>
             <span>Aplicar filtros ({{ selectedCategories.length }})</span>
           </button>
@@ -232,18 +203,10 @@
           </h6>
 
           <div class="categories-list-mobile">
-            <label
-              *ngFor="let cat of categories"
-              class="category-item-mobile">
+            <label *ngFor="let cat of categories" class="category-item-mobile">
               <div class="form-check">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  [id]="'mobile-cat-' + cat"
-                  [value]="cat"
-                  [checked]="selectedCategories.includes(cat)"
-                  (change)="onCategoryChange($event)"
-                />
+                <input type="checkbox" class="form-check-input" [id]="'mobile-cat-' + cat" [value]="cat"
+                  [checked]="selectedCategories.includes(cat)" (change)="onCategoryChange($event)" />
                 <label class="form-check-label w-100" [for]="'mobile-cat-' + cat">
                   <span class="category-name">{{ cat }}</span>
                   <i class="bi bi-chevron-right category-arrow"></i>
@@ -255,11 +218,8 @@
 
         <!-- Botón aplicar fijo al final -->
         <div class="filter-actions-bottom mt-4 pt-3 border-top">
-          <button
-            class="btn btn-lg btn-primary w-100 shadow-lg d-flex align-items-center justify-content-center gap-2"
-            type="button"
-            data-bs-dismiss="offcanvas"
-            (click)="applyFilter()">
+          <button class="btn btn-lg btn-primary w-100 shadow-lg d-flex align-items-center justify-content-center gap-2"
+            type="button" data-bs-dismiss="offcanvas" (click)="applyFilter()">
             <i class="bi bi-check-circle-fill"></i>
             <span>Ver resultados</span>
           </button>
@@ -276,9 +236,9 @@
           <div>
             <h4 class="mb-1 text-white fw-bold">
               @if (selectedCategories.length > 0) {
-                Resultados filtrados
+              Resultados filtrados
               } @else {
-                Todos los productos
+              Todos los productos
               }
             </h4>
             <p class="text-white-50 mb-0">
@@ -302,23 +262,21 @@
       <!-- Grid de productos mejorado -->
       <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
         <div class="col" *ngFor="let product of products">
-          <div class="product-card h-100">
+          <div class="product-card h-100" [class.product-out-of-stock]="isOutOfStock(product)">
 
             <!-- Badge de categoría -->
             @if (product.categoria) {
-              <div class="category-badge">
-                <i class="bi bi-tag-fill me-1"></i>
-                {{ product.categoria }}
-              </div>
+            <div class="category-badge">
+              <i class="bi bi-tag-fill me-1"></i>
+              {{ product.categoria }}
+            </div>
             }
 
             <!-- Imagen del producto -->
             <div class="product-image-wrapper">
               <ng-container *ngIf="product.foto && product.foto !== 'NOT-IMAGE'; else noImage">
-                <img
-                  [src]="product.foto"
-                  [alt]="product.descripcion"
-                  class="product-image">
+                <img [src]="product.foto" [alt]="product.descripcion" class="product-image"
+                  [style.filter]="isOutOfStock(product) ? 'grayscale(100%) opacity(0.5)' : 'none'">
               </ng-container>
               <ng-template #noImage>
                 <div class="no-image-placeholder">
@@ -327,8 +285,16 @@
                 </div>
               </ng-template>
 
-              <!-- Quick view button (hover) -->
-              <div class="product-overlay">
+              <!-- ❌ OVERLAY SIN STOCK -->
+              <div class="oos-overlay" *ngIf="isOutOfStock(product)">
+                <div class="oos-badge">
+                  <i class="bi bi-slash-circle-fill"></i>
+                  SIN STOCK
+                </div>
+              </div>
+
+              <!-- Quick view button (hover) — solo si hay stock -->
+              <div class="product-overlay" *ngIf="!isOutOfStock(product)">
                 <button class="btn btn-sm btn-light rounded-pill">
                   <i class="bi bi-eye me-1"></i>
                   Vista rápida
@@ -345,56 +311,58 @@
                   {{ product.descripcion }}
                 </h5>
                 @if (product.codigo) {
-                  <span class="product-code">
-                    <i class="bi bi-upc-scan me-1"></i>
-                    {{ product.codigo }}
-                  </span>
+                <span class="product-code">
+                  <i class="bi bi-upc-scan me-1"></i>
+                  {{ product.codigo }}
+                </span>
                 }
               </div>
 
               <!-- Precio destacado -->
               <div class="product-price-section mb-3">
                 @if (isDistribuidor) {
-                  <div class="price-wrapper">
-                    <span class="price-label">Precio mayorista</span>
-                    <span class="price-value">${{ product.precioMayorista }}</span>
-                  </div>
+                <div class="price-wrapper">
+                  <span class="price-label">Precio mayorista</span>
+                  <span class="price-value">${{ product.precioMayorista }}</span>
+                </div>
                 } @else {
-                  <div class="price-wrapper">
-                    <span class="price-label">Precio</span>
-                    <span class="price-value">{{ product.pvp | currency:'USD' }}</span>
-                  </div>
+                <div class="price-wrapper">
+                  <span class="price-label">Precio</span>
+                  <span class="price-value">{{ product.pvp | currency:'USD' }}</span>
+                </div>
                 }
               </div>
 
               <!-- Acciones del producto -->
-              <div class="product-actions">
-                <div class="quantity-selector">
-                  <button
-                    class="btn btn-sm btn-outline-secondary"
-                    (click)="decrementQuantity(product)">
-                    <i class="bi bi-dash"></i>
-                  </button>
-                  <input
-                    type="number"
-                    class="form-control form-control-sm text-center"
-                    min="1"
-                    [(ngModel)]="product.cantidad"
-                    [ngModelOptions]="{standalone: true}">
-                  <button
-                    class="btn btn-sm btn-outline-secondary"
-                    (click)="incrementQuantity(product)">
-                    <i class="bi bi-plus"></i>
+              <ng-container *ngIf="isOutOfStock(product); else inStock">
+                <div class="product-actions">
+                  <button class="btn w-100 d-flex align-items-center justify-content-center gap-2 btn-agotado" disabled>
+                    <i class="bi bi-slash-circle-fill"></i>
+                    <span>Agotado</span>
                   </button>
                 </div>
+              </ng-container>
 
-                <button
-                  class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
-                  (click)="addToCart(product)">
-                  <i class="bi bi-cart-plus-fill"></i>
-                  <span>Agregar</span>
-                </button>
-              </div>
+              <ng-template #inStock>
+                <div class="product-actions">
+                  <div class="quantity-selector">
+                    <button class="btn btn-sm btn-outline-secondary" (click)="decrementQuantity(product)">
+                      <i class="bi bi-dash"></i>
+                    </button>
+                    <input type="number" class="form-control form-control-sm text-center" min="1"
+                      [(ngModel)]="product.cantidad" [ngModelOptions]="{standalone: true}">
+                    <button class="btn btn-sm btn-outline-secondary" (click)="incrementQuantity(product)">
+                      <i class="bi bi-plus"></i>
+                    </button>
+                  </div>
+
+                  <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                    (click)="addToCart(product)">
+                    <i class="bi bi-cart-plus-fill"></i>
+                    <span>Agregar</span>
+                  </button>
+                </div>
+              </ng-template>
 
             </div>
           </div>
@@ -413,10 +381,7 @@
           <nav aria-label="Paginación de productos">
             <ul class="pagination mb-0">
               <li class="page-item" [class.disabled]="currentPage === 1">
-                <button
-                  class="page-link"
-                  (click)="onPreviousPage()"
-                  [disabled]="currentPage === 1">
+                <button class="page-link" (click)="onPreviousPage()" [disabled]="currentPage === 1">
                   <i class="bi bi-chevron-left"></i>
                   <span class="d-none d-sm-inline ms-1">Anterior</span>
                 </button>
@@ -428,10 +393,7 @@
               </li>
 
               <li class="page-item" [class.disabled]="currentPage === totalPages">
-                <button
-                  class="page-link"
-                  (click)="onNextPage()"
-                  [disabled]="currentPage === totalPages">
+                <button class="page-link" (click)="onNextPage()" [disabled]="currentPage === totalPages">
                   <span class="d-none d-sm-inline me-1">Siguiente</span>
                   <i class="bi bi-chevron-right"></i>
                 </button>
