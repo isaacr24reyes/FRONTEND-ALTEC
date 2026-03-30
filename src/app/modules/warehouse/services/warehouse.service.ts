@@ -62,5 +62,13 @@ export class ProductService extends ApplicationBaseService {
     return this.genericSend('get', 'api/Products/imported', null);
   }
 
+  reducirStock(productId: string, quantity: number): Observable<any> {
+    const url = `${this.apiUrl}/api/Products/${productId}/reducir-stock`;
+    return this.http.patch(url, { quantity });
+  }
 
+  aumentarStock(productId: string, quantity: number): Observable<any> {
+    const url = `${this.apiUrl}/api/Products/${productId}/aumentar-stock`;
+    return this.http.patch(url, { quantity });
+  }
 }

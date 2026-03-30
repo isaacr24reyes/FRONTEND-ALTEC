@@ -12,6 +12,10 @@
         <p class="hero-subtitle animate-fade-in-delay">
           Busca productos y genera cotizaciones profesionales en segundos
         </p>
+        <button type="button" class="btn-historial animate-fade-in-delay" (click)="abrirHistorial()">
+          <i class="bi bi-clock-history me-2"></i>
+          Historial de Cotizaciones
+        </button>
       </div>
     </div>
 
@@ -380,11 +384,11 @@
           <div *ngIf="isResistor" class="resistor-selector">
             <label class="resistor-label">
               <i class="bi bi-lightning-charge-fill me-2"></i>
-              Valor de la resistencia
+              {{ resistorLabel }} — Selecciona el valor
             </label>
             <select class="resistor-select" [(ngModel)]="selectedResistorValue">
               <option value="">-- Selecciona el valor --</option>
-              <option *ngFor="let r of resistorValues" [value]="r">{{ r }}</option>
+              <option *ngFor="let r of activeResistorValues" [value]="r">{{ r }}</option>
             </select>
           </div>
           <app-car-shop
@@ -439,6 +443,116 @@
             Confirmar
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📋 Modal Historial de Cotizaciones -->
+  <div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content historial-modal">
+
+        <div class="modal-header historial-modal-header">
+          <div class="historial-header-content">
+            <div class="historial-title-group">
+              <i class="bi bi-clock-history historial-icon"></i>
+              <div>
+                <h5 class="modal-title" id="historialModalLabel">Historial de Cotizaciones</h5>
+                <span class="historial-subtitle">{{ historialCotizaciones.length }} cotización(es) registrada(s)</span>
+              </div>
+            </div>
+            <div class="historial-search-wrapper">
+              <i class="bi bi-search historial-search-icon"></i>
+              <input
+                type="text"
+                class="historial-search-input"
+                placeholder="Buscar por N° de cotización..."
+                [(ngModel)]="busquedaHistorial"
+                [ngModelOptions]="{standalone: true}">
+              <button class="historial-search-clear" *ngIf="busquedaHistorial" (click)="busquedaHistorial = ''">
+                <i class="bi bi-x-circle-fill"></i>
+              </button>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white ms-3" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body historial-modal-body">
+
+          <!-- Cargando -->
+          <div *ngIf="cargandoHistorial" class="historial-loading">
+            <div class="historial-spinner"></div>
+            <p>Cargando historial...</p>
+          </div>
+
+          <!-- Sin resultados -->
+          <div *ngIf="!cargandoHistorial && cotizacionesFiltradas.length === 0" class="historial-empty">
+            <i class="bi bi-inbox historial-empty-icon"></i>
+            <p *ngIf="historialCotizaciones.length === 0">No hay cotizaciones registradas aún</p>
+            <p *ngIf="historialCotizaciones.length > 0">No se encontraron cotizaciones con ese número</p>
+          </div>
+
+          <!-- Lista de cotizaciones -->
+          <div *ngIf="!cargandoHistorial && cotizacionesFiltradas.length > 0" class="historial-list">
+            <div
+              class="historial-card"
+              *ngFor="let cot of cotizacionesFiltradas"
+              (click)="cargarCotizacion(cot)">
+
+              <div class="historial-card-left">
+                <div class="historial-number-badge">
+                  <i class="bi bi-hash"></i>{{ cot.quotationNumber }}
+                </div>
+                <div class="historial-date">
+                  <i class="bi bi-calendar3 me-1"></i>
+                  {{ cot.createdAt | date:'dd/MM/yyyy' }}
+                  <span class="historial-time">
+                    <i class="bi bi-clock me-1"></i>
+                    {{ cot.createdAt | date:'HH:mm' }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="historial-card-center">
+                <div class="historial-items-summary">
+                  <span class="historial-items-count">
+                    <i class="bi bi-box-seam me-1"></i>
+                    {{ cot.itemCount }} producto(s)
+                  </span>
+                  <div class="historial-items-preview">
+                    <span *ngFor="let item of cot.items | slice:0:3" class="historial-item-chip">
+                      x{{ $any(item).quantity }}
+                    </span>
+                    <span *ngIf="cot.items.length > 3" class="historial-item-chip historial-item-more">
+                      +{{ cot.items.length - 3 }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="historial-card-right">
+                <div class="historial-total">
+                  {{ cot.totalAmount | currency }}
+                </div>
+                <button class="btn-cargar-cot" type="button">
+                  <i class="bi bi-arrow-up-circle-fill me-1"></i>
+                  Cargar
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer historial-modal-footer">
+          <span class="historial-footer-note">
+            <i class="bi bi-info-circle me-1"></i>
+            Al cargar una cotización se aplicarán los precios actuales de cada producto
+          </span>
+          <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+
       </div>
     </div>
   </div>

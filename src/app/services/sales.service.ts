@@ -22,4 +22,8 @@ export class SalesService {
   getHistoricSales(pageNumber: number, pageSize: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}?pageNumber=${pageNumber}&pageSize=${pageSize}`);
   }
+
+  cancelInvoice(invoiceNumber: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${invoiceNumber}/cancelar`, {});
+  }
 }

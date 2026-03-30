@@ -104,86 +104,491 @@ $border-color: #2d3561;
 // ============================================
 
 .filters-section {
-    input {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid $border-color;
-        color: $text-primary;
-        transition: all 0.3s ease;
+    .filters-body { display: flex; flex-direction: column; }
 
-        &:focus {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: $primary-color;
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
-            color: $text-primary;
+    .filter-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.65rem;
+    }
+
+    .filter-field, .filter-search {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: $text-secondary;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 4px;
+            i { color: $primary-color; }
         }
     }
 
-    .input-group-text {
+    .filter-input {
+        background: rgba(255,255,255,0.06);
         border: 1px solid $border-color;
-        color: $secondary-color;
+        color: $text-primary;
+        border-radius: 8px !important;
+        font-size: 0.82rem;
+        transition: all 0.2s;
+
+        &:focus {
+            background: rgba(108,92,231,0.1);
+            border-color: $primary-color;
+            box-shadow: 0 0 0 3px rgba(108,92,231,0.15);
+            color: $text-primary;
+        }
+
+        &::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+    }
+
+    .filter-input-icon {
+        background: rgba(108,92,231,0.12);
+        border: 1px solid $border-color;
+        border-right: none;
+        color: $primary-light;
+    }
+
+    .filter-clear-btn {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid $border-color;
+        border-left: none;
+        color: $text-secondary;
+        padding: 0 8px;
+        transition: color 0.2s;
+        &:hover { color: $danger-color; }
+    }
+
+    .filter-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.75rem;
+    }
+
+    .filter-count {
+        font-size: 0.75rem;
+        color: $text-secondary;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid $border-color;
+        border-radius: 6px;
+        padding: 3px 10px;
+    }
+
+    .btn-filter-clear {
+        background: rgba(214,48,49,0.12);
+        border: 1px solid rgba(214,48,49,0.35);
+        color: #ff7675;
+        border-radius: 8px;
+        padding: 4px 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        &:hover { background: rgba(214,48,49,0.28); color: #fff; }
     }
 }
 
 // ============================================
-// 📊 CUSTOM CHART
+// 📊 KPI CARDS
+// ============================================
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+}
+
+.kpi-card {
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid transparent;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+
+    .kpi-icon {
+        font-size: 1.4rem;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .kpi-body {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .kpi-label {
+        font-size: 0.68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.75;
+    }
+
+    .kpi-value {
+        font-size: 1rem;
+        font-weight: 800;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &.kpi-ventas {
+        background: linear-gradient(135deg, rgba(108,92,231,0.18) 0%, rgba(162,155,254,0.1) 100%);
+        border-color: rgba(108,92,231,0.35);
+        color: $primary-light;
+        .kpi-icon { background: rgba(108,92,231,0.25); color: $primary-light; }
+    }
+
+    &.kpi-ganancia {
+        background: linear-gradient(135deg, rgba(0,184,148,0.18) 0%, rgba(85,239,196,0.1) 100%);
+        border-color: rgba(0,184,148,0.35);
+        color: $secondary-light;
+        .kpi-icon { background: rgba(0,184,148,0.25); color: $secondary-light; }
+    }
+
+    &.kpi-margen {
+        background: linear-gradient(135deg, rgba(253,203,110,0.18) 0%, rgba(253,203,110,0.08) 100%);
+        border-color: rgba(253,203,110,0.35);
+        color: #fdcb6e;
+        .kpi-icon { background: rgba(253,203,110,0.2); color: #fdcb6e; }
+    }
+
+    &.kpi-facturas {
+        background: linear-gradient(135deg, rgba(116,185,255,0.18) 0%, rgba(116,185,255,0.08) 100%);
+        border-color: rgba(116,185,255,0.35);
+        color: #74b9ff;
+        .kpi-icon { background: rgba(116,185,255,0.2); color: #74b9ff; }
+    }
+}
+
+// ============================================
+// 📊 CHART TOGGLE & LEGEND
+// ============================================
+
+.chart-toggle {
+    display: flex;
+    gap: 4px;
+
+    button {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid $border-color;
+        color: $text-secondary;
+        border-radius: 6px;
+        padding: 3px 10px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover { background: rgba(108,92,231,0.2); color: $primary-light; }
+
+        &.active {
+            background: $primary-color;
+            border-color: $primary-color;
+            color: #fff;
+        }
+    }
+}
+
+.chart-legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: $text-secondary;
+    margin-bottom: 0.75rem;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    display: inline-block;
+
+    &.legend-ventas  { background: $primary-color; }
+    &.legend-ganancia { background: $secondary-color; }
+}
+
+// ============================================
+// 📊 CUSTOM CHART (dual bars — pixel heights)
 // ============================================
 
 .custom-chart {
-    height: 250px;
-    padding-top: 2rem;
+    position: relative;
+}
 
-    .chart-bars {
-        display: flex;
-        justify-content: space-around;
-        align-items: flex-end;
-        height: 100%;
-        border-bottom: 2px solid $border-color;
-        padding-bottom: 0.5rem;
+.chart-area {
+    position: relative;
+    height: 214px;   // 178px barras + 36px padding-top para valores
+    display: flex;
+    flex-direction: column;
+}
 
-        .bar-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-            width: 40px;
-            height: 100%;
-            position: relative;
-            cursor: pointer;
+.chart-grid {
+    position: absolute;
+    top: 36px;       // alinea con el área de barras (después del padding)
+    left: 0;
+    right: 0;
+    bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 0;
+}
 
-            &:hover .bar-fill {
-                background: linear-gradient(180deg, $secondary-light 0%, $secondary-color 100%);
-                box-shadow: 0 0 15px rgba(0, 184, 148, 0.4);
-            }
+.grid-line {
+    width: 100%;
+    height: 1px;
+    border-top: 1px dashed rgba(255,255,255,0.07);
+}
 
-            &:hover .bar-value {
-                opacity: 1;
-                transform: translateY(-5px);
-            }
+.chart-bars {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    height: 190px;
+    padding-top: 36px;       // zona reservada para el valor del bar más alto
+    box-sizing: border-box;  // el padding está dentro de los 190px
+    border-bottom: 2px solid rgba(255,255,255,0.12);
+    gap: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
 
-            .bar-value {
-                font-size: 0.7rem;
-                font-weight: 700;
-                color: $text-primary;
-                opacity: 0;
-                transition: all 0.3s ease;
-                margin-bottom: 0.5rem;
-            }
+.bar-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+    min-width: 0;
+    cursor: default;
 
-            .bar-fill {
-                width: 100%;
-                background: linear-gradient(180deg, $primary-light 0%, $primary-color 100%);
-                border-radius: 4px 4px 0 0;
-                transition: height 1s ease-out, background 0.3s ease;
-            }
+    &:hover .bar-col  { filter: brightness(1.25); }
+    &:hover .bar-val  { opacity: 1; }
+}
 
-            .bar-label {
-                font-size: 0.65rem;
-                color: $text-secondary;
-                margin-top: 0.5rem;
-                font-weight: 600;
-            }
-        }
+.bar-columns {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    width: 100%;
+}
+
+.bar-wrap {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    position: relative;
+}
+
+.bar-val {
+    // Vive DENTRO de .bar-col con posición absoluta
+    // → nunca se corta sin importar qué tan alta sea la barra
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.55rem;
+    font-weight: 700;
+    border-radius: 3px;
+    padding: 1px 4px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    z-index: 2;
+
+    &.bar-val-ventas   { background: rgba(60,40,180,0.82); color: #fff; }
+    &.bar-val-ganancia { background: rgba(0,140,110,0.82); color: #fff; }
+    &.bar-val-peak     { opacity: 1; }   // barra más alta: valor siempre visible
+}
+
+.bar-col {
+    position: relative;   // necesario para que .bar-val se posicione dentro
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    transition: height 0.6s cubic-bezier(0.34,1.56,0.64,1), filter 0.2s;
+    min-height: 28px;     // mínimo garantizado para que el valor siempre quepa
+
+    &.bar-ventas {
+        background: linear-gradient(180deg, $primary-light 0%, $primary-color 100%);
+        box-shadow: 0 -2px 8px rgba(108,92,231,0.4);
     }
+
+    &.bar-ganancia {
+        background: linear-gradient(180deg, $secondary-light 0%, $secondary-color 100%);
+        box-shadow: 0 -2px 8px rgba(0,184,148,0.4);
+    }
+}
+
+.bar-label {
+    font-size: 0.6rem;
+    color: $text-secondary;
+    margin-top: 4px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+
+// ============================================
+// 📊 CHART SCROLL + EXPAND
+// ============================================
+
+.chart-bars-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 2px;
+
+    &::-webkit-scrollbar { height: 4px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.15);
+        border-radius: 2px;
+    }
+}
+
+.btn-expand-chart {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 5px 12px;
+    background: rgba(108,92,231,0.12);
+    border: 1px solid rgba(108,92,231,0.28);
+    border-radius: 8px;
+    color: $primary-light;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+
+    &:hover {
+        background: rgba(108,92,231,0.28);
+        border-color: $primary-color;
+    }
+}
+
+// ============================================
+// 📊 CHART MODAL COMPLETO
+// ============================================
+
+.chart-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.78);
+    backdrop-filter: blur(6px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.chart-modal-box {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 1px solid $border-color;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 920px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid $border-color;
+
+    h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: $text-primary;
+    }
+}
+
+.chart-modal-subtitle {
+    display: block;
+    font-size: 0.75rem;
+    color: $text-secondary;
+    margin-top: 4px;
+}
+
+.chart-modal-legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: $text-secondary;
+    padding: 0.75rem 1.5rem 0;
+}
+
+.chart-modal-body {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 1rem 1.5rem 1.5rem;
+
+    &::-webkit-scrollbar { height: 6px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.15);
+        border-radius: 3px;
+    }
+}
+
+.chart-modal-bars {
+    display: flex;
+    align-items: flex-end;
+    height: 310px;
+    padding-top: 40px;       // zona reservada para los valores siempre visibles
+    box-sizing: border-box;
+    border-bottom: 2px solid rgba(255,255,255,0.15);
+    gap: 6px;
+    padding: 0 4px;
+}
+
+.bar-group-lg {
+    min-width: 44px;
+
+    .bar-label { font-size: 0.65rem; }
+
+    // En el modal los valores se muestran siempre, no solo al hover
+    .bar-val { opacity: 1; }
+}
+
+// Clase de respaldo (se mantiene por compatibilidad)
+.bar-val-always {
+    opacity: 1 !important;
 }
 
 // ============================================
@@ -256,4 +661,288 @@ $border-color: #2d3561;
         font-family: monospace;
         font-weight: 600;
     }
+}
+// ============================================
+// 🖱️ FILA CLICKEABLE
+// ============================================
+
+.sale-row-clickable {
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover td {
+        background: rgba(108, 92, 231, 0.12) !important;
+    }
+}
+
+// ============================================
+// 🪟 MODAL DETALLE DE VENTA
+// ============================================
+
+.detail-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeInOverlay 0.2s ease;
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.detail-modal-box {
+    background: #16213e;
+    border: 1px solid #2d3561;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUpModal 0.22s ease;
+    overflow: hidden;
+}
+
+@keyframes slideUpModal {
+    from { transform: translateY(24px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+// --- Header ---
+.detail-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #2d3561;
+    background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+
+    h4 {
+        margin: 0 0 0.4rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .detail-invoice-badge {
+        background: rgba(255,255,255,0.2);
+        color: #fff;
+        border-radius: 6px;
+        padding: 2px 10px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        font-family: monospace;
+    }
+
+    .detail-date {
+        color: rgba(255,255,255,0.85);
+        font-size: 0.8rem;
+    }
+
+    .btn-close-modal {
+        background: rgba(255,255,255,0.15);
+        border: none;
+        color: #fff;
+        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.15s;
+        flex-shrink: 0;
+
+        &:hover { background: rgba(255,255,255,0.3); }
+    }
+}
+
+// --- Body productos ---
+.detail-modal-body {
+    overflow-y: auto;
+    flex: 1;
+    padding: 0.75rem 1.25rem;
+
+    &::-webkit-scrollbar { width: 6px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb { background: #2d3561; border-radius: 4px; }
+}
+
+.detail-product-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+
+    &:last-child { border-bottom: none; }
+}
+
+.detail-product-img {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid #2d3561;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .detail-img-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c5ce7;
+        font-size: 1.6rem;
+    }
+}
+
+.detail-product-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .detail-product-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #ffffff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .detail-product-code {
+        font-size: 0.75rem;
+        color: #b8bec3;
+    }
+}
+
+.detail-product-numbers {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px 12px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.detail-num-row {
+    display: flex;
+    flex-direction: column;
+
+    .detail-num-label {
+        font-size: 0.65rem;
+        color: #b8bec3;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .detail-num-value {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #ffffff;
+    }
+}
+
+// --- Footer ---
+.detail-modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #2d3561;
+    background: rgba(255,255,255,0.03);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+
+    .detail-footer-method {
+        color: #b8bec3;
+        font-size: 0.82rem;
+        background: rgba(255,255,255,0.06);
+        border-radius: 6px;
+        padding: 4px 10px;
+    }
+
+    .detail-totals {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        text-align: right;
+    }
+
+    .detail-total-row {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        font-size: 0.85rem;
+
+        span:first-child { color: #b8bec3; }
+    }
+}
+
+.detail-footer-left {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.btn-cancel-sale {
+    background: rgba(214, 48, 49, 0.15);
+    border: 1px solid #d63031;
+    color: #ff7675;
+    border-radius: 8px;
+    padding: 5px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+        background: rgba(214, 48, 49, 0.35);
+        color: #fff;
+    }
+}
+
+// ============================================
+// ❌ ESTADO CANCELADA
+// ============================================
+
+.row-cancelled {
+    opacity: 0.55;
+
+    &:hover td {
+        background: rgba(214, 48, 49, 0.08) !important;
+    }
+}
+
+.invoice-badge-cancelled {
+    background: rgba(214, 48, 49, 0.15) !important;
+    color: #ff7675 !important;
+    text-decoration: line-through;
+}
+
+.badge-cancelled {
+    background: rgba(214, 48, 49, 0.2);
+    color: #ff7675;
+    border: 1px solid rgba(214, 48, 49, 0.4);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
 }

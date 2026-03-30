@@ -1,92 +1,289 @@
-.login-form {
-  background: #18181C;
+// ── Design tokens (mismo sistema que inventory/historic) ──────────────────
+$primary:       #6c5ce7;
+$primary-light: #a29bfe;
+$secondary:     #00b894;
+$bg-deep:       #0a0a1a;
+$bg-dark:       #1a1a2e;
+$text-primary:  #e8eaf0;
+$text-muted:    #8892a4;
+$border:        rgba(255, 255, 255, 0.1);
+$card-bg:       rgba(255, 255, 255, 0.04);
 
-  h1{
-    color: white;
+// ── Page wrapper ──────────────────────────────────────────────────────────
+.add-product-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0d1b2e 100%);
+  padding: 1rem 0 2rem;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────
+.page-header {
+  text-align: center;
+
+  .page-title {
     font-family: 'Acephimere', sans-serif;
-    font-weight: 1000;
-    font-size: 35px;
-    padding-top: 20px;
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: $text-primary;
+    text-shadow: 0 0 24px rgba(108, 92, 231, 0.45);
+    margin-bottom: 0.35rem;
   }
-  h2{
-    color: white;
-    font-family: 'Acephimere', sans-serif;
-    font-weight: 1000;
-    font-size: 15px;
-  }
-  .small-text {
-    font-size: 0.75rem;
-  }
-  .gray-input {
-    background-color: #18181C;
-    color: white;
-  }
-  .gray-input::placeholder {
-    color: #7b7979 !important;
-  }
-  .gray-input-select {
-    background-color: #18181C;
-    color: white !important;
-  }
-  .gray-input-select option {
-    color: white !important;
-    background-color: #18181C;
-  }
-  .input-multiselect {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    background: #18181C;
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 6px;
-    padding: .6rem .8rem;
-    color: #e6f1f6;
-    cursor: pointer;
-    position: relative;
 
-    .chip {
-      color: #e6dafe;
-      font-size: 1.1rem;
-      line-height: 1;
-    }
-
-    .placeholder {
-      color: #18181C;
-      cursor: pointer;
-    }
-
-    .caret {
-      margin-left: auto;
-      color: #9aa2ad;
-      font-size: .9rem;
-    }
+  .page-subtitle {
+    color: $text-muted;
+    font-size: 0.85rem;
+    margin: 0;
   }
-  .category-panel {
+}
+
+// ── Cards ─────────────────────────────────────────────────────────────────
+.form-card {
+  background: rgba(255, 255, 255, 0.05);  // ligeramente más opaco para compensar sin blur
+  border: 1px solid $border;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  // SIN backdrop-filter: evita crear un stacking context que atrapa el dropdown
+  transition: border-color 0.25s;
+  overflow: visible;
+
+  &:hover { border-color: rgba(108, 92, 231, 0.28); }
+}
+
+// ── Labels ────────────────────────────────────────────────────────────────
+.field-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.req-star {
+  color: #ff7675;
+  margin-left: 2px;
+}
+
+.optional-badge {
+  font-size: 0.65rem;
+  background: rgba(108, 92, 231, 0.18);
+  color: $primary-light;
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-left: 6px;
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+// ── Inputs ────────────────────────────────────────────────────────────────
+.field-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: $text-primary;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+
+  &::placeholder { color: rgba(255, 255, 255, 0.22); }
+
+  &:focus {
+    background: rgba(108, 92, 231, 0.1);
+    border-color: rgba(108, 92, 231, 0.55);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
+  }
+}
+
+// ── Input con prefijo $ ───────────────────────────────────────────────────
+.input-prefix-wrap {
+  position: relative;
+
+  .input-prefix {
     position: absolute;
-    z-index: 1000;
-    width: 100%;
-    max-width: 770px;
-    background: #18181C;
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 6px;
-    margin-top: .35rem;
-    padding: .25rem 0;
-    max-height: 288px;
-    overflow-y: auto;
-    box-shadow: 0 10px 24px rgba(0,0,0,.35);
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $text-muted;
+    font-weight: 700;
+    font-size: 0.85rem;
+    pointer-events: none;
   }
 
-  .category-option {
-    padding: .65rem .9rem;
-    color: #e6f1f6;
-    cursor: pointer;
+  .with-prefix { padding-left: 1.75rem; }
+}
 
-    &:hover { background: #22232b; }
-    &.active { background: #2b2740; border-left: 3px solid #8B50FB; }
+// ── Multiselect categoría ─────────────────────────────────────────────────
+// Contenedor relativo para anclar el dropdown
+.category-wrapper {
+  position: relative;
+}
+
+.input-multiselect {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  color: $text-primary;
+  cursor: pointer;
+  min-height: 40px;
+  transition: border-color 0.2s, background 0.2s;
+
+  &:hover { border-color: rgba(108, 92, 231, 0.45); }
+
+  .chip {
+    color: $primary-light;
+    font-size: 0.9rem;
+    font-weight: 500;
   }
+
+  .placeholder-text {
+    color: rgba(255, 255, 255, 0.22);
+    font-size: 0.9rem;
+  }
+
+  .caret {
+    margin-left: auto;
+    color: $text-muted;
+    font-size: 0.78rem;
+    transition: transform 0.2s;
+
+    &.rotated { transform: rotate(180deg); }
+  }
+}
+
+// Panel HACIA ABAJO
+.category-panel {
+  position: absolute;
+  z-index: 2000;
+  width: 100%;
+  top: calc(100% + 6px);
+  left: 0;
+  background: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 0.25rem 0;
+  max-height: 270px;
+  overflow-y: auto;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75);
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(108, 92, 231, 0.45);
+    border-radius: 2px;
+  }
+}
+
+.category-option {
+  padding: 0.6rem 1rem;
+  color: $text-primary;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+
+  .check-icon { color: $primary-light; font-size: 0.85rem; }
+
+  &:hover  { background: rgba(255, 255, 255, 0.05); }
+  &.active {
+    background: rgba(108, 92, 231, 0.18);
+    color: $primary-light;
+    font-weight: 600;
+  }
+}
+
+// ── Toggle importación ────────────────────────────────────────────────────
+.toggle-wrap {
   .form-check-input {
     width: 2.5em;
-    height: 1.5em;
+    height: 1.4em;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    margin-top: 0;
+
+    &:checked {
+      background-color: $primary;
+      border-color: $primary;
+    }
+
+    &:focus { box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2); }
   }
 
+  .form-check-label {
+    color: $text-primary;
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
+    cursor: pointer;
+  }
+}
+
+// ── Zona de carga de imagen ───────────────────────────────────────────────
+.file-upload-zone {
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  color: $text-muted;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  &:hover {
+    border-color: rgba(108, 92, 231, 0.55);
+    background: rgba(108, 92, 231, 0.06);
+    color: $primary-light;
+  }
+
+  .upload-icon  { font-size: 1.8rem; }
+  .upload-text  { font-size: 0.875rem; font-weight: 500; }
+  .upload-hint  { font-size: 0.72rem; opacity: 0.6; }
+}
+
+.img-preview {
+  max-height: 90px;
+  max-width: 100%;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+// ── Botón submit ──────────────────────────────────────────────────────────
+.btn-submit {
+  background: linear-gradient(135deg, $primary 0%, #5a4bd1 100%);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.75rem 2.75rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(108, 92, 231, 0.35);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(108, 92, 231, 0.5);
+  }
+
+  &:active { transform: translateY(0); }
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────
+.footer-text {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.25);
+
+  strong { color: #8b50fb; }
 }

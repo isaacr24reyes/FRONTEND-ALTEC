@@ -4,7 +4,9 @@ import {
   R_AUTHENTICATION,
   R_LOGIN,
   R_PRODUCT_QUOTE,
-  R_WAREHOUSE
+  R_WAREHOUSE,
+  R_SALES_MODULE,
+  R_HISTORIC_SALES
 } from "../../../constants/route.constants";
 import {Router} from "@angular/router";
 import {UserSessionService} from "../../../modules/authentication/services/user-session.service";
@@ -69,6 +71,18 @@ export class HeaderComponent implements OnInit {
 
   navigateToIngreso(): void {
     this._router.navigate(['/warehouse/add-product']);
+  }
+
+  navigateToEditProduct(): void {
+    this._router.navigate(['/warehouse/edit-product']);
+  }
+
+  navigateToSalesModule(): void {
+    this._router.navigate([`/${R_SALES_MODULE}`]);
+  }
+
+  navigateToHistoricSales(): void {
+    this._router.navigate([`/${R_HISTORIC_SALES}`]);
   }
   navigateToCart(): void {
     const cart = this.cartService.getCart();

@@ -1526,6 +1526,86 @@
   text-align: center;
 }
 
+// ── Preview de imagen seleccionada ─────────────────────────────
+.image-preview-wrapper {
+  position: relative;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(96, 165, 250, 0.5);
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1);
+
+  .image-preview {
+    display: block;
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .image-preview-badge {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(0deg, rgba(96, 165, 250, 0.85) 0%, transparent 100%);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 10px 12px 8px;
+    display: flex;
+    align-items: center;
+    i { color: #a8d8ff; }
+  }
+}
+
+.image-current-wrapper {
+  position: relative;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  .image-current {
+    display: block;
+    width: 100%;
+    max-height: 160px;
+    object-fit: contain;
+    background: rgba(0, 0, 0, 0.2);
+    opacity: 0.7;
+  }
+
+  .image-current-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 5px 10px;
+    text-align: center;
+  }
+}
+
+// ── Spinner del botón Guardar ────────────────────────────────────
+.save-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spinSave 0.7s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes spinSave {
+  to { transform: rotate(360deg); }
+}
+
+// ────────────────────────────────────────────────────────────────
 // File input estilizado
 .file-input-wrapper {
   position: relative;

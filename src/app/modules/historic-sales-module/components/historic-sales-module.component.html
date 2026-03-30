@@ -20,59 +20,135 @@
         <div class="container-fluid">
             <div class="row g-3">
 
-                <!-- 📊 COLUMNA IZQUIERDA: GRÁFICA & FILTROS -->
+                <!-- 📊 COLUMNA IZQUIERDA: KPIs + GRÁFICA + FILTROS -->
                 <div class="col-12 col-lg-4">
+
+                    <!-- KPI CARDS -->
+                    <div class="kpi-grid mb-3">
+                        <div class="kpi-card kpi-ventas">
+                            <div class="kpi-icon"><i class="bi bi-cash-stack"></i></div>
+                            <div class="kpi-body">
+                                <span class="kpi-label">Total Vendido</span>
+                                <span class="kpi-value">${{ totalVentas | number:'1.2-2' }}</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card kpi-ganancia">
+                            <div class="kpi-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                            <div class="kpi-body">
+                                <span class="kpi-label">Ganancia Neta</span>
+                                <span class="kpi-value">${{ totalGanancia | number:'1.2-2' }}</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card kpi-margen">
+                            <div class="kpi-icon"><i class="bi bi-percent"></i></div>
+                            <div class="kpi-body">
+                                <span class="kpi-label">Margen</span>
+                                <span class="kpi-value">{{ margen | number:'1.1-1' }}%</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card kpi-facturas">
+                            <div class="kpi-icon"><i class="bi bi-receipt"></i></div>
+                            <div class="kpi-body">
+                                <span class="kpi-label">Facturas</span>
+                                <span class="kpi-value">{{ totalFacturas }}</span>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- FILTROS -->
                     <div class="section-card filters-section mb-3">
                         <div class="section-header">
                             <h5><i class="bi bi-funnel-fill"></i> Filtros de Búsqueda</h5>
                         </div>
-                        <div class="form-group mb-2">
-                            <label class="form-label small fw-600">Fecha Inicio</label>
-                            <input type="date" class="form-control form-control-sm" [(ngModel)]="startDate"
-                                (change)="filterSales()" />
-                        </div>
-                        <div class="form-group mb-2">
-                            <label class="form-label small fw-600">Fecha Fin</label>
-                            <input type="date" class="form-control form-control-sm" [(ngModel)]="endDate"
-                                (change)="filterSales()" />
-                        </div>
-                        <div class="form-group mb-3">
-                            <label class="form-label small fw-600">Buscar por Factura</label>
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-transparent border-end-0"><i
-                                        class="bi bi-search"></i></span>
-                                <input type="text" class="form-control border-start-0" placeholder="Ej: INV-123..."
-                                    [(ngModel)]="searchQuery" (input)="filterSales()" />
-                            </div>
-                        </div>
-                        <button class="btn btn-outline-danger btn-sm w-100" (click)="clearFilters()">
-                            <i class="bi bi-x-circle"></i> Limpiar Filtros
-                        </button>
-                    </div>
-
-                    <!-- GRÁFICA MENSUAL (PURA CSS) -->
-                    <div class="section-card chart-section">
-                        <div class="section-header">
-                            <h5><i class="bi bi-bar-chart-line-fill"></i> Rendimiento Mensual</h5>
-                        </div>
-
-                        <div class="custom-chart" *ngIf="monthlyData.length > 0">
-                            <div class="chart-bars">
-                                <div class="bar-item" *ngFor="let m of monthlyData"
-                                    [title]="'Mes: ' + m.month + ' | Ventas: $' + m.amount + ' | Profit: $' + m.profit">
-                                    <div class="bar-value">${{ m.amount | number:'1.0-0' }}</div>
-                                    <div class="bar-fill" [style.height.%]="m.height"></div>
-                                    <div class="bar-label">{{ m.month }}</div>
+                        <div class="filters-body">
+                            <div class="filter-row">
+                                <div class="filter-field">
+                                    <label><i class="bi bi-calendar-event"></i> Fecha Inicio</label>
+                                    <input type="date" class="form-control form-control-sm filter-input"
+                                        [(ngModel)]="startDate" (change)="filterSales()" />
+                                </div>
+                                <div class="filter-field">
+                                    <label><i class="bi bi-calendar-check"></i> Fecha Fin</label>
+                                    <input type="date" class="form-control form-control-sm filter-input"
+                                        [(ngModel)]="endDate" (change)="filterSales()" />
                                 </div>
                             </div>
+                            <div class="filter-search mt-2">
+                                <label><i class="bi bi-search"></i> Buscar Factura</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text filter-input-icon"><i class="bi bi-receipt"></i></span>
+                                    <input type="text" class="form-control filter-input border-start-0"
+                                        placeholder="Ej: INV-1234567890..."
+                                        [(ngModel)]="searchQuery" (input)="filterSales()" />
+                                    <button *ngIf="searchQuery" class="btn filter-clear-btn" type="button"
+                                        (click)="searchQuery=''; filterSales()">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="filter-actions mt-3">
+                                <span class="filter-count">
+                                    <i class="bi bi-list-ul me-1"></i>{{ filteredSales.length }} resultado(s)
+                                </span>
+                                <button class="btn-filter-clear" (click)="clearFilters()">
+                                    <i class="bi bi-x-circle me-1"></i>Limpiar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GRÁFICA -->
+                    <div class="section-card chart-section mb-3">
+                        <div class="section-header">
+                            <h5><i class="bi bi-bar-chart-line-fill"></i> Rendimiento</h5>
+                            <div class="chart-toggle">
+                                <button [class.active]="chartView === 'day'"   (click)="setChartView('day')">Día</button>
+                                <button [class.active]="chartView === 'month'" (click)="setChartView('month')">Mes</button>
+                                <button [class.active]="chartView === 'year'"  (click)="setChartView('year')">Año</button>
+                            </div>
                         </div>
 
-                        <!-- EMPTY CHART MESSAGE -->
-                        <div *ngIf="monthlyData.length === 0" class="empty-state text-center p-4">
-                            <i class="bi bi-graph-down text-muted fs-1"></i>
-                            <p class="mt-2 mb-0 small text-muted">No hay datos para mostrar en este rango.</p>
+                        <div class="chart-legend">
+                            <span class="legend-dot legend-ventas"></span><span>Ventas</span>
+                            <span class="legend-dot legend-ganancia ms-3"></span><span>Ganancia</span>
+                        </div>
+
+                        <div class="custom-chart" *ngIf="chartData.length > 0">
+                            <div class="chart-area">
+                                <div class="chart-grid">
+                                    <div class="grid-line"></div>
+                                    <div class="grid-line"></div>
+                                    <div class="grid-line"></div>
+                                    <div class="grid-line"></div>
+                                </div>
+                                <div class="chart-bars-scroll">
+                                    <div class="chart-bars" [style.min-width.px]="chartData.length * 46">
+                                        <div class="bar-group" *ngFor="let m of chartData">
+                                            <div class="bar-columns">
+                                                <div class="bar-wrap">
+                                                    <div class="bar-col bar-ventas" [style.height.px]="m.hAmount">
+                                                        <span class="bar-val bar-val-ventas" [class.bar-val-peak]="m.isMax">${{ m.amount | number:'1.2-2' }}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="bar-wrap">
+                                                    <div class="bar-col bar-ganancia" [style.height.px]="m.hProfit">
+                                                        <span class="bar-val bar-val-ganancia" [class.bar-val-peak]="m.isMax">${{ m.profit | number:'1.2-2' }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="bar-label">{{ m.label }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button *ngIf="chartData.length > 7" class="btn-expand-chart" (click)="showChartModal = true">
+                                <i class="bi bi-arrows-fullscreen me-1"></i>Ver completo ({{ chartData.length }} registros)
+                            </button>
+                        </div>
+
+                        <div *ngIf="chartData.length === 0" class="empty-state text-center p-4">
+                            <i class="bi bi-graph-down fs-1" style="color:#2d3561"></i>
+                            <p class="mt-2 mb-0 small" style="color:#b8bec3">Sin datos en este rango.</p>
                         </div>
                     </div>
 
@@ -99,7 +175,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr *ngFor="let sale of filteredSales">
+                                    <tr *ngFor="let sale of filteredSales"
+                                        class="sale-row-clickable"
+                                        [class.row-cancelled]="sale.cancelled"
+                                        (click)="openDetail(sale)"
+                                        title="Ver detalle">
                                         <td>
                                             <div class="d-flex flex-column">
                                                 <span class="fw-bold">{{ sale.date | date:'mediumDate' }}</span>
@@ -107,20 +187,28 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="invoice-badge">{{ sale.invoiceNumber }}</span>
+                                            <span class="invoice-badge" [class.invoice-badge-cancelled]="sale.cancelled">
+                                                {{ sale.invoiceNumber }}
+                                            </span>
                                             <small class="d-block text-muted mt-1">{{ sale.itemCount }} artíc.</small>
                                         </td>
                                         <td>
-                                            <span class="text-success fw-bold">${{ sale.totalAmount | number:'1.2-2'
-                                                }}</span>
+                                            <span [class]="sale.cancelled ? 'text-muted text-decoration-line-through' : 'text-success fw-bold'">
+                                                ${{ sale.totalAmount | number:'1.2-2' }}
+                                            </span>
                                         </td>
                                         <td>
-                                            <span class="text-warning fw-bold">${{ sale.totalProfit | number:'1.2-2'
-                                                }}</span>
+                                            <span [class]="sale.cancelled ? 'text-muted text-decoration-line-through' : 'text-warning fw-bold'">
+                                                ${{ sale.totalProfit | number:'1.2-2' }}
+                                            </span>
                                         </td>
                                         <td>
-                                            <span class="badge bg-success"><i class="bi bi-check-circle"></i>
-                                                Completado</span>
+                                            <span *ngIf="!sale.cancelled" class="badge bg-success">
+                                                <i class="bi bi-check-circle"></i> Completado
+                                            </span>
+                                            <span *ngIf="sale.cancelled" class="badge badge-cancelled">
+                                                <i class="bi bi-x-circle"></i> Cancelada
+                                            </span>
                                         </td>
                                     </tr>
 
@@ -142,4 +230,145 @@
         </div>
     </main>
 
+</div>
+
+<!-- ===================== MODAL DETALLE DE VENTA ===================== -->
+<div class="detail-modal-overlay" *ngIf="selectedSale" (click)="closeDetail()">
+    <div class="detail-modal-box" (click)="$event.stopPropagation()">
+
+        <!-- HEADER -->
+        <div class="detail-modal-header">
+            <div>
+                <h4><i class="bi bi-receipt-cutoff me-2"></i>Detalle de Venta</h4>
+                <span class="detail-invoice-badge">{{ selectedSale.invoiceNumber }}</span>
+                <span class="detail-date ms-2">
+                    <i class="bi bi-calendar3 me-1"></i>{{ selectedSale.date | date:'dd/MM/yyyy HH:mm' }}
+                </span>
+            </div>
+            <button class="btn-close-modal" (click)="closeDetail()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <!-- PRODUCTOS -->
+        <div class="detail-modal-body">
+            <div class="detail-product-item" *ngFor="let s of selectedSale.sales">
+                <ng-container *ngIf="getProduct(s.productId) as prod; else noImg">
+                    <div class="detail-product-img">
+                        <img *ngIf="prod.foto && prod.foto !== 'NOT-IMAGE'" [src]="prod.foto" [alt]="prod.descripcion" />
+                        <div class="detail-img-placeholder" *ngIf="!prod.foto || prod.foto === 'NOT-IMAGE'">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                    </div>
+                    <div class="detail-product-info">
+                        <span class="detail-product-name">{{ prod.descripcion }}</span>
+                        <small class="detail-product-code" *ngIf="prod.codigo">
+                            <i class="bi bi-upc-scan me-1"></i>{{ prod.codigo }}
+                        </small>
+                    </div>
+                </ng-container>
+                <ng-template #noImg>
+                    <div class="detail-product-img">
+                        <div class="detail-img-placeholder"><i class="bi bi-box-seam"></i></div>
+                    </div>
+                    <div class="detail-product-info">
+                        <span class="detail-product-name text-muted">Producto no encontrado</span>
+                    </div>
+                </ng-template>
+
+                <div class="detail-product-numbers">
+                    <div class="detail-num-row">
+                        <span class="detail-num-label">Cant.</span>
+                        <span class="detail-num-value">{{ s.quantity }}</span>
+                    </div>
+                    <div class="detail-num-row">
+                        <span class="detail-num-label">P. Unit.</span>
+                        <span class="detail-num-value">${{ s.unitPrice | number:'1.2-2' }}</span>
+                    </div>
+                    <div class="detail-num-row">
+                        <span class="detail-num-label">Total</span>
+                        <span class="detail-num-value text-success fw-bold">${{ s.totalAmount | number:'1.2-2' }}</span>
+                    </div>
+                    <div class="detail-num-row">
+                        <span class="detail-num-label">Ganancia</span>
+                        <span class="detail-num-value text-warning fw-bold">${{ s.profit | number:'1.2-2' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER TOTALES -->
+        <div class="detail-modal-footer">
+            <div class="detail-footer-left">
+                <div class="detail-footer-method">
+                    <i class="bi bi-credit-card me-1"></i>
+                    {{ selectedSale.sales[0]?.paymentMethod | titlecase }}
+                </div>
+                <button *ngIf="!selectedSale.cancelled" class="btn-cancel-sale" (click)="cancelarVenta(selectedSale)">
+                    <i class="bi bi-x-circle-fill me-1"></i> Cancelar Venta
+                </button>
+                <span *ngIf="selectedSale.cancelled" class="badge badge-cancelled fs-6 px-3 py-2">
+                    <i class="bi bi-x-circle me-1"></i> Venta Cancelada
+                </span>
+            </div>
+            <div class="detail-totals">
+                <div class="detail-total-row">
+                    <span>Total vendido</span>
+                    <span class="text-success fw-bold">${{ selectedSale.totalAmount | number:'1.2-2' }}</span>
+                </div>
+                <div class="detail-total-row">
+                    <span>Ganancia neta</span>
+                    <span class="text-warning fw-bold">${{ selectedSale.totalProfit | number:'1.2-2' }}</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===================== MODAL GRÁFICO COMPLETO ===================== -->
+<div class="chart-modal-overlay" *ngIf="showChartModal" (click)="showChartModal = false">
+    <div class="chart-modal-box" (click)="$event.stopPropagation()">
+
+        <div class="chart-modal-header">
+            <div>
+                <h5><i class="bi bi-bar-chart-fill me-2"></i>Gráfico Completo</h5>
+                <span class="chart-modal-subtitle">
+                    {{ chartData.length }} registros —
+                    <span *ngIf="chartView === 'day'">una barra por venta</span>
+                    <span *ngIf="chartView === 'month'">agrupado por día</span>
+                    <span *ngIf="chartView === 'year'">agrupado por mes</span>
+                </span>
+            </div>
+            <button class="btn-close-modal" (click)="showChartModal = false">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="chart-modal-legend">
+            <span class="legend-dot legend-ventas"></span><span>Total vendido</span>
+            <span class="legend-dot legend-ganancia ms-3"></span><span>Ganancia neta</span>
+        </div>
+
+        <div class="chart-modal-body">
+            <div class="chart-modal-bars" [style.min-width.px]="chartData.length * 60">
+                <div class="bar-group bar-group-lg" *ngFor="let m of chartData">
+                    <div class="bar-columns">
+                        <div class="bar-wrap">
+                            <div class="bar-col bar-ventas" [style.height.px]="m.hAmount * 1.5">
+                                <span class="bar-val bar-val-ventas bar-val-always">${{ m.amount | number:'1.2-2' }}</span>
+                            </div>
+                        </div>
+                        <div class="bar-wrap">
+                            <div class="bar-col bar-ganancia" [style.height.px]="m.hProfit * 1.5">
+                                <span class="bar-val bar-val-ganancia bar-val-always">${{ m.profit | number:'1.2-2' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bar-label">{{ m.label }}</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>

@@ -404,6 +404,22 @@
                 <i class="bi bi-image me-2"></i>
                 Actualizar Foto
               </label>
+
+              <!-- Preview de imagen seleccionada -->
+              <div class="image-preview-wrapper" *ngIf="imagePreview">
+                <img [src]="imagePreview" class="image-preview" alt="Vista previa">
+                <div class="image-preview-badge">
+                  <i class="bi bi-check-circle-fill me-1"></i>
+                  Nueva imagen seleccionada
+                </div>
+              </div>
+
+              <!-- Imagen actual (cuando no hay preview nueva) -->
+              <div class="image-current-wrapper" *ngIf="!imagePreview && selectedProduct?.foto && selectedProduct.foto !== 'NOT-IMAGE'">
+                <img [src]="selectedProduct.foto" class="image-current" alt="Imagen actual">
+                <span class="image-current-label">Imagen actual</span>
+              </div>
+
               <div class="file-input-wrapper">
                 <input
                   type="file"
@@ -413,7 +429,7 @@
                   accept="image/*">
                 <label for="fileInput" class="file-input-label">
                   <i class="bi bi-cloud-upload me-2"></i>
-                  Seleccionar imagen
+                  {{ imagePreview ? 'Cambiar imagen' : 'Seleccionar imagen' }}
                 </label>
               </div>
             </div>
@@ -422,13 +438,14 @@
         </div>
 
         <div class="modal-footer modern-modal-footer">
-          <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">
+          <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal" [disabled]="isSaving">
             <i class="bi bi-x-circle me-2"></i>
             Cancelar
           </button>
-          <button type="button" class="btn-modal-confirm" (click)="guardarEdicion()">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            Guardar Cambios
+          <button type="button" class="btn-modal-confirm" (click)="guardarEdicion()" [disabled]="isSaving">
+            <span *ngIf="isSaving" class="save-spinner me-2"></span>
+            <i *ngIf="!isSaving" class="bi bi-check-circle-fill me-2"></i>
+            {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
           </button>
         </div>
       </div>

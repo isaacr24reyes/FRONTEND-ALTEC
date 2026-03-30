@@ -32,12 +32,14 @@ export class CarShopComponent {
   }
 
   cotizar() {
+    const priceType = this.usarPrecioMayorista ? 'mayorista' : 'pvp';
     const precio = this.usarPrecioMayorista ? this.product.precioMayorista : this.product.pvp;
     const total = this.cantidad * precio;
     const item = {
       ...this.product,
       cantidad: this.cantidad,
       precio: precio,
+      priceType: priceType,
       total: total
     };
     this.agregarCotizacion.emit(item);

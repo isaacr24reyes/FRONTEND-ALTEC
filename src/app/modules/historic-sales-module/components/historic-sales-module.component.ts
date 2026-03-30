@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SalesService } from '../../../services/sales.service';
+import { ProductService } from '../../warehouse/services/warehouse.service';
+import { forkJoin } from 'rxjs';
 import Notiflix from 'notiflix';
 
 interface HistoricSaleRow {
@@ -12,6 +14,7 @@ interface HistoricSaleRow {
     dateStr: string;
     itemCount: number;
     sales: any[];
+    cancelled: boolean;
 }
 
 @Component({
@@ -26,7 +29,15 @@ export class HistoricSalesModuleComponent implements OnInit {
     filteredSales: HistoricSaleRow[] = [];
 
     // Chart
-    monthlyData: { month: string; amount: number; profit: number; height: number; }[] = [];
+    chartView: 'day' | 'month' | 'year' = 'month';
+    readonly CHART_PX = 148;   // max bar px — deja 30px de margen para el valor en la parte superior
+    chartData: { label: string; amount: number; profit: number; hAmount: number; hProfit: number; isMax: boolean; }[] = [];
+
+    // KPIs
+    totalVentas: number = 0;
+    totalGanancia: number = 0;
+    totalFacturas: number = 0;
+    margen: number = 0;
 
     // Pagination
     currentPage: number = 1;
@@ -38,11 +49,90 @@ export class HistoricSalesModuleComponent implements OnInit {
     searchQuery: string = '';
 
     isLoading: boolean = false;
+    showChartModal: boolean = false;
 
-    constructor(private salesService: SalesService) { }
+    // Modal detalle
+    selectedSale: HistoricSaleRow | null = null;
+    allProducts: any[] = [];
+
+    constructor(private salesService: SalesService, private productService: ProductService) { }
 
     ngOnInit(): void {
         this.loadHistoricSales();
+        this.productService.getProducts(1, 1000, '', 'descripcion', 'asc').subscribe({
+            next: (data: any) => { this.allProducts = data.items || []; },
+            error: () => {}
+        });
+    }
+
+    openDetail(sale: HistoricSaleRow): void {
+        this.selectedSale = sale;
+    }
+
+    closeDetail(): void {
+        this.selectedSale = null;
+    }
+
+    getProduct(productId: string): any {
+        return this.allProducts.find(p => p.id === productId) || null;
+    }
+
+    cancelarVenta(sale: HistoricSaleRow): void {
+        Notiflix.Confirm.show(
+            'Cancelar Venta',
+            `¿Seguro que desea cancelar la factura <strong>${sale.invoiceNumber}</strong>?<br>Se devolverá el stock de todos los productos.`,
+            'Sí, Cancelar',
+            'No',
+            () => {
+                Notiflix.Loading.standard('Cancelando venta...');
+
+                // 1. Marcar como Cancelled en BD
+                this.salesService.cancelInvoice(sale.invoiceNumber).subscribe({
+                    next: () => {
+                        // 2. Restaurar stock de cada producto
+                        const restoreObs = sale.sales.map(s =>
+                            this.productService.aumentarStock(s.productId, s.quantity)
+                        );
+                        forkJoin(restoreObs).subscribe({
+                            next: () => {
+                                Notiflix.Loading.remove();
+                                Notiflix.Notify.success(`Factura ${sale.invoiceNumber} cancelada. Stock restaurado.`);
+                                // Marcar como cancelada en la lista local sin quitarla
+                                const row = this.historicSales.find(h => h.invoiceNumber === sale.invoiceNumber);
+                                if (row) {
+                                    row.cancelled = true;
+                                    row.totalAmount = 0;
+                                    row.totalProfit = 0;
+                                }
+                                this.closeDetail();
+                                this.filterSales();
+                            },
+                            error: () => {
+                                Notiflix.Loading.remove();
+                                Notiflix.Notify.failure('Factura cancelada pero hubo un error al restaurar el stock.');
+                                this.closeDetail();
+                            }
+                        });
+                    },
+                    error: () => {
+                        Notiflix.Loading.remove();
+                        Notiflix.Notify.failure('Error al cancelar la factura. Intenta de nuevo.');
+                    }
+                });
+            },
+            () => {},
+            {
+                titleColor: '#ffffff',
+                messageColor: '#ffffff',
+                backgroundColor: '#1e1e2f',
+                okButtonBackground: '#d63031',
+                cancelButtonBackground: '#2d3561',
+                okButtonColor: '#ffffff',
+                cancelButtonColor: '#ffffff',
+                borderRadius: '12px',
+                width: '380px'
+            }
+        );
     }
 
     loadHistoricSales(): void {
@@ -86,14 +176,17 @@ export class HistoricSalesModuleComponent implements OnInit {
                     }
                 });
 
+                const isCancelled = salesArr.some((s: any) => s.status === 'Cancelled');
+
                 this.historicSales.push({
                     invoiceNumber: invoice,
-                    totalAmount: totalAmount,
-                    totalProfit: totalProfit,
+                    totalAmount: isCancelled ? 0 : totalAmount,
+                    totalProfit: isCancelled ? 0 : totalProfit,
                     itemCount: salesArr.length,
                     date: saleDate,
                     dateStr: saleDate ? new Date(saleDate).toLocaleDateString() : 'N/A',
-                    sales: salesArr
+                    sales: salesArr,
+                    cancelled: isCancelled
                 });
             }
         });
@@ -124,31 +217,73 @@ export class HistoricSalesModuleComponent implements OnInit {
         this.generateChartData();
     }
 
+    setChartView(view: 'day' | 'month' | 'year'): void {
+        this.chartView = view;
+        this.generateChartData();
+    }
+
     generateChartData(): void {
-        const monthMap = new Map<string, { amount: number; profit: number }>();
-        this.filteredSales.forEach(s => {
-            if (!s.date) return;
-            const d = new Date(s.date);
-            const mKey = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
-            const curr = monthMap.get(mKey) || { amount: 0, profit: 0 };
-            curr.amount += s.totalAmount;
-            curr.profit += s.totalProfit;
-            monthMap.set(mKey, curr);
-        });
+        let entries: { label: string; amount: number; profit: number }[] = [];
 
-        const entries = Array.from(monthMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-        let maxAmount = 1;
+        if (this.chartView === 'day') {
+            // Cada factura individual = su propio par de barras
+            entries = this.filteredSales
+                .filter(s => !s.cancelled && s.date)
+                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                .map(s => {
+                    const d = new Date(s.date);
+                    const hh = d.getHours().toString().padStart(2, '0');
+                    const mm = d.getMinutes().toString().padStart(2, '0');
+                    return { label: `${hh}:${mm}`, amount: s.totalAmount, profit: s.totalProfit };
+                });
+        } else {
+            const map = new Map<string, { amount: number; profit: number }>();
+            this.filteredSales.filter(s => !s.cancelled && s.date).forEach(s => {
+                const d = new Date(s.date);
+                const key = this.chartView === 'year'
+                    ? `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`
+                    : `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+                const curr = map.get(key) || { amount: 0, profit: 0 };
+                curr.amount += s.totalAmount;
+                curr.profit += s.totalProfit;
+                map.set(key, curr);
+            });
+            entries = Array.from(map.entries())
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .map(([key, val]) => ({ label: this.formatLabel(key), ...val }));
+        }
 
-        entries.forEach(e => {
-            if (e[1].amount > maxAmount) maxAmount = e[1].amount;
-        });
+        // Un solo máximo compartido: ganancia crece proporcionalmente al total
+        const maxValue      = Math.max(1, ...entries.map(e => e.amount), ...entries.map(e => e.profit));
+        const peakAmount    = Math.max(...entries.map(e => e.amount));
 
-        this.monthlyData = entries.map(e => ({
-            month: e[0],
-            amount: e[1].amount,
-            profit: e[1].profit,
-            height: (e[1].amount / maxAmount) * 100
+        this.chartData = entries.map(e => ({
+            label:   e.label,
+            amount:  e.amount,
+            profit:  e.profit,
+            isMax:   e.amount === peakAmount,   // barra más alta siempre muestra su valor
+            hAmount: Math.max(6, (e.amount / maxValue) * this.CHART_PX),
+            hProfit: Math.max(6, (e.profit / maxValue) * this.CHART_PX)
         }));
+
+        // KPIs
+        this.totalVentas   = this.filteredSales.reduce((s, r) => s + r.totalAmount, 0);
+        this.totalGanancia = this.filteredSales.reduce((s, r) => s + r.totalProfit, 0);
+        this.totalFacturas = this.filteredSales.length;
+        this.margen = this.totalVentas > 0 ? (this.totalGanancia / this.totalVentas) * 100 : 0;
+    }
+
+    private formatLabel(key: string): string {
+        if (this.chartView === 'month') {
+            const parts = key.split('-');
+            return `${parts[2]}/${parts[1]}`;
+        }
+        if (this.chartView === 'year') {
+            const [, m] = key.split('-');
+            const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+            return months[parseInt(m, 10) - 1] ?? key;
+        }
+        return key;
     }
 
     clearFilters(): void {

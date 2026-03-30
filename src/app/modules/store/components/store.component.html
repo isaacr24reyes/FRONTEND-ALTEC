@@ -420,14 +420,14 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-dark text-white" style="border-radius: 12px;">
       <div class="modal-header">
-        <h5 class="modal-title" id="resistorModalLabel">Selecciona el valor de resistencia</h5>
+        <h5 class="modal-title" id="resistorModalLabel">{{ resistorModalTitle }}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
         <label class="form-label">Valor disponible:</label>
         <select class="form-select" [(ngModel)]="selectedValue">
           <option disabled selected value="">-- Selecciona un valor --</option>
-          <option *ngFor="let value of resistorValues" [value]="value">{{ value }}</option>
+          <option *ngFor="let value of activeResistorValues" [value]="value">{{ value }}</option>
         </select>
       </div>
       <div class="modal-footer">

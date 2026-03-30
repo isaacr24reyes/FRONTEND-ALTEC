@@ -82,7 +82,7 @@ export class CartService {
     let existing: any;
 
     const matchByDescripcion =
-      (descripcion.includes('resistencia') && product.descripcion.includes('1/4 W')) ||
+      (descripcion.includes('resistencia') && (product.descripcion.includes('1/4 W') || product.descripcion.includes('1/2 W'))) ||
       (descripcion.includes('led') && descripcion.includes('diodo'));
 
     if (matchByDescripcion) {

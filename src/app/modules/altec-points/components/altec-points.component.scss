@@ -1,70 +1,299 @@
-.login-form {
-  background: #18181C;
+// ── Design tokens ─────────────────────────────────────────────────────────
+$primary:       #6c5ce7;
+$primary-light: #a29bfe;
+$gold:          #fdcb6e;
+$gold-dark:     #e17055;
+$text-primary:  #e8eaf0;
+$text-muted:    #8892a4;
+$border:        rgba(255, 255, 255, 0.1);
+$card-bg:       rgba(255, 255, 255, 0.05);
 
-  h1{
-    color: white;
+// ── Page ──────────────────────────────────────────────────────────────────
+.altec-points-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0d1b2e 100%);
+  padding: 1rem 0 2rem;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────
+.page-header {
+  text-align: center;
+
+  .header-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(253,203,110,0.25), rgba(225,112,85,0.15));
+    border: 1px solid rgba(253,203,110,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: $gold;
+    margin: 0 auto 0.75rem;
+  }
+
+  .page-title {
     font-family: 'Acephimere', sans-serif;
-    font-weight: 1000;
-    font-size: 35px;
-    padding-top: 20px;
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: $text-primary;
+    text-shadow: 0 0 24px rgba(253, 203, 110, 0.3);
+    margin-bottom: 0.3rem;
   }
-  h2{
-    color: white;
-    font-family: 'Acephimere', sans-serif;
-    font-weight: 1000;
-    font-size: 15px;
-  }
-  .small-text {
-    font-size: 0.75rem;
-  }
-  .gray-input {
-    background-color: #18181C;
-    color: white;
-  }
-  .gray-input::placeholder {
-    color: #7b7979 !important;
-  }
-  .gray-input-select {
-    background-color: #18181C;
-    color: white !important;
-  }
-  .gray-input-select option {
-    color: white !important;
-    background-color: #18181C;
+
+  .page-subtitle {
+    color: $text-muted;
+    font-size: 0.85rem;
+    margin: 0;
   }
 }
+
+// ── Cards ─────────────────────────────────────────────────────────────────
+.form-card {
+  background: $card-bg;
+  border: 1px solid $border;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  transition: border-color 0.25s;
+  overflow: visible;
+
+  &:hover { border-color: rgba(108, 92, 231, 0.28); }
+}
+
+// ── Labels ────────────────────────────────────────────────────────────────
+.field-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.req-star { color: #ff7675; margin-left: 2px; }
+
+.field-error {
+  display: block;
+  font-size: 0.78rem;
+  color: #ff7675;
+  margin-top: 0.4rem;
+}
+
+// ── Inputs ────────────────────────────────────────────────────────────────
+.field-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: $text-primary;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+
+  &::placeholder { color: rgba(255, 255, 255, 0.22); }
+
+  &:focus {
+    background: rgba(108, 92, 231, 0.1);
+    border-color: rgba(108, 92, 231, 0.55);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
+  }
+}
+
+// Input con ícono de búsqueda
+.input-icon-wrap {
+  position: relative;
+
+  .input-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $text-muted;
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+
+  .with-icon { padding-left: 2.2rem; }
+}
+
+// Input con prefijo $
+.input-prefix-wrap {
+  position: relative;
+
+  .input-prefix {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $text-muted;
+    font-weight: 700;
+    font-size: 0.9rem;
+    pointer-events: none;
+  }
+
+  .with-prefix { padding-left: 1.85rem; }
+}
+
+// ── Autocomplete ──────────────────────────────────────────────────────────
+.autocomplete-wrapper {
+  position: relative;
+}
+
 .autocomplete-menu {
   position: absolute;
+  top: calc(100% + 6px);
   left: 0;
   right: 0;
-  top: 100%;
-  transform: none !important;
-  min-width: 0;
-  max-height: 260px;
-  overflow: auto;
-  z-index: 1000;
-}
-.selected-user-card {
-  color: #fff;
-  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  z-index: 2000;
+  background: #1a1a2e;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 0.25rem 0;
+  max-height: 260px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(108, 92, 231, 0.45);
+    border-radius: 2px;
+  }
 }
 
-.selected-user-card .suc-label {
-  opacity: 0.9;
-  font-weight: 600;
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: none;
+  border: none;
+  color: $text-primary;
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+
+  &:hover, &.active {
+    background: rgba(108, 92, 231, 0.18);
+    color: $primary-light;
+  }
+
+  &.loading-item, &.no-results {
+    color: $text-muted;
+    cursor: default;
+    font-size: 0.82rem;
+    &:hover { background: none; color: $text-muted; }
+  }
+
+  .username-chip {
+    margin-left: auto;
+    font-size: 0.72rem;
+    color: $text-muted;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
 }
 
-.selected-user-card .points-badge {
-  display: inline-block;
-  padding: 0.35rem 0.6rem;
+// ── Tarjeta usuario seleccionado ──────────────────────────────────────────
+.selected-user-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, rgba(108,92,231,0.12) 0%, rgba(162,155,254,0.06) 100%);
+  border: 1px solid rgba(108, 92, 231, 0.28);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+
+  .suc-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(108,92,231,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: $primary-light;
+    flex-shrink: 0;
+  }
+
+  .suc-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .suc-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: $text-primary;
+    }
+
+    .suc-username {
+      font-size: 0.75rem;
+      color: $text-muted;
+    }
+  }
+
+  .suc-balance {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+  }
+
+  .suc-label {
+    font-size: 0.68rem;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+}
+
+.points-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
   border-radius: 999px;
-  background: rgba(139, 80, 251, 0.15);
-  border: 1px solid rgba(139, 80, 251, 0.35);
-  color: #fff;
+  background: rgba(253, 203, 110, 0.15);
+  border: 1px solid rgba(253, 203, 110, 0.35);
+  color: $gold;
   font-weight: 700;
+  font-size: 0.9rem;
   letter-spacing: 0.3px;
+}
+
+// ── Botón submit ──────────────────────────────────────────────────────────
+.btn-submit {
+  background: linear-gradient(135deg, $gold-dark 0%, $gold 100%);
+  border: none;
+  border-radius: 10px;
+  color: #1a1a2e;
+  font-weight: 800;
+  font-size: 0.95rem;
+  padding: 0.75rem 2.75rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(253, 203, 110, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(253, 203, 110, 0.45);
+  }
+
+  &:active { transform: translateY(0); }
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────
+.footer-text {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.25);
+
+  strong { color: #8b50fb; }
 }

@@ -364,7 +364,7 @@ $success-color: #00b894;
 
 .client-section,
 .search-section {
-  height: 100%;
+  height: auto;
 
   .form-label {
     display: flex;
@@ -949,6 +949,11 @@ $success-color: #00b894;
       margin-bottom: 0.4rem;
     }
 
+    .unit-price {
+      color: $text-secondary;
+      font-size: 0.8rem;
+    }
+
     .item-subtotal {
       font-weight: 700;
       color: $secondary-color;
@@ -1019,12 +1024,30 @@ $success-color: #00b894;
       }
     }
 
-    .quantity-display {
+    .quantity-input {
       flex: 1;
       text-align: center;
       font-weight: 700;
       font-size: 0.9rem;
       min-width: 30px;
+      max-width: 56px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px;
+      color: #fff;
+      padding: 2px 4px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+
+      &:focus {
+        background: rgba(108,92,231,0.18);
+        border-color: rgba(108,92,231,0.6);
+      }
+
+      // Oculta las flechas nativas del input[type=number]
+      &::-webkit-inner-spin-button,
+      &::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+      -moz-appearance: textfield;
 
       @media (min-width: 992px) {
         font-size: 0.85rem;
@@ -1034,6 +1057,7 @@ $success-color: #00b894;
       @media (max-width: 991px) {
         font-size: 1.1rem;
         min-width: 40px;
+        max-width: 64px;
       }
     }
   }
@@ -1754,3 +1778,351 @@ $success-color: #00b894;
     background: #5f3dc4;
   }
 }
+
+// ============================================
+// 📋 QUOTATION LOADER
+// ============================================
+
+.quotation-loader-section {
+  .quotation-loader-body {
+    padding: 0.5rem 0;
+
+    .input-group {
+      .input-group-text {
+        color: $text-secondary;
+        border-color: $border-color;
+      }
+
+      .form-control {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: $border-color;
+        color: $text-primary;
+
+        &::placeholder { color: $text-secondary; }
+        &:focus {
+          background: rgba(255, 255, 255, 0.08);
+          border-color: $primary-light;
+          box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+          color: $text-primary;
+        }
+      }
+
+      .btn-outline-primary {
+        border-color: $primary-light;
+        color: $primary-light;
+
+        &:hover {
+          background: $primary-color;
+          border-color: $primary-color;
+          color: #fff;
+        }
+      }
+    }
+  }
+
+  .quotation-result {
+    background: rgba(0, 184, 148, 0.08);
+    border: 1px solid rgba(0, 184, 148, 0.3);
+    border-radius: 8px;
+    padding: 0.75rem;
+
+    .quotation-result-header {
+      font-size: 0.85rem;
+      color: $secondary-light;
+      margin-bottom: 0.5rem;
+    }
+
+    .quotation-items-preview {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 140px;
+      overflow-y: auto;
+
+      li {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.3rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: 0.82rem;
+
+        &:last-child { border-bottom: none; }
+
+        .item-qty {
+          background: rgba(108, 92, 231, 0.3);
+          color: $primary-light;
+          border-radius: 4px;
+          padding: 1px 6px;
+          font-weight: 600;
+          min-width: 32px;
+          text-align: center;
+        }
+
+        .item-desc {
+          flex: 1;
+          color: $text-secondary;
+          font-size: 0.78rem;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .item-badge {
+          background: rgba(0, 184, 148, 0.2);
+          color: $secondary-light;
+          border-radius: 4px;
+          padding: 1px 6px;
+          font-size: 0.72rem;
+          white-space: nowrap;
+
+          &.badge-mayorista {
+            background: rgba(253, 203, 110, 0.2);
+            color: #fdcb6e;
+          }
+        }
+
+        .item-price-preview {
+          color: $text-primary;
+          font-size: 0.78rem;
+          font-weight: 600;
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+}
+
+// ============================================
+// 💰 DUAL PRICE + MAYORISTA BUTTON
+// ============================================
+
+.product-footer {
+  .price-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .price-pvp {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .price-mayorista {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      .mayorista-label {
+        font-size: 0.68rem;
+        color: #fdcb6e;
+        font-weight: 600;
+      }
+
+      .mayorista-value {
+        font-size: 0.78rem;
+        color: #fdcb6e;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .add-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+
+    .btn-add-mayorista {
+      background: rgba(253, 203, 110, 0.15);
+      border: 1px solid #fdcb6e;
+      color: #fdcb6e;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      line-height: 1.4;
+      transition: all 0.2s;
+
+      &:hover:not(:disabled) {
+        background: rgba(253, 203, 110, 0.35);
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+// ============================================
+// ⚡ MODAL SELECCIÓN RESISTENCIAS
+// ============================================
+
+.resistor-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.18s ease;
+}
+
+.resistor-box {
+  background: linear-gradient(135deg, #1a1f2e 0%, #161b27 100%);
+  border: 1px solid rgba(108, 92, 231, 0.35);
+  border-radius: 16px;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(108, 92, 231, 0.1);
+  overflow: hidden;
+}
+
+.resistor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
+  h5 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #a29bfe;
+    display: flex;
+    align-items: center;
+
+    i { color: #fdcb6e; }
+  }
+}
+
+.resistor-close {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+  }
+}
+
+.resistor-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.resistor-label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.resistor-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(108, 92, 231, 0.3);
+  border-radius: 10px;
+  color: #e2e8f0;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  appearance: auto;
+
+  &:focus {
+    outline: none;
+    border-color: rgba(108, 92, 231, 0.7);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+  }
+
+  option {
+    background: #1a1f2e;
+    color: #e2e8f0;
+  }
+}
+
+.resistor-footer {
+  padding: 14px 20px 18px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.btn-resistor-cancel {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+  }
+}
+
+.btn-resistor-confirm {
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  padding: 8px 18px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(108, 92, 231, 0.5);
+  }
+
+  &:active { transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+// ============================================
+// Badge en el carrito
+.price-type-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(0, 184, 148, 0.2);
+  color: #55efc4;
+
+  &.mayorista-badge {
+    background: rgba(253, 203, 110, 0.2);
+    color: #fdcb6e;
+  }
+}
+

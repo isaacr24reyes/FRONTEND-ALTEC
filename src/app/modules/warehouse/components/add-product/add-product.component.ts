@@ -29,6 +29,7 @@ export class AddProductComponent {
     'Parlantes',
     'Pilas y Baterias',
     'Plugs y Conectores',
+    'Por Importar',
     'Protoboards',
     'Proyectos Y kits',
     'Redes y Comunicación',
@@ -46,7 +47,7 @@ export class AddProductComponent {
   ) {
     this.formGroup = this.fb.group({
       productCategory: ['', Validators.required],
-      productCode: ['', Validators.required],
+      productCode: [''],   // Opcional: el script asigna el código automáticamente
       isImported: [false],
       productStock: ['', [Validators.required, Validators.pattern('^[0-9]*$')]],
       productPvp: ['', [Validators.required, Validators.pattern('^[0-9]+([.,][0-9]{1,2})?$')]],
@@ -136,7 +137,7 @@ export class AddProductComponent {
         formDataToSend.append('IsImport', formData.isImported);
         formDataToSend.append('Stock', formData.productStock);
         formDataToSend.append('PrecioMayorista', normalizedMp);
-        formDataToSend.append('Codigo', formData.productCode);
+        formDataToSend.append('Codigo', formData.productCode || '');
         formDataToSend.append('PrecioImportacion', normalizedPi);
         formDataToSend.append('CreatedBy', this.userName);
 

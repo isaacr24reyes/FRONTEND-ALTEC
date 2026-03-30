@@ -25,7 +25,7 @@ export class EditProductComponent implements OnInit {
   products: any[] = [];
   selectedProduct: any
   currentPage = 1;
-  pageSize = 25;
+  pageSize = 30;
   totalCount: number = 0;
   totalPages: number = 0;
   categoriasValidas: string[] = [
@@ -55,6 +55,8 @@ export class EditProductComponent implements OnInit {
   isFirstLoad: boolean = true;
   isLoading: boolean = true;
   onlyNoImage: boolean = false;
+  imagePreview: string | null = null;
+  isSaving: boolean = false;
 
   constructor(
     private productService: ProductService,
@@ -194,6 +196,7 @@ export class EditProductComponent implements OnInit {
       ...producto,
       isImport: this.convertToBoolean(producto.isImport)
     };
+    this.imagePreview = null;
 
     const modalElement = document.getElementById('productModal');
     if (modalElement) {
@@ -212,9 +215,11 @@ export class EditProductComponent implements OnInit {
 
 
   guardarEdicion(): void {
-    if (!this.selectedProduct) return;
+    if (!this.selectedProduct || this.isSaving) return;
+    this.isSaving = true;
     this.productService.updateProduct(this.selectedProduct.id, this.selectedProduct).subscribe(
       (updatedProduct: any) => {
+        this.isSaving = false;
         const idxAll = this.allProducts.findIndex(p => p.id === updatedProduct.id);
         if (idxAll !== -1) {
           this.allProducts[idxAll] = {
@@ -224,9 +229,7 @@ export class EditProductComponent implements OnInit {
           };
         }
         this.applyFilter();
-
         this.closeModal();
-
         Notiflix.Report.success(
           'Producto actualizado',
           'El producto ha sido actualizado correctamente.',
@@ -234,6 +237,7 @@ export class EditProductComponent implements OnInit {
         );
       },
       (error: any) => {
+        this.isSaving = false;
         console.error("Error al actualizar el producto", error);
         Notiflix.Report.failure(
           'Error',
@@ -261,6 +265,11 @@ export class EditProductComponent implements OnInit {
     const file = event.target.files[0];
     if (file && this.selectedProduct) {
       this.selectedProduct.archivo = file;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagePreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
     }
   }
 

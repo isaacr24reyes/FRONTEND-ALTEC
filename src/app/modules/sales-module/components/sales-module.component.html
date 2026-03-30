@@ -102,35 +102,91 @@
               </div>
             </div>
 
-            <!-- COLUMNA 2: BÚSQUEDA DE PRODUCTOS -->
+            <!-- COLUMNA 2: CARGAR COTIZACIÓN -->
             <div class="col-12 col-md-6">
-              <div class="section-card search-section">
+              <div class="section-card quotation-loader-section">
                 <div class="section-header">
                   <h5>
-                    <i class="bi bi-search"></i> Buscar Productos
+                    <i class="bi bi-file-earmark-text"></i> Cargar Cotización
                   </h5>
                 </div>
 
-                <div class="search-wrapper" [formGroup]="formGroup">
-                  <label class="form-label small fw-600 mb-2">
-                    Busca por código o nombre
-                  </label>
-                  <div class="input-group input-group-lg">
-                    <span class="input-group-text bg-transparent border-end-0">
-                      <i class="bi bi-search"></i>
+                <div class="quotation-loader-body">
+                  <div class="input-group">
+                    <span class="input-group-text bg-transparent">
+                      <i class="bi bi-hash"></i>
                     </span>
                     <input
                       type="text"
-                      class="form-control form-control-lg border-start-0"
-                      placeholder="Ej: laptop, teclado..."
-                      formControlName="searchControl"
-                      (focus)="onSearchFocus()"
-                      autocomplete="off" />
+                      class="form-control"
+                      placeholder="Número de cotización (ej: 45231)"
+                      [(ngModel)]="numeroCotizacion"
+                      (keyup.enter)="buscarCotizacion()"
+                      maxlength="10" />
+                    <button
+                      type="button"
+                      class="btn btn-outline-primary"
+                      (click)="buscarCotizacion()"
+                      [disabled]="buscandoCotizacion">
+                      <span *ngIf="buscandoCotizacion" class="spinner-border spinner-border-sm me-1"></span>
+                      <i *ngIf="!buscandoCotizacion" class="bi bi-search me-1"></i>
+                      Buscar
+                    </button>
+                  </div>
+
+                  <!-- RESULTADO DE LA COTIZACIÓN -->
+                  <div *ngIf="cotizacionCargada" class="quotation-result mt-3">
+                    <div class="quotation-result-header">
+                      <span><i class="bi bi-check-circle-fill text-success me-1"></i> Cotización encontrada — {{ cotizacionCargada.length }} producto(s)</span>
+                    </div>
+                    <ul class="quotation-items-preview">
+                      <li *ngFor="let item of cotizacionCargada">
+                        <span class="item-qty">x{{ item.quantity }}</span>
+                        <span class="item-desc">{{ getProductName(item.productId) }}</span>
+                        <span class="item-badge" [class.badge-mayorista]="item.priceType?.toLowerCase() === 'mayorista'">
+                          {{ item.priceType?.toLowerCase() === 'mayorista' ? 'Mayorista' : 'PVP' }}
+                        </span>
+                        <span class="item-price-preview">${{ getPrecioParaCotizacion(item) | number: '1.2-2' }}</span>
+                      </li>
+                    </ul>
+                    <button
+                      type="button"
+                      class="btn btn-success btn-sm w-100 mt-2"
+                      (click)="cargarCotizacionAlCarrito()">
+                      <i class="bi bi-cart-plus me-1"></i> Cargar al Carrito con Precios Actuales
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
 
+          </div><!-- fin row DOS COLUMNAS -->
+
+          <!-- 🔍 BÚSQUEDA DE PRODUCTOS -->
+          <div class="section-card search-section mb-3">
+            <div class="section-header">
+              <h5>
+                <i class="bi bi-search"></i> Buscar Productos
+              </h5>
+            </div>
+
+            <div class="search-wrapper" [formGroup]="formGroup">
+              <label class="form-label small fw-600 mb-2">
+                Busca por código o nombre
+              </label>
+              <div class="input-group input-group-lg">
+                <span class="input-group-text bg-transparent border-end-0">
+                  <i class="bi bi-search"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control form-control-lg border-start-0"
+                  placeholder="Ej: laptop, teclado..."
+                  formControlName="searchControl"
+                  (focus)="onSearchFocus()"
+                  autocomplete="off" />
+              </div>
+            </div>
           </div>
 
           <!-- 📦 GRILLA DE PRODUCTOS -->
@@ -191,18 +247,35 @@
 
                   <div class="product-footer">
                     <div class="price-section">
-                      <span class="price-label">Precio</span>
-                      <span class="price-value">${{ product.pvp | number: '1.2-2' }}</span>
+                      <div class="price-pvp">
+                        <span class="price-label">PVP</span>
+                        <span class="price-value">${{ product.pvp | number: '1.2-2' }}</span>
+                      </div>
+                      <div class="price-mayorista" *ngIf="product.precioMayorista">
+                        <span class="price-label mayorista-label">Mayor.</span>
+                        <span class="price-value mayorista-value">${{ product.precioMayorista | number: '1.2-2' }}</span>
+                      </div>
                     </div>
 
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-add-to-cart"
-                      (click)="addProductToCart(product); $event.stopPropagation()"
-                      [disabled]="product.stock === 0"
-                      title="Agregar al carrito">
-                      <i class="bi bi-plus-circle-fill"></i>
-                    </button>
+                    <div class="add-buttons">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-add-to-cart"
+                        (click)="addProductToCart(product, 'pvp'); $event.stopPropagation()"
+                        [disabled]="product.stock === 0"
+                        title="Agregar a precio PVP">
+                        <i class="bi bi-plus-circle-fill"></i>
+                      </button>
+                      <button
+                        *ngIf="product.precioMayorista"
+                        type="button"
+                        class="btn btn-sm btn-add-mayorista"
+                        (click)="addProductToCart(product, 'mayorista'); $event.stopPropagation()"
+                        [disabled]="product.stock === 0"
+                        title="Agregar a precio mayorista">
+                        M
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -258,7 +331,12 @@
                 </div>
 
                 <div class="item-price-info">
-                  <small class="text-muted">${{ item.pvp | number: '1.2-2' }}</small>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="unit-price">${{ item.pvp | number: '1.2-2' }} c/u</span>
+                    <span class="price-type-badge" [class.mayorista-badge]="item.priceType === 'mayorista'">
+                      {{ item.priceType === 'mayorista' ? 'Mayorista' : 'PVP' }}
+                    </span>
+                  </div>
                   <span class="item-subtotal">${{ item.subtotal | number: '1.2-2' }}</span>
                 </div>
 
@@ -272,7 +350,14 @@
                     <i class="bi bi-dash-circle"></i>
                   </button>
 
-                  <span class="quantity-display">{{ item.cantidad }}</span>
+                  <input
+                    type="number"
+                    class="quantity-input"
+                    [value]="item.cantidad"
+                    min="1"
+                    (keydown)="onQtyKeydown($event)"
+                    (input)="onQtyInput($event, idx)"
+                    (blur)="onQtyBlur($event, idx)" />
 
                   <button
                     type="button"
@@ -413,4 +498,32 @@
       </div>
     </div>
   </main>
+
+  <!-- ⚡ MODAL SELECCIÓN RESISTENCIAS (1/4W y 1/2W) -->
+  <div class="resistor-overlay" *ngIf="showResistorModal" (click)="showResistorModal = false">
+    <div class="resistor-box" (click)="$event.stopPropagation()">
+      <div class="resistor-header">
+        <h5><i class="bi bi-lightning-charge-fill me-2"></i>{{ resistorModalTitle }}</h5>
+        <button class="resistor-close" (click)="showResistorModal = false">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="resistor-body">
+        <label class="resistor-label">Selecciona el valor de la resistencia:</label>
+        <select class="resistor-select" [(ngModel)]="selectedResistorValue">
+          <option value="">-- Selecciona un valor --</option>
+          <option *ngFor="let r of activeResistorValues" [value]="r">{{ r }}</option>
+        </select>
+      </div>
+      <div class="resistor-footer">
+        <button class="btn-resistor-cancel" (click)="showResistorModal = false">
+          <i class="bi bi-x-circle me-1"></i>Cancelar
+        </button>
+        <button class="btn-resistor-confirm" (click)="confirmResistorSales()">
+          <i class="bi bi-cart-plus me-1"></i>Agregar al carrito
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>

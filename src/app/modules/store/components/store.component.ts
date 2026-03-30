@@ -48,78 +48,23 @@ export class StoreComponent implements OnInit, AfterViewInit, OnDestroy {
   private mouse = { x: 0, y: 0 };
 
   resistorValues: string[] = [
-    '1Ω',
-    '8.2Ω',
-    '10Ω',
-    '20Ω',
-    '22Ω',
-    '27Ω',
-    '47Ω',
-    '56Ω',
-    '62Ω',
-    '68Ω',
-    '75Ω',
-    '82Ω',
-    '100Ω',
-    '110Ω',
-    '120Ω',
-    '200Ω',
-    '220Ω',
-    '240Ω',
-    '270Ω',
-    '300Ω',
-    '330Ω',
-    '360Ω',
-    '390Ω',
-    '470Ω',
-    '510Ω',
-    '560Ω',
-    '680Ω',
-    '820Ω',
-
-    // kΩ (Kiloohmios)
-    '1kΩ',
-    '1.2kΩ',
-    '1.8kΩ',
-    '2kΩ',
-    '2.2kΩ',
-    '2.7kΩ',
-    '3.3kΩ',
-    '3.9kΩ',
-    '4.7kΩ',
-    '5.1kΩ',
-    '5.6kΩ',
-    '6.2kΩ',
-    '6.8kΩ',
-    '8.2kΩ',
-    '10kΩ',
-    '12kΩ',
-    '15kΩ',
-    '16kΩ',
-    '20kΩ',
-    '22kΩ',
-    '27kΩ',
-    '39kΩ',
-    '47kΩ',
-    '56kΩ',
-    '68kΩ',
-    '82kΩ',
-    '100kΩ',
-    '120kΩ',
-    '150kΩ',
-    '220kΩ',
-    '270kΩ',
-    '330kΩ',
-    '470kΩ',
-    '560kΩ',
-    '750kΩ',
-    '820kΩ',
-
-    // MΩ (Megaohmios)
-    '1MΩ',
-    '2.2MΩ',
-    '10MΩ'
+    '1Ω', '8.2Ω', '10Ω', '20Ω', '22Ω', '27Ω', '47Ω', '56Ω', '62Ω', '68Ω', '75Ω', '82Ω',
+    '100Ω', '110Ω', '120Ω', '200Ω', '220Ω', '240Ω', '270Ω', '300Ω', '330Ω', '360Ω',
+    '390Ω', '470Ω', '510Ω', '560Ω', '680Ω', '820Ω',
+    '1kΩ', '1.2kΩ', '1.8kΩ', '2kΩ', '2.2kΩ', '2.7kΩ', '3.3kΩ', '3.9kΩ', '4.7kΩ',
+    '5.1kΩ', '5.6kΩ', '6.2kΩ', '6.8kΩ', '8.2kΩ', '10kΩ', '12kΩ', '15kΩ', '16kΩ',
+    '20kΩ', '22kΩ', '27kΩ', '39kΩ', '47kΩ', '56kΩ', '68kΩ', '82kΩ', '100kΩ',
+    '120kΩ', '150kΩ', '220kΩ', '270kΩ', '330kΩ', '470kΩ', '560kΩ', '750kΩ', '820kΩ',
+    '1MΩ', '2.2MΩ', '10MΩ'
   ];
+
+  resistorHalfWattValues: string[] = [
+    '12Ω', '15Ω', '18Ω', '30Ω', '33Ω', '39Ω', '56Ω', '150Ω',
+    '1.5kΩ', '10kΩ', '33kΩ', '100kΩ', '150kΩ', '680kΩ'
+  ];
+
+  activeResistorValues: string[] = [];
+  resistorModalTitle: string = '';
 
   categories = [
     'Audio y video',
@@ -202,10 +147,23 @@ export class StoreComponent implements OnInit, AfterViewInit, OnDestroy {
   addToCart(product: any): void {
     const descripcion = product.descripcion?.toLowerCase() || '';
 
-    // Modal para resistencias
-    if (descripcion.includes('resistencia') && product.descripcion.includes('1/4 W')) {
+    // Modal para resistencias 1/4 W
+    if (descripcion.includes('resistencia') && descripcion.includes('1/4')) {
       this.selectedProduct = product;
       this.selectedValue = '';
+      this.activeResistorValues = this.resistorValues;
+      this.resistorModalTitle = 'Resistencia ¼ Watt — Selecciona el valor';
+      const modal = new (window as any).bootstrap.Modal(document.getElementById('resistorModal'));
+      modal.show();
+      return;
+    }
+
+    // Modal para resistencias 1/2 W
+    if (descripcion.includes('resistencia') && descripcion.includes('1/2')) {
+      this.selectedProduct = product;
+      this.selectedValue = '';
+      this.activeResistorValues = this.resistorHalfWattValues;
+      this.resistorModalTitle = 'Resistencia ½ Watt — Selecciona el valor';
       const modal = new (window as any).bootstrap.Modal(document.getElementById('resistorModal'));
       modal.show();
       return;

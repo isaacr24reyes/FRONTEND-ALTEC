@@ -5,12 +5,15 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ProductService } from '../../warehouse/services/warehouse.service';
 import { SalesService, SaleDto } from '../../../services/sales.service';
 import { forkJoin } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 import Notiflix from 'notiflix';
 
 interface CartItem {
   id?: string;
   descripcion: string;
   pvp: number;
+  priceType: string;
   cantidad: number;
   subtotal?: number;
 }
@@ -43,6 +46,28 @@ export class SalesModuleComponent implements OnInit {
   allProducts: any[] = [];
   products: any[] = [];
 
+  // ⚡ Resistencias
+  resistorValues: string[] = [
+    '1Ω', '8.2Ω', '10Ω', '20Ω', '22Ω', '27Ω', '47Ω', '56Ω', '62Ω', '68Ω', '75Ω', '82Ω',
+    '100Ω', '110Ω', '120Ω', '200Ω', '220Ω', '240Ω', '270Ω', '300Ω', '330Ω', '360Ω',
+    '390Ω', '470Ω', '510Ω', '560Ω', '680Ω', '820Ω',
+    '1kΩ', '1.2kΩ', '1.8kΩ', '2kΩ', '2.2kΩ', '2.7kΩ', '3.3kΩ', '3.9kΩ', '4.7kΩ',
+    '5.1kΩ', '5.6kΩ', '6.2kΩ', '6.8kΩ', '8.2kΩ', '10kΩ', '12kΩ', '15kΩ', '16kΩ',
+    '20kΩ', '22kΩ', '27kΩ', '39kΩ', '47kΩ', '56kΩ', '68kΩ', '82kΩ', '100kΩ',
+    '120kΩ', '150kΩ', '220kΩ', '270kΩ', '330kΩ', '470kΩ', '560kΩ', '750kΩ', '820kΩ',
+    '1MΩ', '2.2MΩ', '10MΩ'
+  ];
+  resistorHalfWattValues: string[] = [
+    '12Ω', '15Ω', '18Ω', '30Ω', '33Ω', '39Ω', '56Ω', '150Ω',
+    '1.5kΩ', '10kΩ', '33kΩ', '100kΩ', '150kΩ', '680kΩ'
+  ];
+  showResistorModal = false;
+  resistorModalTitle = '';
+  activeResistorValues: string[] = [];
+  selectedResistorValue = '';
+  pendingResistorProduct: any = null;
+  pendingResistorPriceType = 'pvp';
+
   // 🛒 Carrito
   cartItems: CartItem[] = [];
 
@@ -68,13 +93,14 @@ export class SalesModuleComponent implements OnInit {
   showCart: boolean = true;
   cartCollapsed: boolean = false;
 
-  private readonly MAX_RESULTS = 8;
+  private readonly MAX_RESULTS = 10;
   private readonly TAX_RATE = 0.00; // IVA 15% ya incluido en precio
 
   constructor(
     private fb: FormBuilder,
     private productService: ProductService,
-    private salesService: SalesService
+    private salesService: SalesService,
+    private http: HttpClient
   ) { }
 
   ngOnInit(): void {
@@ -147,7 +173,7 @@ export class SalesModuleComponent implements OnInit {
     Notiflix.Loading.standard('Procesando venta...');
 
     const invoiceNumber = `INV-${Date.now()}`;
-    const saleDate = new Date().toISOString();
+    const saleDate = new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(); // UTC-5 Ecuador
     const paymentMethod = this.selectedPaymentMethod;
 
     // TODO: Ajustar employeeID real cuando exista autenticación
@@ -181,11 +207,30 @@ export class SalesModuleComponent implements OnInit {
       return this.salesService.createSale(sale);
     });
 
+    // Capturar items antes de limpiar el carrito
+    const itemsVendidos = this.cartItems.map(i => ({ id: i.id!, cantidad: i.cantidad }));
+
     forkJoin(salesObservables).subscribe({
-      next: (results) => {
-        Notiflix.Loading.remove();
-        Notiflix.Notify.success('✓ Venta realizada con éxito');
-        this.limpiarVenta();
+      next: () => {
+        // Descontar stock de cada producto vendido
+        const stockObservables = itemsVendidos
+          .filter(i => i.id)
+          .map(i => this.productService.reducirStock(i.id, i.cantidad));
+
+        forkJoin(stockObservables).subscribe({
+          next: () => {
+            Notiflix.Loading.remove();
+            Notiflix.Notify.success('✓ Venta realizada con éxito');
+            this.limpiarVenta();
+            this.getAllProducts(); // refresca stock en tiempo real
+          },
+          error: () => {
+            Notiflix.Loading.remove();
+            Notiflix.Notify.success('✓ Venta guardada, pero hubo un error al actualizar el stock.');
+            this.limpiarVenta();
+            this.getAllProducts(); // refresca de todas formas para mostrar estado real
+          }
+        });
       },
       error: (err) => {
         Notiflix.Loading.remove();
@@ -208,11 +253,17 @@ export class SalesModuleComponent implements OnInit {
       .subscribe({
         next: (data: any) => {
           this.allProducts = data.items || [];
-          this.showDefaultProducts();
+          // Preserva el filtro activo para que el stock se actualice
+          // en la vista que el usuario ya tiene abierta
+          const currentSearch = this.formGroup.get('searchControl')?.value || '';
+          if (currentSearch.trim()) {
+            this.applyFilter(currentSearch);
+          } else {
+            this.showDefaultProducts();
+          }
         },
         error: (err) => {
           console.error('Error loading products:', err);
-          Notiflix.Notify.failure('Error al cargar productos');
         }
       });
   }
@@ -314,18 +365,71 @@ export class SalesModuleComponent implements OnInit {
      🛒 CARRITO
      ========================= */
 
-  addProductToCart(product: any): void {
-    const existing = this.cartItems.find(
-      p => p.descripcion === product.descripcion
-    );
+  addProductToCart(product: any, priceType: string = 'pvp'): void {
+    const desc = (product.descripcion || '').toLowerCase();
+
+    // Interceptar resistencias 1/4W para pedir el valor
+    if (desc.includes('resistencia') && desc.includes('1/4')) {
+      this.pendingResistorProduct = product;
+      this.pendingResistorPriceType = priceType;
+      this.activeResistorValues = this.resistorValues;
+      this.resistorModalTitle = 'Resistencia ¼ Watt';
+      this.selectedResistorValue = '';
+      this.showResistorModal = true;
+      return;
+    }
+
+    // Interceptar resistencias 1/2W para pedir el valor
+    if (desc.includes('resistencia') && desc.includes('1/2')) {
+      this.pendingResistorProduct = product;
+      this.pendingResistorPriceType = priceType;
+      this.activeResistorValues = this.resistorHalfWattValues;
+      this.resistorModalTitle = 'Resistencia ½ Watt';
+      this.selectedResistorValue = '';
+      this.showResistorModal = true;
+      return;
+    }
+
+    this.doAddToCart(product, priceType);
+  }
+
+  /** Confirmación desde el modal de resistencias */
+  confirmResistorSales(): void {
+    if (!this.selectedResistorValue) {
+      Notiflix.Notify.warning('Selecciona el valor de la resistencia');
+      return;
+    }
+    const product = {
+      ...this.pendingResistorProduct,
+      descripcion: `${this.pendingResistorProduct.descripcion} - ${this.selectedResistorValue}`
+    };
+    this.showResistorModal = false;
+    this.doAddToCart(product, this.pendingResistorPriceType);
+  }
+
+  /** Agrega directamente al carrito (sin verificación de resistencias) */
+  private doAddToCart(product: any, priceType: string): void {
+    const precio = priceType === 'mayorista'
+      ? (product.precioMayorista || product.pvp || 0)
+      : (product.pvp || 0);
+
+    const productId = product.idProducto?.toString() || product.id?.toString() || '0';
+    const desc = (product.descripcion || '').toLowerCase();
+    const isResistor = desc.includes('resistencia');
+
+    // Resistencias se diferencian por descripción completa (incluye el valor)
+    const existing = isResistor
+      ? this.cartItems.find(p => p.id === productId && p.descripcion === product.descripcion && p.priceType === priceType)
+      : this.cartItems.find(p => p.id === productId && p.priceType === priceType);
 
     if (existing) {
       existing.cantidad++;
     } else {
       this.cartItems.push({
-        id: product.idProducto?.toString() || product.id?.toString() || '0',
+        id: productId,
         descripcion: product.descripcion,
-        pvp: product.pvp || 0,
+        pvp: precio,
+        priceType: priceType,
         cantidad: 1
       });
     }
@@ -348,6 +452,34 @@ export class SalesModuleComponent implements OnInit {
       } else {
         this.removeItem(index);
       }
+      this.recalculate();
+    }
+  }
+
+  /** Solo permite teclas numéricas, borrar, flechas y tabulador */
+  onQtyKeydown(event: KeyboardEvent): void {
+    const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Tab'];
+    if (allowed.includes(event.key)) return;
+    if (!/^\d$/.test(event.key)) event.preventDefault();
+  }
+
+  /** Actualiza la cantidad mientras el usuario escribe */
+  onQtyInput(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+    const val = parseInt(input.value, 10);
+    if (!isNaN(val) && val >= 1) {
+      this.cartItems[index].cantidad = val;
+      this.recalculate();
+    }
+  }
+
+  /** Al perder el foco: si queda vacío o 0, fuerza 1 */
+  onQtyBlur(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+    const val = parseInt(input.value, 10);
+    if (isNaN(val) || val < 1) {
+      this.cartItems[index].cantidad = 1;
+      input.value = '1';
       this.recalculate();
     }
   }
@@ -480,6 +612,93 @@ export class SalesModuleComponent implements OnInit {
     const searchControl = this.formGroup.get('searchControl');
     if (searchControl && searchControl.value) {
       searchControl.setValue('');
+    }
+  }
+
+  /* =========================
+     📋 CARGAR COTIZACIÓN
+     ========================= */
+
+  numeroCotizacion: string = '';
+  buscandoCotizacion: boolean = false;
+  cotizacionCargada: any[] | null = null;
+
+  buscarCotizacion(): void {
+    const numero = this.numeroCotizacion.trim();
+    if (!numero) {
+      Notiflix.Notify.warning('Ingresa un número de cotización.');
+      return;
+    }
+
+    this.buscandoCotizacion = true;
+    this.cotizacionCargada = null;
+
+    this.http.get<any[]>(`${environment.apiALTEC}/api/cotizaciones/${numero}`).subscribe({
+      next: (items) => {
+        this.buscandoCotizacion = false;
+        if (!items || items.length === 0) {
+          Notiflix.Notify.warning('No se encontró la cotización.');
+          return;
+        }
+        this.cotizacionCargada = items;
+      },
+      error: () => {
+        this.buscandoCotizacion = false;
+        Notiflix.Notify.failure('No se encontró la cotización o ocurrió un error.');
+      }
+    });
+  }
+
+  getProductName(productId: string): string {
+    const product = this.allProducts.find(p => p.id === productId);
+    return product ? product.descripcion : productId;
+  }
+
+  getPrecioParaCotizacion(item: any): number {
+    const product = this.allProducts.find(p => p.id === item.productId);
+    if (!product) return item.unitPrice ?? 0;
+    const esMayorista = (item.priceType ?? '').toLowerCase() === 'mayorista';
+    return esMayorista && product.precioMayorista > 0
+      ? product.precioMayorista
+      : product.pvp;
+  }
+
+  cargarCotizacionAlCarrito(): void {
+    if (!this.cotizacionCargada) return;
+
+    let cargados = 0;
+    for (const item of this.cotizacionCargada) {
+      const product = this.allProducts.find(p => p.id === item.productId);
+      if (!product) continue;
+
+      const esMayorista = (item.priceType ?? '').toLowerCase() === 'mayorista';
+      const precio = esMayorista && product.precioMayorista > 0
+        ? product.precioMayorista
+        : product.pvp;
+
+      const existing = this.cartItems.find(c => c.id === product.id && c.priceType === (esMayorista ? 'mayorista' : 'pvp'));
+      if (existing) {
+        existing.cantidad += item.quantity;
+      } else {
+        this.cartItems.push({
+          id: product.id,
+          descripcion: product.descripcion,
+          pvp: precio,
+          priceType: item.priceType || 'pvp',
+          cantidad: item.quantity
+        });
+      }
+      cargados++;
+    }
+
+    this.recalculate();
+
+    if (cargados > 0) {
+      Notiflix.Notify.success(`${cargados} producto(s) cargado(s) al carrito.`);
+      this.cotizacionCargada = null;
+      this.numeroCotizacion = '';
+    } else {
+      Notiflix.Notify.warning('No se encontraron productos de la cotización en el inventario.');
     }
   }
 }

@@ -79,6 +79,12 @@
                 Cargar Productos
               </a>
             </li>
+            <li>
+              <a class="dropdown-item" (click)="navigateToEditProduct()">
+                <i class="bi bi-pencil-square me-2"></i>
+                Editar Productos
+              </a>
+            </li>
           </ul>
         </li>
 
@@ -91,13 +97,13 @@
           </a>
           <ul class="dropdown-menu modern-dropdown">
             <li>
-              <a class="dropdown-item" href="#">
+              <a class="dropdown-item" (click)="navigateToSalesModule()">
                 <i class="bi bi-cash-coin me-2"></i>
                 Realizar Venta
               </a>
             </li>
             <li>
-              <a class="dropdown-item" href="#">
+              <a class="dropdown-item" (click)="navigateToHistoricSales()">
                 <i class="bi bi-receipt me-2"></i>
                 Ver Ventas
               </a>
