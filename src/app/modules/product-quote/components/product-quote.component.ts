@@ -49,6 +49,17 @@ export class ProductQuoteComponent implements OnInit {
 
   activeResistorValues: string[] = [];
   resistorLabel: string = '';
+
+  ledColors: { nombre: string; hex: string }[] = [
+    { nombre: 'Blanco',   hex: '#ffffff' },
+    { nombre: 'Rojo',     hex: '#ef4444' },
+    { nombre: 'Verde',    hex: '#22c55e' },
+    { nombre: 'Amarillo', hex: '#facc15' },
+    { nombre: 'Azul',     hex: '#3b82f6' }
+  ];
+  isLed: boolean = false;
+  selectedLedColor: string = '';
+
   selectedCategory: string = '';
   onlyImport: boolean = false;
   onlyLowStock: boolean = false;
@@ -67,6 +78,7 @@ export class ProductQuoteComponent implements OnInit {
     'Parlantes',
     'Pilas y Baterias',
     'Plugs y Conectores',
+    'Por Importar',
     'Protoboards',
     'Proyectos Y kits',
     'Redes y Comunicación',
@@ -87,6 +99,7 @@ export class ProductQuoteComponent implements OnInit {
   historialCotizaciones: any[] = [];
   busquedaHistorial: string = '';
   cargandoHistorial: boolean = false;
+  cotizacionCargadaNumero: string | null = null;
 
   constructor(
     private productService: ProductService,
@@ -156,18 +169,27 @@ export class ProductQuoteComponent implements OnInit {
     const desc = product.descripcion?.toLowerCase() || '';
     if (desc.includes('resistencia') && desc.includes('1/2')) {
       this.isResistor = true;
+      this.isLed = false;
       this.activeResistorValues = this.resistorHalfWattValues;
       this.resistorLabel = 'Resistencia ½ Watt';
     } else if (desc.includes('resistencia') && desc.includes('1/4')) {
       this.isResistor = true;
+      this.isLed = false;
       this.activeResistorValues = this.resistorValues;
       this.resistorLabel = 'Resistencia ¼ Watt';
+    } else if (desc.includes('diodo') && desc.includes('led')) {
+      this.isLed = true;
+      this.isResistor = false;
+      this.activeResistorValues = [];
+      this.resistorLabel = '';
     } else {
       this.isResistor = false;
+      this.isLed = false;
       this.activeResistorValues = [];
       this.resistorLabel = '';
     }
     this.selectedResistorValue = '';
+    this.selectedLedColor = '';
 
     const modalElement = document.getElementById('productModal');
     if (modalElement) {
@@ -356,10 +378,21 @@ export class ProductQuoteComponent implements OnInit {
         Notiflix.Notify.warning('Selecciona el valor de la resistencia');
         return;
       }
-
       item = {
         ...item,
         descripcion: `${item.descripcion} - ${this.selectedResistorValue}`
+      };
+    }
+
+    // 💡 Si es diodo LED, exige color
+    if (this.isLed) {
+      if (!this.selectedLedColor) {
+        Notiflix.Notify.warning('Selecciona el color del LED');
+        return;
+      }
+      item = {
+        ...item,
+        descripcion: `${item.descripcion} - ${this.selectedLedColor}`
       };
     }
 
@@ -424,6 +457,19 @@ export class ProductQuoteComponent implements OnInit {
     } else {
       // Si la cantidad es 1, eliminar el producto
       this.eliminarDeCotizacion(index);
+    }
+  }
+
+  setCantidad(index: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const val = parseInt(input.value, 10);
+    if (!isNaN(val) && val >= 1) {
+      this.cotizacion[index].cantidad = val;
+      this.cotizacion[index].total = val * this.cotizacion[index].precio;
+    } else {
+      this.cotizacion[index].cantidad = 1;
+      this.cotizacion[index].total = this.cotizacion[index].precio;
+      input.value = '1';
     }
   }
 
@@ -718,15 +764,78 @@ export class ProductQuoteComponent implements OnInit {
       this.cotizacion.push(nuevoItem);
     }
 
+    this.cotizacionCargadaNumero = summary.quotationNumber;
     Notiflix.Loading.remove();
     Notiflix.Notify.success(`Cotización N° ${summary.quotationNumber} cargada con precios actuales`);
   }
 
+  async guardarCambiosCotizacion(): Promise<void> {
+    if (!this.cotizacionCargadaNumero || !this.cotizacion.length) return;
+
+    const quotationDetails = this.cotizacion.map(product => ({
+      productId: product.id,
+      quantity: product.cantidad,
+      unitPrice: product.precio,
+      priceType: product.priceType || 'pvp'
+    }));
+
+    Notiflix.Loading.standard('Guardando cambios...');
+    try {
+      await new Promise((resolve, reject) => {
+        this.http.put(
+          `${environment.apiALTEC}/api/cotizaciones/${this.cotizacionCargadaNumero}`,
+          { quotationDetails }
+        ).subscribe({ next: resolve, error: reject });
+      });
+      Notiflix.Loading.remove();
+      Notiflix.Notify.success(`Cotización N° ${this.cotizacionCargadaNumero} actualizada correctamente`);
+    } catch {
+      Notiflix.Loading.remove();
+      Notiflix.Notify.failure('Error al guardar los cambios');
+    }
+  }
+
   async descargarExcelConImagenes() {
     this.isDownloading = true;
-    this.downloadMessage = 'Generando Excel...';
+    this.downloadMessage = 'Guardando cotización...';
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Guardar o actualizar en BD
+    const quotationDetails = this.cotizacion.map(product => ({
+      productId: product.id,
+      quantity: product.cantidad,
+      unitPrice: product.precio,
+      priceType: product.priceType || 'pvp'
+    }));
+
+    let quotationNumber: string;
+    try {
+      if (this.cotizacionCargadaNumero) {
+        // Actualizar la cotización existente
+        await new Promise((resolve, reject) => {
+          this.http.put(
+            `${environment.apiALTEC}/api/cotizaciones/${this.cotizacionCargadaNumero}`,
+            { quotationDetails }
+          ).subscribe({ next: resolve, error: reject });
+        });
+        quotationNumber = this.cotizacionCargadaNumero;
+      } else {
+        // Crear nueva cotización
+        const response: any = await new Promise((resolve, reject) => {
+          this.http.post(`${environment.apiALTEC}/api/cotizaciones`, { quotationDetails })
+            .subscribe({ next: resolve, error: reject });
+        });
+        quotationNumber = response[0]?.quotationNumber;
+        if (!quotationNumber) throw new Error('Número de cotización no recibido');
+        this.cotizacionCargadaNumero = quotationNumber;
+      }
+    } catch {
+      Notiflix.Notify.failure('Error al guardar la cotización en la base de datos');
+      this.isDownloading = false;
+      return;
+    }
+
+    this.downloadMessage = 'Generando Excel...';
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Cotización ALTEC');
@@ -817,7 +926,7 @@ export class ProductQuoteComponent implements OnInit {
 
     try {
       const buffer = await workbook.xlsx.writeBuffer();
-      saveAs(new Blob([buffer]), `ALTEC-Cotizacion-${new Date().toISOString().slice(0, 10)}.xlsx`);
+      saveAs(new Blob([buffer]), `ALTEC-Cotizacion-${quotationNumber}.xlsx`);
       this.downloadMessage = '¡Excel descargado exitosamente!';
       await new Promise(resolve => setTimeout(resolve, 1000));
       Notiflix.Notify.success('Excel descargado correctamente');

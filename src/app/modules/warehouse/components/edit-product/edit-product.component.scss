@@ -1236,8 +1236,40 @@
   border-top: 1px solid rgba(96, 165, 250, .2);
   padding: 1rem;
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: .75rem;
-  justify-content: flex-end;
+}
+
+.modal-footer-right {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+}
+
+.btn-modal-delete {
+  padding: .625rem 1.25rem;
+  background: rgba(239, 68, 68, .12);
+  border: 2px solid rgba(239, 68, 68, .35);
+  border-radius: 50px;
+  color: #ef4444;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  transition: all .3s ease;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: rgba(239, 68, 68, .25);
+    border-color: #ef4444;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, .3);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 }
 
 .btn-modal-cancel {
@@ -1697,6 +1729,18 @@
     color: #60A5FA;
     font-size: .95rem;
   }
+
+}
+
+.price-stack {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.price-mayorista {
+  color: #fdcb6e;
+  font-size: .78rem;
 }
 
 // Ajustes responsive para modal

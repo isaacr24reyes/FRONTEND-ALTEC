@@ -80,6 +80,7 @@ export class StoreComponent implements OnInit, AfterViewInit, OnDestroy {
     'Parlantes',
     'Pilas y Baterias',
     'Plugs y Conectores',
+    'Por Importar',
     'Protoboards',
     'Proyectos Y kits',
     'Redes y Comunicación',

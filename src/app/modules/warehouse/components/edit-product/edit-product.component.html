@@ -212,11 +212,14 @@
                 </div>
                 <div class="info-item">
                   <i class="bi bi-currency-dollar"></i>
-                  <span>{{ producto.pvp | currency }}</span>
+                  <div class="price-stack">
+                    <span>{{ producto.pvp | currency }}</span>
+                    <span class="price-mayorista">{{ producto.precioMayorista | currency }}</span>
+                  </div>
                 </div>
               </div>
 
-              <button class="card-btn" (click)="openModal(producto); $event.stopPropagation()">
+              <button type="button" class="card-btn" (click)="openModal(producto); $event.stopPropagation()">
                 <i class="bi bi-pencil-square me-2"></i>
                 Editar
               </button>
@@ -438,15 +441,21 @@
         </div>
 
         <div class="modal-footer modern-modal-footer">
-          <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal" [disabled]="isSaving">
-            <i class="bi bi-x-circle me-2"></i>
-            Cancelar
+          <button type="button" class="btn-modal-delete" (click)="eliminarProducto()" [disabled]="isSaving">
+            <i class="bi bi-trash3-fill me-2"></i>
+            Eliminar
           </button>
-          <button type="button" class="btn-modal-confirm" (click)="guardarEdicion()" [disabled]="isSaving">
-            <span *ngIf="isSaving" class="save-spinner me-2"></span>
-            <i *ngIf="!isSaving" class="bi bi-check-circle-fill me-2"></i>
-            {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
-          </button>
+          <div class="modal-footer-right">
+            <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal" [disabled]="isSaving">
+              <i class="bi bi-x-circle me-2"></i>
+              Cancelar
+            </button>
+            <button type="button" class="btn-modal-confirm" (click)="guardarEdicion()" [disabled]="isSaving">
+              <span *ngIf="isSaving" class="save-spinner me-2"></span>
+              <i *ngIf="!isSaving" class="bi bi-check-circle-fill me-2"></i>
+              {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>

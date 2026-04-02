@@ -42,6 +42,7 @@ export class EditProductComponent implements OnInit {
     'Parlantes',
     'Pilas y Baterias',
     'Plugs y Conectores',
+    'Por Importar',
     'Proyectos Y kits',
     'Protoboards',
     'Redes y Comunicación',
@@ -216,6 +217,7 @@ export class EditProductComponent implements OnInit {
 
   guardarEdicion(): void {
     if (!this.selectedProduct || this.isSaving) return;
+    const paginaActual = this.currentPage;
     this.isSaving = true;
     this.productService.updateProduct(this.selectedProduct.id, this.selectedProduct).subscribe(
       (updatedProduct: any) => {
@@ -228,6 +230,7 @@ export class EditProductComponent implements OnInit {
             _normCode: this.normalizeText(`${updatedProduct.codigo ?? ''}`)
           };
         }
+        this.currentPage = paginaActual;
         this.applyFilter();
         this.closeModal();
         Notiflix.Report.success(
@@ -244,6 +247,48 @@ export class EditProductComponent implements OnInit {
           'Hubo un problema al actualizar el producto.',
           'Cerrar'
         );
+      }
+    );
+  }
+
+  eliminarProducto(): void {
+    if (!this.selectedProduct) return;
+
+    Notiflix.Confirm.show(
+      'Eliminar producto',
+      `¿Seguro que deseas eliminar "${this.selectedProduct.descripcion}"? Esta acción no se puede deshacer.`,
+      'Sí, eliminar',
+      'Cancelar',
+      () => {
+        Notiflix.Loading.standard('Eliminando producto...');
+        this.productService.deactivateProduct(this.selectedProduct.id).subscribe({
+          next: () => {
+            Notiflix.Loading.remove();
+            // Quitar de la lista local sin recargar
+            this.allProducts = this.allProducts.filter(p => p.id !== this.selectedProduct.id);
+            this.applyFilter();
+            this.closeModal();
+            Notiflix.Report.success(
+              'Producto eliminado',
+              'El producto ha sido eliminado correctamente.',
+              'Aceptar'
+            );
+          },
+          error: () => {
+            Notiflix.Loading.remove();
+            Notiflix.Report.failure(
+              'Error',
+              'No se pudo eliminar el producto. Intenta de nuevo.',
+              'Cerrar'
+            );
+          }
+        });
+      },
+      () => {},
+      {
+        titleColor: '#ef4444',
+        okButtonColor: '#fff',
+        okButtonBackground: '#ef4444',
       }
     );
   }

@@ -251,6 +251,14 @@
               <i class="bi bi-truck me-2"></i>
               <span class="d-none d-md-inline">Incluir </span>Envío
             </button>
+            <button
+              *ngIf="cotizacionCargadaNumero"
+              type="button"
+              class="btn-summary btn-update"
+              (click)="guardarCambiosCotizacion()">
+              <i class="bi bi-floppy-fill me-2"></i>
+              Guardar N° {{ cotizacionCargadaNumero }}
+            </button>
             <button type="button" class="btn-summary btn-pdf" (click)="descargarPDF()">
               <i class="bi bi-file-earmark-pdf-fill me-2"></i>
               <span class="d-none d-md-inline">Descargar </span>PDF
@@ -287,7 +295,13 @@
                     <button type="button" class="btn-quantity-minus" (click)="decrementarCantidad(i)">
                       <i class="bi bi-dash"></i>
                     </button>
-                    <span class="quantity-value">{{ item.cantidad }}</span>
+                    <input
+                      type="number"
+                      class="quantity-value quantity-input"
+                      [value]="item.cantidad"
+                      min="1"
+                      (change)="setCantidad(i, $event)"
+                      (keydown)="$event.key==='e'||$event.key==='-'||$event.key==='.'?$event.preventDefault():null">
                     <button type="button" class="btn-quantity-plus" (click)="incrementarCantidad(i)">
                       <i class="bi bi-plus"></i>
                     </button>
@@ -326,7 +340,13 @@
                       <button type="button" class="btn-quantity-minus" (click)="decrementarCantidad(i)">
                         <i class="bi bi-dash"></i>
                       </button>
-                      <span class="quantity-value">{{ item.cantidad }}</span>
+                      <input
+                        type="number"
+                        class="quantity-value quantity-input"
+                        [value]="item.cantidad"
+                        min="1"
+                        (change)="setCantidad(i, $event)"
+                        (keydown)="$event.key==='e'||$event.key==='-'||$event.key==='.'?$event.preventDefault():null">
                       <button type="button" class="btn-quantity-plus" (click)="incrementarCantidad(i)">
                         <i class="bi bi-plus"></i>
                       </button>
@@ -381,6 +401,16 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body modern-modal-body">
+
+          <!-- Stock disponible -->
+          <div class="stock-info-bar" *ngIf="selectedProduct">
+            <i class="bi bi-box-seam me-2"></i>
+            <span>Stock disponible:</span>
+            <span class="stock-value" [class.stock-low]="selectedProduct.stock < 5" [class.stock-ok]="selectedProduct.stock >= 5">
+              {{ selectedProduct.stock }} unidades
+            </span>
+          </div>
+
           <div *ngIf="isResistor" class="resistor-selector">
             <label class="resistor-label">
               <i class="bi bi-lightning-charge-fill me-2"></i>
@@ -390,6 +420,25 @@
               <option value="">-- Selecciona el valor --</option>
               <option *ngFor="let r of activeResistorValues" [value]="r">{{ r }}</option>
             </select>
+          </div>
+
+          <div *ngIf="isLed" class="led-selector">
+            <label class="resistor-label">
+              <i class="bi bi-lightbulb-fill me-2"></i>
+              Diodo LED — Selecciona el color
+            </label>
+            <div class="led-colors">
+              <button
+                type="button"
+                *ngFor="let c of ledColors"
+                class="led-color-btn"
+                [class.led-color-active]="selectedLedColor === c.nombre"
+                (click)="selectedLedColor = c.nombre"
+                [title]="c.nombre">
+                <span class="led-swatch" [style.background]="c.hex"></span>
+                <span class="led-name">{{ c.nombre }}</span>
+              </button>
+            </div>
           </div>
           <app-car-shop
             [product]="selectedProduct"

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import {environment} from "../../../../environments/environment.prod";
+import {environment} from "../../../../environments/environment";
 
 
 export class ApplicationBaseService {
@@ -21,6 +21,8 @@ export class ApplicationBaseService {
         return this.http.put(url, body);
       case 'delete':
         return this.http.delete(url);
+      case 'patch':
+        return this.http.patch(url, body);
       default:
         throw new Error(`Método HTTP no soportado: ${method}`);
     }
