@@ -1,1 +1,0 @@
-import{K as r,Kb as s,M as i,P as n,_ as o}from"./chunk-ICKUQILN.js";var a,g=(()=>{class t{constructor(e){this.injector=e,a=this.injector}static{this.\u0275fac=function(c){return new(c||t)(i(o))}}static{this.\u0275mod=n({type:t})}static{this.\u0275inj=r({imports:[s]})}}return t})();export{g as a};
