@@ -57,6 +57,7 @@ export class EditProductComponent implements OnInit {
   isLoading: boolean = true;
   onlyNoImage: boolean = false;
   imagePreview: string | null = null;
+  isDragging: boolean = false;
   isSaving: boolean = false;
 
   constructor(
@@ -308,6 +309,32 @@ export class EditProductComponent implements OnInit {
 
   onFileSelected(event: any): void {
     const file = event.target.files[0];
+    this.processImageFile(file);
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+    const file = event.dataTransfer?.files[0];
+    if (file && file.type.startsWith('image/')) {
+      this.processImageFile(file);
+    }
+  }
+
+  private processImageFile(file: File): void {
     if (file && this.selectedProduct) {
       this.selectedProduct.archivo = file;
       const reader = new FileReader();

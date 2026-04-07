@@ -408,19 +408,39 @@
                 Actualizar Foto
               </label>
 
-              <!-- Preview de imagen seleccionada -->
-              <div class="image-preview-wrapper" *ngIf="imagePreview">
-                <img [src]="imagePreview" class="image-preview" alt="Vista previa">
-                <div class="image-preview-badge">
-                  <i class="bi bi-check-circle-fill me-1"></i>
-                  Nueva imagen seleccionada
-                </div>
-              </div>
+              <!-- Zona de Drop + Preview -->
+              <div class="drop-zone"
+                [class.drop-zone-active]="isDragging"
+                (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave($event)"
+                (drop)="onDrop($event)">
 
-              <!-- Imagen actual (cuando no hay preview nueva) -->
-              <div class="image-current-wrapper" *ngIf="!imagePreview && selectedProduct?.foto && selectedProduct.foto !== 'NOT-IMAGE'">
-                <img [src]="selectedProduct.foto" class="image-current" alt="Imagen actual">
-                <span class="image-current-label">Imagen actual</span>
+                <!-- Preview de imagen seleccionada -->
+                <div class="image-preview-wrapper" *ngIf="imagePreview">
+                  <img [src]="imagePreview" class="image-preview" alt="Vista previa">
+                  <div class="image-preview-badge">
+                    <i class="bi bi-check-circle-fill me-1"></i>
+                    Nueva imagen seleccionada
+                  </div>
+                </div>
+
+                <!-- Imagen actual (cuando no hay preview nueva) -->
+                <div class="image-current-wrapper" *ngIf="!imagePreview && selectedProduct?.foto && selectedProduct.foto !== 'NOT-IMAGE'">
+                  <img [src]="selectedProduct.foto" class="image-current" alt="Imagen actual">
+                  <span class="image-current-label">Imagen actual</span>
+                </div>
+
+                <!-- Hint de drag cuando no hay imagen -->
+                <div class="drop-zone-hint" *ngIf="!imagePreview && (!selectedProduct?.foto || selectedProduct.foto === 'NOT-IMAGE')">
+                  <i class="bi bi-cloud-arrow-up"></i>
+                  <span>Arrastra una imagen aquí</span>
+                </div>
+
+                <!-- Overlay al arrastrar -->
+                <div class="drop-zone-overlay" *ngIf="isDragging">
+                  <i class="bi bi-cloud-arrow-up-fill"></i>
+                  <span>Suelta la imagen aquí</span>
+                </div>
               </div>
 
               <div class="file-input-wrapper">

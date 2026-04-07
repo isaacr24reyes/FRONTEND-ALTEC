@@ -369,14 +369,24 @@
               </div>
             </div>
 
+            <!-- 🧾 CHECKBOX FACTURA -->
+            <div class="factura-toggle" *ngIf="cartItems.length > 0">
+              <label class="factura-label">
+                <input type="checkbox" class="form-check-input"
+                  [(ngModel)]="conFactura" (change)="recalculate()">
+                <i class="bi bi-receipt"></i>
+                <span>Requiere Factura</span>
+              </label>
+            </div>
+
             <!-- 💳 RESUMEN DE COMPRA -->
             <div class="cart-summary" *ngIf="cartItems.length > 0">
               <div class="summary-row">
-                <span class="summary-label">Subtotal</span>
+                <span class="summary-label">{{ conFactura ? 'Subtotal (sin IVA)' : 'Subtotal' }}</span>
                 <span class="summary-value">${{ subtotal | number: '1.2-2' }}</span>
               </div>
 
-              <div class="summary-row tax-row">
+              <div class="summary-row tax-row" *ngIf="conFactura">
                 <span class="summary-label">IVA (15%)</span>
                 <span class="summary-value">${{ taxAmount | number: '1.2-2' }}</span>
               </div>

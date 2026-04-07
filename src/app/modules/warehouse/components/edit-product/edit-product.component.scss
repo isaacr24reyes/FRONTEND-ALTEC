@@ -1559,6 +1559,79 @@
 }
 
 // ── Preview de imagen seleccionada ─────────────────────────────
+// ---- Drop Zone ----
+.drop-zone {
+  position: relative;
+  min-height: 120px;
+  border-radius: 14px;
+  border: 2px dashed rgba(96, 165, 250, 0.2);
+  background: rgba(96, 165, 250, 0.03);
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  &.drop-zone-active {
+    border-color: #60A5FA;
+    background: rgba(96, 165, 250, 0.08);
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
+  }
+
+  .image-preview-wrapper,
+  .image-current-wrapper {
+    margin-bottom: 0;
+    border: none;
+    box-shadow: none;
+  }
+}
+
+.drop-zone-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  color: rgba(96, 165, 250, 0.4);
+
+  i {
+    font-size: 2.5rem;
+  }
+
+  span {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+}
+
+.drop-zone-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(96, 165, 250, 0.12);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+  color: #60A5FA;
+  animation: dropPulse 0.8s ease-in-out infinite;
+
+  i {
+    font-size: 2.5rem;
+  }
+
+  span {
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+}
+
+@keyframes dropPulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
 .image-preview-wrapper {
   position: relative;
   margin-bottom: 12px;

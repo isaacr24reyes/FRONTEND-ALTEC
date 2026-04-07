@@ -89,6 +89,9 @@ export class SalesModuleComponent implements OnInit {
   cambio: number = 0;
   showCalculadoraCambio: boolean = false;
 
+  // 🧾 Factura
+  conFactura: boolean = false;
+
   // 📱 UI State
   showCart: boolean = true;
   cartCollapsed: boolean = false;
@@ -185,7 +188,7 @@ export class SalesModuleComponent implements OnInit {
       const precioImportacion = product?.precioImportacion || 0; // Obtener precioImportacion del producto
 
       const subtotalItem = item.pvp * item.cantidad;
-      const taxItem = subtotalItem * this.TAX_RATE;
+      const taxItem = this.conFactura ? subtotalItem - (subtotalItem / 1.15) : 0;
 
       // Calcular ganancia total (PVP - precioImportacion) * cantidad
       const profit = (item.pvp - precioImportacion) * item.cantidad;
@@ -193,13 +196,13 @@ export class SalesModuleComponent implements OnInit {
       const sale: SaleDto = {
         invoiceNumber: invoiceNumber,
         employeeID: employeeID,
-        productID: item.id || '', // El backend espera un GUID como string.
+        productID: item.id || '',
         saleDate: saleDate,
         profit: profit,
         quantity: item.cantidad,
         unitPrice: item.pvp,
         taxAmount: taxItem,
-        totalAmount: subtotalItem + taxItem,
+        totalAmount: subtotalItem,
         paymentMethod: paymentMethod,
         status: 'Completed'
       };
@@ -498,13 +501,21 @@ export class SalesModuleComponent implements OnInit {
   }
 
   recalculate(): void {
-    this.subtotal = this.cartItems.reduce(
+    const rawTotal = this.cartItems.reduce(
       (sum, item) => sum + (item.pvp * item.cantidad),
       0
     );
 
-    this.taxAmount = this.subtotal * this.TAX_RATE;
-    this.total = this.subtotal + this.taxAmount;
+    if (this.conFactura) {
+      // Desglose: el precio ya incluye IVA 15%, extraer base e impuesto
+      this.subtotal = rawTotal / 1.15;
+      this.taxAmount = rawTotal - this.subtotal;
+    } else {
+      this.subtotal = rawTotal;
+      this.taxAmount = 0;
+    }
+
+    this.total = rawTotal;
 
     // Actualizar subtotal en items
     this.cartItems.forEach(item => {

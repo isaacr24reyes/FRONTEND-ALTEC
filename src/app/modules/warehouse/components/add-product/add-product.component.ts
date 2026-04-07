@@ -13,6 +13,7 @@ export class AddProductComponent {
   public formGroup!: UntypedFormGroup;
   selectedFile!: File | null;
   imagePreview: string | ArrayBuffer | null = null;
+  isDragging: boolean = false;
   userName: string = '';
 
   categories = [
@@ -172,20 +173,43 @@ export class AddProductComponent {
   onFileSelected(event: Event): void {
     const fileInput = event.target as HTMLInputElement;
     if (fileInput?.files?.[0]) {
-      const file = fileInput.files[0];
-      const allowedTypes = ['image/jpeg', 'image/png'];
-
-      if (!allowedTypes.includes(file.type)) {
-        Notiflix.Notify.failure('Solo se permiten archivos JPG y PNG');
-        fileInput.value = '';
-        return;
-      }
-      this.selectedFile = file;
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        this.imagePreview = reader.result;
-      };
-      reader.readAsDataURL(file);
+      this.processImageFile(fileInput.files[0]);
     }
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+    const file = event.dataTransfer?.files[0];
+    if (file) {
+      this.processImageFile(file);
+    }
+  }
+
+  private processImageFile(file: File): void {
+    const allowedTypes = ['image/jpeg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      Notiflix.Notify.failure('Solo se permiten archivos JPG y PNG');
+      return;
+    }
+    this.selectedFile = file;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      this.imagePreview = reader.result;
+    };
+    reader.readAsDataURL(file);
   }
 }

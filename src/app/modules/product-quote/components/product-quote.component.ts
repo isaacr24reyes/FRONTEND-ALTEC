@@ -90,8 +90,9 @@ export class ProductQuoteComponent implements OnInit {
   isResistor: boolean = false;
   @ViewChild('pdfCotizacion', {static: false}) pdfCotizacion!: ElementRef;
 
-  // Variables para modal de envío y loader
-  shippingCost: number = 0;
+  // Variables para modal de extra y loader
+  extraCost: number = 0;
+  extraDescription: string = '';
   isDownloading: boolean = false;
   downloadMessage: string = '';
 
@@ -639,46 +640,38 @@ export class ProductQuoteComponent implements OnInit {
     this.isDownloading = false;
   }
 
-  incluirEnvio() {
-    const envioExistente = this.cotizacion.find(item => item.descripcion === 'Envío');
-    if (envioExistente) {
-      this.shippingCost = envioExistente.precio;
-    } else {
-      this.shippingCost = 0;
-    }
+  incluirExtra() {
+    this.extraDescription = '';
+    this.extraCost = 0;
 
-    const modalElement = document.getElementById('shippingModal');
+    const modalElement = document.getElementById('extraModal');
     if (modalElement) {
       const modal = new bootstrap.Modal(modalElement);
       modal.show();
     }
   }
 
-  confirmarEnvio() {
-    const envioExistente = this.cotizacion.find(item => item.descripcion === 'Envío');
-
-    if (this.shippingCost > 0) {
-      if (envioExistente) {
-        envioExistente.precio = this.shippingCost;
-        envioExistente.total = this.shippingCost;
-      } else {
-        this.cotizacion.push({
-          descripcion: 'Envío',
-          cantidad: 1,
-          precio: this.shippingCost,
-          total: this.shippingCost
-        });
-      }
-      this.updateTotal();
-      Notiflix.Notify.success(`Envío de ${this.shippingCost.toFixed(2)} agregado correctamente`);
-    } else if (envioExistente) {
-      // Si el costo es 0, eliminar el envío
-      const index = this.cotizacion.indexOf(envioExistente);
-      this.cotizacion.splice(index, 1);
-      Notiflix.Notify.info('Envío eliminado de la cotización');
+  confirmarExtra() {
+    const desc = this.extraDescription.trim();
+    if (!desc) {
+      Notiflix.Notify.warning('Ingresa una descripción para el extra');
+      return;
+    }
+    if (this.extraCost <= 0) {
+      Notiflix.Notify.warning('Ingresa un costo válido');
+      return;
     }
 
-    const modalElement = document.getElementById('shippingModal');
+    this.cotizacion.push({
+      descripcion: desc,
+      cantidad: 1,
+      precio: this.extraCost,
+      total: this.extraCost
+    });
+    this.updateTotal();
+    Notiflix.Notify.success(`Extra "${desc}" por $${this.extraCost.toFixed(2)} agregado`);
+
+    const modalElement = document.getElementById('extraModal');
     if (modalElement) {
       const modal = bootstrap.Modal.getInstance(modalElement);
       modal?.hide();

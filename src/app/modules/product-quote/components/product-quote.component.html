@@ -247,9 +247,9 @@
             Resumen de Cotización
           </h2>
           <div class="summary-actions">
-            <button type="button" class="btn-summary btn-shipping" (click)="incluirEnvio()">
-              <i class="bi bi-truck me-2"></i>
-              <span class="d-none d-md-inline">Incluir </span>Envío
+            <button type="button" class="btn-summary btn-extra" (click)="incluirExtra()">
+              <i class="bi bi-plus-circle-dotted me-2"></i>
+              <span class="d-none d-md-inline">Incluir </span>Extra
             </button>
             <button
               *ngIf="cotizacionCargadaNumero"
@@ -449,29 +449,40 @@
     </div>
   </div>
 
-  <!-- 🚚 Modal de Envío -->
-  <div class="modal fade" id="shippingModal" tabindex="-1" aria-hidden="true">
+  <!-- ➕ Modal de Extra -->
+  <div class="modal fade" id="extraModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content modern-modal">
         <div class="modal-header modern-modal-header">
           <h5 class="modal-title">
-            <i class="bi bi-truck me-2"></i>
-            Costo de Envío
+            <i class="bi bi-plus-circle-dotted me-2"></i>
+            Agregar Extra
           </h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body modern-modal-body">
           <div class="shipping-form">
             <label class="shipping-label">
+              <i class="bi bi-tag me-2"></i>
+              Descripción / Razón
+            </label>
+            <input
+              type="text"
+              class="shipping-input mb-3"
+              [(ngModel)]="extraDescription"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Ej: Envío, Instalación, Mano de obra...">
+
+            <label class="shipping-label">
               <i class="bi bi-currency-dollar me-2"></i>
-              Ingrese el costo de envío
+              Costo
             </label>
             <div class="input-group-modern">
               <span class="input-prefix">$</span>
               <input
                 type="number"
                 class="shipping-input"
-                [(ngModel)]="shippingCost"
+                [(ngModel)]="extraCost"
                 [ngModelOptions]="{standalone: true}"
                 placeholder="0.00"
                 min="0"
@@ -479,7 +490,7 @@
             </div>
             <div class="shipping-info">
               <i class="bi bi-info-circle me-2"></i>
-              <span>Se agregará al total de la cotización</span>
+              <span>Se agregará como línea adicional a la cotización</span>
             </div>
           </div>
         </div>
@@ -487,9 +498,9 @@
           <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">
             Cancelar
           </button>
-          <button type="button" class="btn-modal-confirm" (click)="confirmarEnvio()">
+          <button type="button" class="btn-modal-confirm" (click)="confirmarExtra()">
             <i class="bi bi-check-circle-fill me-2"></i>
-            Confirmar
+            Agregar
           </button>
         </div>
       </div>
