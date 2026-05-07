@@ -126,6 +126,14 @@
             <span>Altec-Puntos</span>
           </a>
         </li>
+
+        <!-- Mundial 2026 (Solo admin) -->
+        <li class="nav-item" *ngIf="!isExternal && role !== 'Distribuidor' && role !== 'Cliente'">
+          <a class="nav-link nav-mundial" [routerLink]="['/dashboard/code-generator']" routerLinkActive="active">
+            <span class="mundial-ball-nav">⚽</span>
+            <span>Mundial 2026</span>
+          </a>
+        </li>
       </ul>
 
       <!-- Acciones derecha -->

@@ -10,3 +10,4 @@ export const R_ALTEC_POINTS: string = 'altec-points'
 export const R_USER_ADMIN: string = 'user-admin'
 export const R_SALES_MODULE: string = 'sales-module';
 export const R_HISTORIC_SALES: string = 'historic-sales';
+export const R_MUNDIAL: string = 'mundial-2026';

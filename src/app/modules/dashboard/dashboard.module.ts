@@ -7,6 +7,7 @@ import {DemoDialogComponent} from './components/demo/demo-dialog/demo-dialog.com
 import {AppMaterialModule} from "../../app-material.module";
 import {AppTranslationLanguageModule} from "../../app-translation-language.module";
 import {HomeComponent} from "./components/home/home.component";
+import {CodeGeneratorComponent} from "./components/code-generator/code-generator.component";
 import {ReactiveFormsModule} from "@angular/forms";
 
 @NgModule({
@@ -24,6 +25,7 @@ export class DashboardModule {
   static COMPONENT = [
     HomeComponent,
     DemoDialogComponent,
-    DemoComponent
+    DemoComponent,
+    CodeGeneratorComponent
   ]
 }

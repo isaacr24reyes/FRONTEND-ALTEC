@@ -1,0 +1,239 @@
+$mx:   #006847;
+$usa:  #0033A0;
+$can:  #CC1024;
+$gold: #FFD700;
+$bg:   #07090f;
+$text: #f0f2f8;
+$muted: #8892a4;
+
+.codegen-page {
+  min-height: calc(100vh - 70px);
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 10%, rgba(0,104,71,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 25%, rgba(0,51,160,0.16) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 85%, rgba(200,16,46,0.12) 0%, transparent 60%),
+    linear-gradient(160deg, #07090f 0%, #0b0e18 60%, #060c09 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 2rem 1rem 4rem;
+}
+
+.blob {
+  position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0;
+  &-1 { width:400px; height:400px; background:rgba(0,104,71,0.12);  top:-80px; left:-120px;  animation: blobF 9s ease-in-out infinite; }
+  &-2 { width:300px; height:300px; background:rgba(0,51,160,0.15);  top:40%;   right:-80px;  animation: blobF 11s ease-in-out infinite reverse; }
+  &-3 { width:280px; height:280px; background:rgba(200,16,46,0.1);  bottom:5%; left:25%;     animation: blobF 13s ease-in-out infinite 3s; }
+}
+@keyframes blobF { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,-15px)} }
+
+.codegen-container {
+  position: relative; z-index: 5;
+  max-width: 620px; margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center; gap: 1.5rem;
+}
+
+// ── Header ──────────────────────────────────────────────────────────────────
+.codegen-header {
+  display: flex; align-items: center; gap: 1.25rem;
+  animation: fadeUp 0.7s ease-out both;
+}
+
+.fifa-logo {
+  width: 90px; border-radius: 12px;
+  filter: drop-shadow(0 4px 16px rgba(255,215,0,0.35));
+  animation: logoFloat 4s ease-in-out infinite;
+}
+@keyframes logoFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+.header-text {
+  .codegen-title {
+    font-size: 1.7rem; font-weight: 900; color: $text; margin: 0 0 0.2rem;
+    text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+  }
+  .codegen-sub {
+    font-size: 0.85rem; color: $muted; margin: 0;
+    .gold { color: $gold; font-weight: 700; }
+  }
+}
+
+// ── Tricolor stripe ─────────────────────────────────────────────────────────
+.tri-stripe {
+  display: flex; width: 100%; height: 4px; border-radius: 2px; overflow: hidden;
+  .s { flex:1; }
+  .mx  { background:$mx; }
+  .usa { background:$usa; }
+  .can { background:$can; }
+}
+
+// ── Main card ───────────────────────────────────────────────────────────────
+.gen-card {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 2.5rem 2rem 2rem;
+  display: flex; flex-direction: column; align-items: center; gap: 1.25rem;
+  animation: fadeUp 0.7s 0.15s ease-out both;
+  transition: border-color 0.3s;
+  &:hover { border-color: rgba(255,215,0,0.2); }
+}
+
+// ── Code display ─────────────────────────────────────────────────────────────
+.code-display {
+  width: 100%;
+  background: rgba(0,0,0,0.35);
+  border: 2px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  min-height: 100px;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.3s, box-shadow 0.3s;
+
+  &.rolling {
+    border-color: rgba(255,215,0,0.4);
+    box-shadow: 0 0 24px rgba(255,215,0,0.12);
+    animation: rollPulse 0.12s ease-in-out infinite;
+  }
+
+  &.has-code {
+    border-color: rgba(255,215,0,0.5);
+    box-shadow: 0 0 40px rgba(255,215,0,0.15), inset 0 0 30px rgba(255,215,0,0.04);
+    animation: codeAppear 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+}
+
+@keyframes rollPulse  { 0%,100%{transform:scale(1)} 50%{transform:scale(1.005)} }
+@keyframes codeAppear { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+
+.code-placeholder {
+  font-size: 2.8rem; font-weight: 800; letter-spacing: 16px;
+  color: rgba(255,255,255,0.12); font-family: monospace;
+}
+
+.code-value {
+  font-size: 3.5rem; font-weight: 900; letter-spacing: 12px;
+  font-family: 'Courier New', monospace;
+  background: linear-gradient(135deg, $gold 0%, #FFA500 50%, $gold 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: goldShimmer 2s linear infinite;
+  text-shadow: none;
+}
+@keyframes goldShimmer { 0%{background-position:0%} 100%{background-position:200%} }
+
+.code-hint {
+  font-size: 0.82rem; color: $muted; text-align: center; margin: 0;
+  strong { color: $text; }
+  .used-msg { color: #4ade80; }
+}
+
+// ── Buttons ──────────────────────────────────────────────────────────────────
+.btn-row {
+  display: flex; gap: 1rem; width: 100%;
+}
+
+.btn-gen {
+  flex: 1; padding: 0.85rem 1.5rem;
+  background: linear-gradient(135deg, $mx 0%, $usa 60%, $can 100%);
+  background-size: 200% 200%; animation: colorShift 4s ease-in-out infinite;
+  border: none; border-radius: 12px; color: #fff;
+  font-weight: 800; font-size: 1rem; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  box-shadow: 0 4px 20px rgba(0,51,160,0.35);
+  display: flex; align-items: center; justify-content: center;
+
+  .spin { animation: spin 0.6s linear infinite; }
+
+  &:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,51,160,0.5); }
+  &:disabled { opacity: 0.7; cursor: not-allowed; }
+}
+
+.btn-usar {
+  flex: 1; padding: 0.85rem 1.5rem;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.12);
+  border-radius: 12px; color: $muted;
+  font-weight: 700; font-size: 1rem; cursor: not-allowed;
+  transition: all 0.3s ease;
+  display: flex; align-items: center; justify-content: center;
+
+  &.active {
+    background: rgba(255,215,0,0.12);
+    border-color: rgba(255,215,0,0.5);
+    color: $gold;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(255,215,0,0.15);
+    &:hover { background: rgba(255,215,0,0.2); transform: translateY(-2px); }
+  }
+
+  &:disabled:not(.active) { opacity: 0.4; }
+}
+
+@keyframes colorShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+@keyframes spin       { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+
+// ── Info badges ───────────────────────────────────────────────────────────────
+.code-info {
+  display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;
+}
+
+.info-badge {
+  font-size: 0.7rem; font-weight: 600;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 50px; padding: 0.25rem 0.75rem;
+  color: $muted;
+}
+
+// ── History ───────────────────────────────────────────────────────────────────
+.history-section {
+  width: 100%;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 1.25rem;
+  animation: fadeUp 0.5s ease-out both;
+}
+
+.history-title {
+  font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: $muted; margin-bottom: 0.85rem;
+  display: flex; align-items: center;
+}
+
+.history-list {
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+
+.history-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px; padding: 0.5rem 0.85rem;
+  transition: border-color 0.2s;
+  &:hover { border-color: rgba(255,215,0,0.25); }
+}
+
+.history-code {
+  font-family: 'Courier New', monospace; font-size: 1rem;
+  font-weight: 800; letter-spacing: 6px; color: $gold;
+}
+
+.history-copy {
+  background: none; border: none; color: $muted; cursor: pointer;
+  font-size: 0.9rem; padding: 0.2rem 0.4rem; border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+  &:hover { color: $gold; background: rgba(255,215,0,0.1); }
+}
+
+// ── Animations ────────────────────────────────────────────────────────────────
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 576px) {
+  .codegen-header { flex-direction: column; text-align: center; }
+  .fifa-logo { width: 70px; }
+  .codegen-title { font-size: 1.4rem; }
+  .code-value { font-size: 2.5rem; letter-spacing: 8px; }
+  .code-placeholder { font-size: 2rem; letter-spacing: 10px; }
+  .btn-row { flex-direction: column; }
+}

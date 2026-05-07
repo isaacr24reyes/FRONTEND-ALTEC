@@ -1,0 +1,359 @@
+<div class="mundial-page">
+
+  <!-- ── LOADING OVERLAY ── -->
+  <div class="loading-overlay" [class.fade-out]="!isLoading">
+    <div class="loader-wrap" [class.hidden]="!isLoading">
+      <div class="pitch-lines"><div class="pitch-circle"></div><div class="pitch-center"></div></div>
+      <div class="ball-scene">
+        <div class="ball-shadow"></div>
+        <div class="ball">⚽</div>
+      </div>
+      <div class="loader-text">
+        <span class="loader-title">FIFA World Cup</span>
+        <span class="loader-year">2026</span>
+        <div class="loader-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="loader-stripe">
+        <div class="ls mx"></div><div class="ls usa"></div><div class="ls can"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Back -->
+  <a routerLink="/" class="btn-back">
+    <i class="bi bi-arrow-left-circle-fill"></i><span>Volver</span>
+  </a>
+
+  <!-- Stripe top -->
+  <div class="stripe-bar top">
+    <div class="s mx"></div><div class="s usa"></div><div class="s can"></div>
+  </div>
+
+  <!-- Blobs -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       VISTA: MENÚ (pantalla completa, sin hero)
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div class="menu-fullscreen" *ngIf="view === 'menu'">
+
+    <div class="menu-brand">
+      <span class="menu-brand-text">Polla</span>
+      <span class="menu-brand-gold">Mundial 2026</span>
+    </div>
+
+    <div class="menu-grid">
+
+      <!-- Registrar -->
+      <div class="menu-option menu-option-register" (click)="goTo('register')">
+        <div class="option-bg-icon">📝</div>
+        <div class="option-content">
+          <span class="option-emoji">📝</span>
+          <h2 class="option-title">Registrar<br>Pronóstico</h2>
+          <p class="option-desc">Ingresa tu código y completa tus predicciones</p>
+          <div class="option-cta">
+            <span>Participar</span>
+            <i class="bi bi-arrow-right-circle-fill"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ver pronósticos -->
+      <div class="menu-option menu-option-list" (click)="goTo('list')">
+        <div class="option-bg-icon">🏆</div>
+        <div class="option-content">
+          <span class="option-emoji">🏆</span>
+          <h2 class="option-title">Ver<br>Pronósticos</h2>
+          <p class="option-desc">Consulta todos los pronósticos registrados</p>
+          <div class="option-cta">
+            <span>Ver ahora</span>
+            <i class="bi bi-arrow-right-circle-fill"></i>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="menu-hosts">
+      <span class="host-badge mx">🇲🇽 México</span>
+      <span class="host-dot">✦</span>
+      <span class="host-badge usa">🇺🇸 USA</span>
+      <span class="host-dot">✦</span>
+      <span class="host-badge can">🇨🇦 Canadá</span>
+    </div>
+  </div>
+
+  <!-- Logo pequeño fijo arriba a la derecha (solo en register/list) -->
+  <div class="logo-corner" *ngIf="view !== 'menu'">
+    <img src="assets/images/mundial_2026.png" alt="FIFA 2026" class="logo-corner-img" />
+  </div>
+
+  <div class="mundial-container" *ngIf="view !== 'menu'">
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         VISTA: REGISTRAR
+    ══════════════════════════════════════════════════════════════════════ -->
+    <div class="register-view" *ngIf="view === 'register'">
+
+      <!-- Nav breadcrumb -->
+      <div class="view-nav">
+        <button class="btn-back-view" (click)="goTo('menu')">
+          <i class="bi bi-chevron-left me-1"></i>Menú
+        </button>
+        <span class="view-nav-title">📝 Registrar Pronóstico</span>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
+
+        <!-- CÓDIGO ÚNICO -->
+        <div class="codigo-card"
+             [class.code-is-valid]="codeStatus === 'valid'"
+             [class.code-is-invalid]="codeStatus === 'invalid' || codeStatus === 'used'">
+          <div class="codigo-header">
+            <i class="bi bi-key-fill codigo-icon"></i>
+            <div>
+              <div class="codigo-title">Código Único de Participación</div>
+              <div class="codigo-desc">Ingresa el código que recibiste al registrarte en la polla</div>
+            </div>
+            <!-- Badge de estado -->
+            <div class="code-status-badge" *ngIf="codeStatus !== 'idle'">
+              <span *ngIf="codeStatus === 'checking'" class="badge-checking">
+                <i class="bi bi-arrow-repeat spin me-1"></i>Verificando...
+              </span>
+              <span *ngIf="codeStatus === 'valid'" class="badge-valid">
+                <i class="bi bi-check-circle-fill me-1"></i>{{ codeMessage }}
+              </span>
+              <span *ngIf="codeStatus === 'invalid'" class="badge-invalid">
+                <i class="bi bi-x-circle-fill me-1"></i>{{ codeMessage }}
+              </span>
+              <span *ngIf="codeStatus === 'used'" class="badge-used">
+                <i class="bi bi-slash-circle-fill me-1"></i>{{ codeMessage }}
+              </span>
+            </div>
+          </div>
+          <div class="codigo-input-wrap">
+            <input type="text" formControlName="codigoUnico" class="codigo-input"
+                   placeholder="Ej: ALTEC1" autocomplete="off"
+                   [class.code-valid-input]="codeStatus === 'valid'"
+                   [class.code-invalid-input]="codeStatus === 'invalid' || codeStatus === 'used'"
+                   style="text-transform:uppercase"
+                   (input)="onCodeInput($event)">
+            <i class="bi bi-check-circle-fill code-icon-valid"   *ngIf="codeStatus === 'valid'"></i>
+            <i class="bi bi-x-circle-fill   code-icon-invalid" *ngIf="codeStatus === 'invalid' || codeStatus === 'used'"></i>
+            <i class="bi bi-arrow-repeat    code-icon-checking spin" *ngIf="codeStatus === 'checking'"></i>
+          </div>
+          <small class="err-msg" *ngIf="submitted && f['codigoUnico'].errors?.['required']">El código es obligatorio</small>
+          <small class="err-msg" *ngIf="submitted && codeStatus !== 'valid' && !f['codigoUnico'].errors?.['required']">
+            Debes ingresar un código válido para continuar
+          </small>
+        </div>
+
+        <!-- Datos personales -->
+        <div class="form-card">
+          <div class="card-label"><i class="bi bi-person-circle me-2"></i>Tus Datos</div>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label class="field-label">Nombre completo <span class="req">*</span></label>
+              <input type="text" formControlName="nombre" class="field-input"
+                     [class.invalid]="submitted && f['nombre'].invalid">
+              <small class="err-msg" *ngIf="submitted && f['nombre'].errors?.['required']">Campo requerido</small>
+              <small class="err-msg" *ngIf="submitted && f['nombre'].errors?.['minlength']">Mínimo 3 caracteres</small>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="field-label">Celular <span class="req">*</span></label>
+              <input type="tel" formControlName="telefono" class="field-input"
+                     [class.invalid]="submitted && f['telefono'].invalid">
+              <small class="err-msg" *ngIf="submitted && f['telefono'].invalid">Número inválido (7-15 dígitos)</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clasificación -->
+        <div class="form-card">
+          <div class="card-label"><i class="bi bi-trophy-fill me-2 gold"></i>Clasificación Final</div>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label class="field-label"><span class="pos-badge gold-badge">🥇 1°</span> Campeón <span class="req">*</span></label>
+              <input type="text" formControlName="campeon" class="field-input"
+                     [class.invalid]="submitted && f['campeon'].invalid">
+              <small class="err-msg" *ngIf="submitted && f['campeon'].errors?.['required']">Campo requerido</small>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="field-label"><span class="pos-badge silver-badge">🥈 2°</span> Subcampeón <span class="req">*</span></label>
+              <input type="text" formControlName="subcampeon" class="field-input"
+                     [class.invalid]="submitted && f['subcampeon'].invalid">
+              <small class="err-msg" *ngIf="submitted && f['subcampeon'].errors?.['required']">Campo requerido</small>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="field-label"><span class="pos-badge bronze-badge">🥉 3°</span> Tercer Lugar <span class="req">*</span></label>
+              <input type="text" formControlName="tercerLugar" class="field-input"
+                     [class.invalid]="submitted && f['tercerLugar'].invalid">
+              <small class="err-msg" *ngIf="submitted && f['tercerLugar'].errors?.['required']">Campo requerido</small>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="field-label"><span class="pos-badge fourth-badge">4°</span> Cuarto Lugar <span class="req">*</span></label>
+              <input type="text" formControlName="cuartoLugar" class="field-input"
+                     [class.invalid]="submitted && f['cuartoLugar'].invalid">
+              <small class="err-msg" *ngIf="submitted && f['cuartoLugar'].errors?.['required']">Campo requerido</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Extras -->
+        <div class="form-card">
+          <div class="card-label"><i class="bi bi-stars me-2" style="color:#a78bfa"></i>Predicciones Extra</div>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label class="field-label">⚽ Goleador del Torneo <span class="req">*</span></label>
+              <input type="text" formControlName="goleador" class="field-input"
+                     [class.invalid]="submitted && f['goleador'].invalid">
+              <small class="err-msg" *ngIf="submitted && f['goleador'].errors?.['required']">Campo requerido</small>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="field-label">📋 Marcador de la Final <span class="req">*</span></label>
+              <input type="text" formControlName="resultadoFinal" class="field-input"
+                     [class.invalid]="submitted && f['resultadoFinal'].invalid">
+              <small class="err-msg" *ngIf="submitted && f['resultadoFinal'].errors?.['required']">Campo requerido</small>
+              <small class="err-msg" *ngIf="submitted && f['resultadoFinal'].errors?.['pattern']">Formato: 2-1</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="submit-wrap">
+          <button type="submit" class="btn-submit"
+                  [disabled]="isSaving || codeStatus === 'checking'"
+                  [class.btn-submit-disabled]="codeStatus !== 'valid' && codeStatus !== 'idle'">
+            <i class="bi bi-arrow-repeat spin me-2" *ngIf="isSaving"></i>
+            <i class="bi bi-send-fill me-2"         *ngIf="!isSaving"></i>
+            {{ isSaving ? 'Registrando...' : 'Registrar Pronóstico' }}
+          </button>
+          <p class="submit-note">🎉 ¡El mejor pronóstico gana! Organizado por <strong>ALTEC</strong></p>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         VISTA: LISTA DE PRONÓSTICOS
+    ══════════════════════════════════════════════════════════════════════ -->
+    <div class="list-view" *ngIf="view === 'list'">
+
+      <!-- Nav breadcrumb -->
+      <div class="view-nav">
+        <button class="btn-back-view" (click)="goTo('menu')">
+          <i class="bi bi-chevron-left me-1"></i>Menú
+        </button>
+        <span class="view-nav-title">🏆 Pronósticos Registrados</span>
+      </div>
+
+      <!-- Counter + Search -->
+      <div class="list-header">
+        <div class="list-count">
+          <span class="count-num">{{ filteredPronosticos.length }}</span>
+          <span class="count-lbl">
+            {{ filteredPronosticos.length === 1 ? 'participante' : 'participantes' }}
+            <span class="count-total" *ngIf="searchTerm">de {{ pronosticos.length }}</span>
+          </span>
+        </div>
+        <p class="list-note">Los números de celular no se muestran por privacidad</p>
+      </div>
+
+      <!-- Buscador -->
+      <div class="search-wrap" *ngIf="!loadingList && pronosticos.length > 0">
+        <div class="search-box">
+          <i class="bi bi-search search-icon"></i>
+          <input type="text"
+                 class="search-input"
+                 placeholder="Buscar por nombre o código..."
+                 [(ngModel)]="searchTerm"
+                 autocomplete="off">
+          <button class="search-clear" *ngIf="searchTerm" (click)="searchTerm = ''">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading list -->
+      <div class="empty-state" *ngIf="loadingList">
+        <div class="empty-icon"><i class="bi bi-arrow-repeat spin" style="font-size:2.5rem;color:#facc15"></i></div>
+        <p class="empty-title">Cargando pronósticos...</p>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" *ngIf="!loadingList && pronosticos.length === 0">
+        <div class="empty-icon">⚽</div>
+        <p class="empty-title">Aún no hay pronósticos registrados</p>
+        <p class="empty-sub">¡Sé el primero en participar!</p>
+        <button class="btn-submit" style="margin-top:1rem" (click)="goTo('register')">
+          <i class="bi bi-plus-circle-fill me-2"></i>Registrar mi pronóstico
+        </button>
+      </div>
+
+      <!-- Sin resultados de búsqueda -->
+      <div class="empty-state" *ngIf="!loadingList && pronosticos.length > 0 && filteredPronosticos.length === 0">
+        <div class="empty-icon">🔍</div>
+        <p class="empty-title">Sin resultados</p>
+        <p class="empty-sub">No hay pronósticos que coincidan con "<strong>{{ searchTerm }}</strong>"</p>
+        <button class="btn-back-view" style="margin-top:1rem" (click)="searchTerm = ''">
+          <i class="bi bi-x-circle me-1"></i>Limpiar búsqueda
+        </button>
+      </div>
+
+      <!-- Cards de pronósticos -->
+      <div class="pronostico-list" *ngIf="!loadingList && filteredPronosticos.length > 0">
+        <div class="pronostico-card" *ngFor="let p of filteredPronosticos; let i = index">
+
+          <!-- Header de la card -->
+          <div class="pcard-header">
+            <div class="pcard-num">#{{ i + 1 }}</div>
+            <div class="pcard-info">
+              <span class="pcard-nombre">{{ p.nombre }}</span>
+              <span class="pcard-fecha">{{ p.fecha }}</span>
+            </div>
+            <div class="pcard-code">
+              <i class="bi bi-key-fill me-1"></i>{{ p.codigoUnico }}
+            </div>
+          </div>
+
+          <!-- Clasificación -->
+          <div class="pcard-body">
+            <div class="pcard-pos">
+              <span class="pos-badge gold-badge">🥇 1°</span>
+              <span class="pcard-team">{{ p.campeon }}</span>
+            </div>
+            <div class="pcard-pos">
+              <span class="pos-badge silver-badge">🥈 2°</span>
+              <span class="pcard-team">{{ p.subcampeon }}</span>
+            </div>
+            <div class="pcard-pos">
+              <span class="pos-badge bronze-badge">🥉 3°</span>
+              <span class="pcard-team">{{ p.tercerLugar }}</span>
+            </div>
+            <div class="pcard-pos">
+              <span class="pos-badge fourth-badge">4°</span>
+              <span class="pcard-team">{{ p.cuartoLugar }}</span>
+            </div>
+          </div>
+
+          <!-- Extras -->
+          <div class="pcard-extras">
+            <span class="pcard-extra"><i class="bi bi-lightning-charge-fill me-1" style="color:#facc15"></i>⚽ {{ p.goleador }}</span>
+            <span class="pcard-extra"><i class="bi bi-clipboard-fill me-1" style="color:#a78bfa"></i>📋 {{ p.resultadoFinal }}</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Stripe bottom -->
+  <div class="stripe-bar bottom">
+    <div class="s can"></div><div class="s usa"></div><div class="s mx"></div>
+  </div>
+
+</div>

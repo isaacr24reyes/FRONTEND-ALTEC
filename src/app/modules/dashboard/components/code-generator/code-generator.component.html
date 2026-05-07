@@ -1,0 +1,74 @@
+<div class="codegen-page">
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div class="codegen-container">
+
+    <!-- Header -->
+    <div class="codegen-header">
+      <img src="assets/images/mundial_2026.png" alt="FIFA World Cup 2026" class="fifa-logo">
+      <div class="header-text">
+        <div class="codegen-title">Generador de Códigos</div>
+        <div class="codegen-sub">Polla — <span class="gold">FIFA World Cup 2026</span></div>
+      </div>
+    </div>
+
+    <!-- Stripe tricolor -->
+    <div class="tri-stripe">
+      <div class="s mx"></div><div class="s usa"></div><div class="s can"></div>
+    </div>
+
+    <!-- Card principal -->
+    <div class="gen-card">
+
+      <!-- Display del código -->
+      <div class="code-display"
+           [class.rolling]="isGenerating"
+           [class.has-code]="generatedCode && !isGenerating"
+           [class.saving]="isSaving">
+        <span class="code-placeholder" *ngIf="!generatedCode">_ _ _ _ _ _</span>
+        <span class="code-value" *ngIf="generatedCode">{{ generatedCode }}</span>
+      </div>
+
+      <!-- Estado -->
+      <p class="code-hint">
+        <span *ngIf="!generatedCode && !isGenerating">Pulsa <strong>Generar</strong> para crear y guardar un código único</span>
+        <span *ngIf="isGenerating" class="hint-rolling">⚡ Generando código...</span>
+        <span *ngIf="isSaving"     class="hint-saving"><i class="bi bi-cloud-arrow-up me-1"></i>Guardando en base de datos...</span>
+        <span *ngIf="generatedCode && !isGenerating && !isSaving" class="hint-done">
+          <i class="bi bi-check-circle-fill me-1"></i>Guardado correctamente
+        </span>
+      </p>
+
+      <!-- Botón único -->
+      <button class="btn-gen" (click)="generate()" [disabled]="isGenerating || isSaving">
+        <i class="bi bi-arrow-clockwise me-2" [class.spin]="isGenerating || isSaving"></i>
+        {{ isGenerating ? 'Generando...' : isSaving ? 'Guardando...' : 'Generar Código' }}
+      </button>
+
+      <!-- Info badges -->
+      <div class="code-info">
+        <span class="info-badge"><i class="bi bi-shield-check me-1"></i>Sin B ni V</span>
+        <span class="info-badge"><i class="bi bi-hash me-1"></i>6 caracteres</span>
+        <span class="info-badge"><i class="bi bi-cloud-check me-1"></i>Se guarda automáticamente</span>
+      </div>
+    </div>
+
+    <!-- Historial -->
+    <div class="history-section" *ngIf="history.length > 0">
+      <div class="history-title">
+        <i class="bi bi-clock-history me-2"></i>Códigos generados
+        <span class="history-count">{{ history.length }}</span>
+      </div>
+      <div class="history-list">
+        <div class="history-item" *ngFor="let h of history">
+          <span class="history-code">{{ h.codigo }}</span>
+          <span class="history-date">{{ h.createdAt }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
