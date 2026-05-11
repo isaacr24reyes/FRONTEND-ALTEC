@@ -40,7 +40,7 @@
   <div class="menu-fullscreen" *ngIf="view === 'menu'">
 
     <div class="menu-brand">
-      <span class="menu-brand-text">Polla</span>
+      <span class="menu-brand-text">Pronóstico</span>
       <span class="menu-brand-gold">Mundial 2026</span>
     </div>
 
@@ -201,25 +201,6 @@
           </div>
         </div>
 
-        <!-- Extras -->
-        <div class="form-card">
-          <div class="card-label"><i class="bi bi-stars me-2" style="color:#a78bfa"></i>Predicciones Extra</div>
-          <div class="row g-3">
-            <div class="col-12 col-md-6">
-              <label class="field-label">⚽ Goleador del Torneo <span class="req">*</span></label>
-              <input type="text" formControlName="goleador" class="field-input"
-                     [class.invalid]="submitted && f['goleador'].invalid">
-              <small class="err-msg" *ngIf="submitted && f['goleador'].errors?.['required']">Campo requerido</small>
-            </div>
-            <div class="col-12 col-md-6">
-              <label class="field-label">📋 Marcador de la Final <span class="req">*</span></label>
-              <input type="text" formControlName="resultadoFinal" class="field-input"
-                     [class.invalid]="submitted && f['resultadoFinal'].invalid">
-              <small class="err-msg" *ngIf="submitted && f['resultadoFinal'].errors?.['required']">Campo requerido</small>
-              <small class="err-msg" *ngIf="submitted && f['resultadoFinal'].errors?.['pattern']">Formato: 2-1</small>
-            </div>
-          </div>
-        </div>
 
         <!-- Submit -->
         <div class="submit-wrap">
@@ -230,7 +211,15 @@
             <i class="bi bi-send-fill me-2"         *ngIf="!isSaving"></i>
             {{ isSaving ? 'Registrando...' : 'Registrar Pronóstico' }}
           </button>
-          <p class="submit-note">🎉 ¡El mejor pronóstico gana! Organizado por <strong>ALTEC</strong></p>
+
+          <button type="button" class="btn-tickets-pdf" (click)="downloadBlankTickets()">
+            <i class="bi bi-printer-fill me-2"></i>Descargar 8 tickets para imprimir
+          </button>
+
+          <p class="submit-note">
+            🎉 ¡El mejor pronóstico gana! Organizado por <strong>ALTEC</strong>
+            <br><small style="color:#94a3b8">Al registrar se descargará tu PDF de confirmación automáticamente</small>
+          </p>
         </div>
 
       </form>
@@ -338,11 +327,6 @@
             </div>
           </div>
 
-          <!-- Extras -->
-          <div class="pcard-extras">
-            <span class="pcard-extra"><i class="bi bi-lightning-charge-fill me-1" style="color:#facc15"></i>⚽ {{ p.goleador }}</span>
-            <span class="pcard-extra"><i class="bi bi-clipboard-fill me-1" style="color:#a78bfa"></i>📋 {{ p.resultadoFinal }}</span>
-          </div>
 
         </div>
       </div>
@@ -354,6 +338,60 @@
   <!-- Stripe bottom -->
   <div class="stripe-bar bottom">
     <div class="s can"></div><div class="s usa"></div><div class="s mx"></div>
+  </div>
+
+  <!-- ── BOTÓN REGLAMENTO (fijo, inferior izquierda) ── -->
+  <button class="btn-reglamento" (click)="showReglamento = true">
+    <i class="bi bi-journal-text me-1"></i>Reglamento
+  </button>
+
+  <!-- ── MODAL REGLAMENTO ── -->
+  <div class="reglamento-overlay" *ngIf="showReglamento" (click)="showReglamento = false">
+    <div class="reglamento-modal" (click)="$event.stopPropagation()">
+
+      <div class="regl-header">
+        <span class="regl-title"><i class="bi bi-journal-text me-2"></i>Reglamento</span>
+        <span class="regl-sub">Polla FIFA World Cup 2026 · ALTEC</span>
+        <button class="regl-close" (click)="showReglamento = false">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="regl-body">
+
+        <div class="regl-rule">
+          <div class="rule-num">1</div>
+          <div class="rule-text">
+            <strong>Registro obligatorio en el aplicativo</strong>
+            Si su pronóstico no aparece registrado en el aplicativo <em>no contará como ganador</em>, independientemente de que haya entregado un ticket físico.
+          </div>
+        </div>
+
+        <div class="regl-rule">
+          <div class="rule-num">2</div>
+          <div class="rule-text">
+            <strong>Fecha límite de participación</strong>
+            Solo puede entregar su pronóstico hasta el <strong class="gold">8 de julio de 2026</strong>. Después de esa fecha no se aceptarán registros.
+          </div>
+        </div>
+
+        <div class="regl-rule">
+          <div class="rule-num">3</div>
+          <div class="rule-text">
+            <strong>Premios</strong>
+            Los premios para los ganadores serán: <strong class="gold">🚲 Bicicleta</strong>, <strong class="gold">⚽ Balones</strong> y <strong class="gold">👕 Camisetas</strong> de equipos participantes.
+          </div>
+        </div>
+
+      </div>
+
+      <div class="regl-footer">
+        <button class="btn-regl-ok" (click)="showReglamento = false">
+          <i class="bi bi-check-circle-fill me-2"></i>Entendido
+        </button>
+      </div>
+
+    </div>
   </div>
 
 </div>

@@ -6,18 +6,17 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import Notiflix from 'notiflix';
 import { MundialService } from '../dashboard/services/mundial.service';
+import { MundialPdfService } from './mundial-pdf.service';
 
 export interface Pronostico {
-  id?:            number;
-  codigoUnico:    string;
-  nombre:         string;
-  campeon:        string;
-  subcampeon:     string;
-  tercerLugar:    string;
-  cuartoLugar:    string;
-  goleador:       string;
-  resultadoFinal: string;
-  fecha:          string;
+  id?:         number;
+  codigoUnico: string;
+  nombre:      string;
+  campeon:     string;
+  subcampeon:  string;
+  tercerLugar: string;
+  cuartoLugar: string;
+  fecha:       string;
 }
 
 export type CodeStatus = 'idle' | 'checking' | 'valid' | 'invalid' | 'used';
@@ -42,6 +41,7 @@ export class Mundial2026Component implements OnDestroy {
   codeStatus: CodeStatus = 'idle';
   codeMessage            = '';
   searchTerm             = '';
+  showReglamento         = false;
 
   get filteredPronosticos(): Pronostico[] {
     const term = this.searchTerm.trim().toLowerCase();
@@ -57,7 +57,8 @@ export class Mundial2026Component implements OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private mundialService: MundialService
+    private mundialService: MundialService,
+    private pdfService: MundialPdfService
   ) {
     this.form = this.fb.group({
       codigoUnico:    ['', [Validators.required, Validators.minLength(6)]],
@@ -67,8 +68,8 @@ export class Mundial2026Component implements OnDestroy {
       subcampeon:     ['', Validators.required],
       tercerLugar:    ['', Validators.required],
       cuartoLugar:    ['', Validators.required],
-      goleador:       ['', Validators.required],
-      resultadoFinal: ['', [Validators.required, Validators.pattern('^[0-9]+-[0-9]+$')]]
+      goleador:       [''],
+      resultadoFinal: ['']
     });
 
     // Validación con debounce al escribir el código
@@ -143,7 +144,7 @@ export class Mundial2026Component implements OnDestroy {
     this.isSaving = true;
     const v = this.form.value;
 
-    this.mundialService.savePronostico({
+    const payload = {
       codigoUnico:    v.codigoUnico.toUpperCase().trim(),
       nombre:         v.nombre,
       telefono:       v.telefono,
@@ -151,12 +152,24 @@ export class Mundial2026Component implements OnDestroy {
       subcampeon:     v.subcampeon,
       tercerLugar:    v.tercerLugar,
       cuartoLugar:    v.cuartoLugar,
-      goleador:       v.goleador,
-      resultadoFinal: v.resultadoFinal
-    }).subscribe({
+      goleador:       '',
+      resultadoFinal: ''
+    };
+
+    this.mundialService.savePronostico(payload).subscribe({
       next: () => {
         this.isSaving = false;
-        Notiflix.Notify.success('¡Pronóstico registrado! ¡Mucha suerte en el Mundial 2026! 🏆');
+        // Auto-descarga del PDF de confirmación
+        this.pdfService.generateConfirmationPDF({
+          codigoUnico: payload.codigoUnico,
+          nombre:      payload.nombre,
+          campeon:     payload.campeon,
+          subcampeon:  payload.subcampeon,
+          tercerLugar: payload.tercerLugar,
+          cuartoLugar: payload.cuartoLugar,
+          fecha: new Date().toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' })
+        });
+        Notiflix.Notify.success('¡Pronóstico registrado! PDF de confirmación descargado 🏆');
         this.resetForm();
         this.goTo('menu');
       },
@@ -168,6 +181,11 @@ export class Mundial2026Component implements OnDestroy {
     });
   }
 
+  // ── PDF tickets en blanco ─────────────────────────────────────────────────
+  downloadBlankTickets(): void {
+    this.pdfService.generateBlankTickets();
+  }
+
   // ── Cargar lista desde BD ─────────────────────────────────────────────────
   loadPronosticos() {
     this.loadingList = true;
@@ -175,15 +193,13 @@ export class Mundial2026Component implements OnDestroy {
       next: (data: any[]) => {
         this.loadingList = false;
         this.pronosticos = (data ?? []).map(p => ({
-          id:             p.id,
-          codigoUnico:    p.codigoUnico,
-          nombre:         p.nombre,
-          campeon:        p.campeon,
-          subcampeon:     p.subcampeon,
-          tercerLugar:    p.tercerLugar,
-          cuartoLugar:    p.cuartoLugar,
-          goleador:       p.goleador,
-          resultadoFinal: p.resultadoFinal,
+          id:          p.id,
+          codigoUnico: p.codigoUnico,
+          nombre:      p.nombre,
+          campeon:     p.campeon,
+          subcampeon:  p.subcampeon,
+          tercerLugar: p.tercerLugar,
+          cuartoLugar: p.cuartoLugar,
           fecha: new Date(p.createdAt).toLocaleDateString('es-EC', {
             day: '2-digit', month: 'short', year: 'numeric'
           })

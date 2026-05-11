@@ -423,6 +423,187 @@ $muted: #8892a4;
 }
 .submit-note { margin-top:1rem; font-size:0.82rem; color:$muted; strong { color:$gold; } }
 
+// ── Botón tickets PDF ──────────────────────────────────────────────────────
+.btn-tickets-pdf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.85rem;
+  background: transparent;
+  border: 1.5px solid rgba($gold, 0.4);
+  border-radius: 50px;
+  color: $gold;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0.6rem 2rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  letter-spacing: 0.3px;
+  &:hover {
+    background: rgba($gold, 0.1);
+    border-color: $gold;
+    transform: translateY(-2px);
+  }
+  &:active { transform: translateY(0); }
+}
+
+// ── Botón Reglamento fijo ──────────────────────────────────────────────────
+.btn-reglamento {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.25rem;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(0, 51, 160, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgba($usa, 0.6);
+  border-radius: 50px;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.55rem 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 51, 160, 0.4);
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  letter-spacing: 0.3px;
+
+  i { color: $gold; }
+
+  &:hover {
+    background: rgba(0, 51, 160, 0.98);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 51, 160, 0.6);
+  }
+}
+
+// ── Modal Reglamento ───────────────────────────────────────────────────────
+.reglamento-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+
+.reglamento-modal {
+  background: linear-gradient(160deg, #0a1220 0%, #07111d 100%);
+  border: 1px solid rgba($usa, 0.4);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba($gold, 0.08);
+  animation: slideUp 0.25s ease;
+  overflow: hidden;
+}
+
+@keyframes slideUp { from { opacity: 0; transform: translateY(24px) } to { opacity: 1; transform: translateY(0) } }
+
+.regl-header {
+  background: linear-gradient(135deg, rgba(0,51,160,0.6) 0%, rgba(0,104,71,0.4) 100%);
+  padding: 1.25rem 1.5rem 1rem;
+  position: relative;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+
+  .regl-title {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: $gold;
+    letter-spacing: 0.5px;
+  }
+  .regl-sub {
+    display: block;
+    font-size: 0.75rem;
+    color: $muted;
+    margin-top: 0.2rem;
+  }
+  .regl-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255,255,255,0.08);
+    border: none;
+    color: $muted;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    &:hover { background: rgba(255,118,117,0.2); color: #ff7675; }
+  }
+}
+
+.regl-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.regl-rule {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+
+  .rule-num {
+    min-width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, $usa, $mx);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 900;
+    color: #fff;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .rule-text {
+    font-size: 0.88rem;
+    color: $text;
+    line-height: 1.55;
+
+    strong { color: $text; display: block; margin-bottom: 0.2rem; }
+    strong.gold { color: $gold; display: inline; }
+    em { color: #ff7675; font-style: normal; font-weight: 700; }
+  }
+}
+
+.regl-footer {
+  padding: 1rem 1.5rem 1.5rem;
+  text-align: center;
+  border-top: 1px solid rgba(255,255,255,0.06);
+
+  .btn-regl-ok {
+    background: linear-gradient(135deg, $mx 0%, $usa 100%);
+    border: none;
+    border-radius: 50px;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 800;
+    padding: 0.7rem 2.5rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 18px rgba(0,51,160,0.4);
+    &:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,51,160,0.55); }
+  }
+}
+
 // ── Shared keyframes ───────────────────────────────────────────────────────
 @keyframes colorShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 @keyframes shimmer { 0%{left:-60%} 100%{left:130%} }
