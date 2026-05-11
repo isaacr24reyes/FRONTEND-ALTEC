@@ -152,8 +152,8 @@ export class Mundial2026Component implements OnDestroy {
       subcampeon:     v.subcampeon,
       tercerLugar:    v.tercerLugar,
       cuartoLugar:    v.cuartoLugar,
-      goleador:       '',
-      resultadoFinal: ''
+      goleador:       'No registrado',
+      resultadoFinal: 'No registrado'
     };
 
     this.mundialService.savePronostico(payload).subscribe({
