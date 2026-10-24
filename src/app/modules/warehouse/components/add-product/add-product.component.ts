@@ -68,8 +68,10 @@ export class AddProductComponent {
           Validators.pattern('^[0-9]+([.,][0-9]{1,2})?$')
         ]);
       } else {
-        productPiControl?.clearValidators();
-        productPiControl?.setValue('');
+        // Precio compra opcional para no importados, pero se conserva lo escrito
+        productPiControl?.setValidators([
+          Validators.pattern('^[0-9]+([.,][0-9]{1,2})?$')
+        ]);
       }
 
       productPiControl?.updateValueAndValidity();
@@ -127,9 +129,10 @@ export class AddProductComponent {
         const normalizedPvp = formData.productPvp.replace('.', ',');
         const normalizedMp = formData.productMp.replace('.', ',');
 
+        // Precio compra (costo): se envía siempre que esté lleno, sea o no importado
         let normalizedPi = '0';
-        if (formData.isImported && formData.productPi) {
-          normalizedPi = formData.productPi.replace('.', ',');
+        if (formData.productPi) {
+          normalizedPi = String(formData.productPi).replace('.', ',');
         }
 
         formDataToSend.append('Pvp', normalizedPvp);
