@@ -127,11 +127,11 @@
           </a>
         </li>
 
-        <!-- Historial de Cotizaciones (Solo admin) -->
+        <!-- Historial de Importaciones (Solo admin) -->
         <li class="nav-item" *ngIf="!isExternal && role !== 'Distribuidor' && role !== 'Cliente'">
           <a class="nav-link" (click)="navigateToQuotationHistory()" routerLinkActive="active">
             <i class="bi bi-file-earmark-spreadsheet-fill me-2"></i>
-            <span>Historial Cotizaciones</span>
+            <span>Historial Importaciones</span>
           </a>
         </li>
       </ul>

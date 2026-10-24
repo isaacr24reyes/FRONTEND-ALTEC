@@ -4,8 +4,8 @@
     <!-- ── HEADER ── -->
     <div class="page-header mb-4">
       <div class="header-icon"><i class="bi bi-file-earmark-spreadsheet-fill"></i></div>
-      <h1 class="page-title">Historial de Cotizaciones</h1>
-      <p class="page-subtitle">Sube tus cotizaciones en Excel y consúltalas cuando quieras</p>
+      <h1 class="page-title">Historial de Importaciones</h1>
+      <p class="page-subtitle">Sube tus importaciones en Excel y consúltalas cuando quieras</p>
     </div>
 
     <div class="row g-4">
@@ -13,7 +13,7 @@
       <!-- ── SUBIR EXCEL ── -->
       <div class="col-12 col-xl-4">
         <form class="form-card" [formGroup]="uploadForm" (ngSubmit)="upload()" autocomplete="off">
-          <h2 class="card-title"><i class="bi bi-cloud-arrow-up me-2"></i>Nueva cotización</h2>
+          <h2 class="card-title"><i class="bi bi-cloud-arrow-up me-2"></i>Nueva importación</h2>
 
           <label class="field-label">Nombre <span class="req-star">*</span></label>
           <input type="text" class="field-input" formControlName="nombre"
@@ -56,7 +56,7 @@
           <button type="submit" class="btn-primary-action mt-4" [disabled]="isUploading">
             <span *ngIf="isUploading" class="spinner-border spinner-border-sm me-2"></span>
             <i *ngIf="!isUploading" class="bi bi-save2 me-2"></i>
-            {{ isUploading ? 'Guardando...' : 'Guardar cotización' }}
+            {{ isUploading ? 'Guardando...' : 'Guardar importación' }}
           </button>
         </form>
       </div>
@@ -68,7 +68,7 @@
           <!-- KPIs -->
           <div class="kpi-row">
             <div class="kpi">
-              <span class="kpi-label">Cotizaciones</span>
+              <span class="kpi-label">Importaciones</span>
               <span class="kpi-value">{{ quotations.length }}</span>
             </div>
             <div class="kpi">
@@ -109,7 +109,7 @@
 
           <div class="state-box" *ngIf="!isLoading && quotations.length === 0">
             <i class="bi bi-inbox"></i>
-            <span>{{ (searchTerm || startDate || endDate) ? 'No hay cotizaciones con esos filtros' : 'Aún no has subido cotizaciones' }}</span>
+            <span>{{ (searchTerm || startDate || endDate) ? 'No hay importaciones con esos filtros' : 'Aún no has subido importaciones' }}</span>
           </div>
 
           <!-- Tabla -->
