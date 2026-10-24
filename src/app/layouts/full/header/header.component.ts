@@ -6,7 +6,8 @@ import {
   R_PRODUCT_QUOTE,
   R_WAREHOUSE,
   R_SALES_MODULE,
-  R_HISTORIC_SALES
+  R_HISTORIC_SALES,
+  R_QUOTATION_HISTORY
 } from "../../../constants/route.constants";
 import {Router} from "@angular/router";
 import {UserSessionService} from "../../../modules/authentication/services/user-session.service";
@@ -64,6 +65,9 @@ export class HeaderComponent implements OnInit {
   navigateToAltecPoints(): void {
     this._router.navigate([`/${R_ALTEC_POINTS}`]);
 
+  }
+  navigateToQuotationHistory(): void {
+    this._router.navigate([`/${R_QUOTATION_HISTORY}`]);
   }
   navigateToBodega(): void {
     this._router.navigate(['/warehouse/inventario']);

@@ -1,0 +1,450 @@
+// ── Design tokens (mismos que Altec-Puntos) ───────────────────────────────
+$primary:       #6c5ce7;
+$primary-light: #a29bfe;
+$gold:          #fdcb6e;
+$green:         #00b894;
+$text-primary:  #e8eaf0;
+$text-muted:    #8892a4;
+$border:        rgba(255, 255, 255, 0.1);
+$card-bg:       rgba(255, 255, 255, 0.05);
+
+// ── Page ──────────────────────────────────────────────────────────────────
+.quotation-history-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0d1b2e 100%);
+  padding: 1rem 0 2rem;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────
+.page-header {
+  text-align: center;
+
+  .header-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(0, 184, 148, 0.25), rgba(108, 92, 231, 0.15));
+    border: 1px solid rgba(0, 184, 148, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: $green;
+    margin: 0 auto 0.75rem;
+  }
+
+  .page-title {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: $text-primary;
+    text-shadow: 0 0 24px rgba(0, 184, 148, 0.25);
+    margin-bottom: 0.3rem;
+  }
+
+  .page-subtitle {
+    color: $text-muted;
+    font-size: 0.85rem;
+    margin: 0;
+  }
+}
+
+// ── Cards ─────────────────────────────────────────────────────────────────
+.form-card {
+  background: $card-bg;
+  border: 1px solid $border;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  height: 100%;
+  transition: border-color 0.25s;
+
+  &:hover { border-color: rgba(108, 92, 231, 0.28); }
+}
+
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: $text-primary;
+  margin-bottom: 1.25rem;
+
+  i { color: $green; }
+}
+
+// ── Campos ────────────────────────────────────────────────────────────────
+.field-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.req-star { color: #ff7675; margin-left: 2px; }
+
+.field-error {
+  display: block;
+  font-size: 0.78rem;
+  color: #ff7675;
+  margin-top: 0.35rem;
+}
+
+.field-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  color: $text-primary;
+  font-size: 0.9rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  color-scheme: dark;
+
+  &::placeholder { color: rgba(136, 146, 164, 0.6); }
+
+  &:focus {
+    outline: none;
+    border-color: $primary-light;
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+  }
+
+  &.with-icon { padding-left: 2.4rem; }
+}
+
+.input-icon-wrap {
+  position: relative;
+
+  .input-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $text-muted;
+    pointer-events: none;
+  }
+}
+
+// ── Drop zone ─────────────────────────────────────────────────────────────
+.drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 140px;
+  padding: 1.25rem;
+  border: 2px dashed rgba(0, 184, 148, 0.3);
+  border-radius: 12px;
+  background: rgba(0, 184, 148, 0.04);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.25s ease;
+
+  &:hover { border-color: rgba(0, 184, 148, 0.6); }
+
+  &.drop-zone-active {
+    border-color: $green;
+    background: rgba(0, 184, 148, 0.1);
+    box-shadow: 0 0 0 4px rgba(0, 184, 148, 0.15);
+
+    // Mientras se arrastra, los hijos no deben capturar eventos (evita el parpadeo)
+    * { pointer-events: none; }
+  }
+
+  &.has-file { border-style: solid; }
+
+  .drop-icon { font-size: 2.2rem; color: $green; }
+  .drop-text { color: $text-primary; font-weight: 600; font-size: 0.9rem; }
+  .drop-hint { color: $text-muted; font-size: 0.75rem; }
+}
+
+.file-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+
+  > i { font-size: 2rem; color: $green; }
+
+  .file-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .file-name {
+    color: $text-primary;
+    font-weight: 600;
+    font-size: 0.88rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .file-size { color: $text-muted; font-size: 0.75rem; }
+
+  .file-remove {
+    border: none;
+    background: rgba(255, 118, 117, 0.15);
+    color: #ff7675;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+
+    &:hover { background: rgba(255, 118, 117, 0.3); }
+  }
+}
+
+// ── Botones ───────────────────────────────────────────────────────────────
+.btn-primary-action {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, $green, #00a383);
+  box-shadow: 0 4px 16px rgba(0, 184, 148, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0, 184, 148, 0.4);
+  }
+
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.btn-ghost {
+  border: 1px solid $border;
+  background: transparent;
+  color: $text-muted;
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  white-space: nowrap;
+  align-self: flex-end;
+
+  &:hover { color: $text-primary; border-color: $primary-light; }
+}
+
+.btn-download {
+  border: 1px solid rgba(108, 92, 231, 0.4);
+  background: rgba(108, 92, 231, 0.15);
+  color: $primary-light;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) { background: rgba(108, 92, 231, 0.3); color: #fff; }
+  &:disabled { opacity: 0.6; }
+}
+
+// ── KPIs y filtros ────────────────────────────────────────────────────────
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid $border;
+
+  .kpi-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: $text-muted;
+  }
+
+  .kpi-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: $text-primary;
+  }
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  .input-icon-wrap { min-width: 220px; align-self: flex-end; }
+
+  .date-filter {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+
+    label {
+      font-size: 0.7rem;
+      color: $text-muted;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+  }
+}
+
+.state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 3rem 1rem;
+  color: $text-muted;
+
+  i { font-size: 2rem; }
+}
+
+// ── Tabla ─────────────────────────────────────────────────────────────────
+.history-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: $text-primary;
+  font-size: 0.88rem;
+
+  th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: $text-muted;
+    font-weight: 600;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid $border;
+  }
+
+  td {
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+  }
+
+  tbody tr { transition: background 0.2s; }
+  tbody tr:hover { background: rgba(108, 92, 231, 0.08); }
+
+  .q-name { display: block; font-weight: 600; }
+  .q-file { display: block; font-size: 0.75rem; color: $text-muted; }
+}
+
+.gold { color: $gold; font-weight: 700; }
+.muted { color: $text-muted; }
+.nowrap { white-space: nowrap; }
+
+@media (max-width: 576px) {
+  .page-header .page-title { font-size: 1.4rem; }
+  .kpi-row { grid-template-columns: 1fr; }
+  .form-card { padding: 1rem; }
+}
+
+// ── Filas clicables y botón Ver ───────────────────────────────────────────
+.clickable-row { cursor: pointer; }
+
+.btn-view {
+  border: 1px solid rgba(0, 184, 148, 0.4);
+  background: rgba(0, 184, 148, 0.12);
+  color: $green;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) { background: rgba(0, 184, 148, 0.25); color: #fff; }
+  &:disabled { opacity: 0.6; }
+}
+
+// ── Modal de detalle ──────────────────────────────────────────────────────
+.detail-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(5, 5, 15, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.detail-modal {
+  width: min(1100px, 100%);
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #12122a 0%, #1a1a2e 60%, #0f1d30 100%);
+  border: 1px solid rgba(108, 92, 231, 0.3);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  .detail-title-wrap { min-width: 0; }
+
+  .detail-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: $text-primary;
+    margin: 0 0 0.25rem;
+    overflow-wrap: anywhere;
+  }
+
+  .detail-meta {
+    font-size: 0.8rem;
+    color: $text-muted;
+  }
+}
+
+.btn-close-modal {
+  border: 1px solid $border;
+  background: rgba(255, 255, 255, 0.05);
+  color: $text-muted;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  flex-shrink: 0;
+
+  &:hover { color: #fff; border-color: #ff7675; background: rgba(255, 118, 117, 0.15); }
+}
+
+.detail-table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid $border;
+  border-radius: 12px;
+
+  thead th {
+    position: sticky;
+    top: 0;
+    background: #17172f;
+    z-index: 1;
+  }
+}
+
+@media (max-width: 576px) {
+  .detail-modal { padding: 1rem; }
+  .detail-header .detail-title { font-size: 1.1rem; }
+}
