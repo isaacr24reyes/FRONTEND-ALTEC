@@ -68,8 +68,10 @@ export class AddProductComponent {
           Validators.pattern('^[0-9]+([.,][0-9]{1,2})?$')
         ]);
       } else {
-        productPiControl?.clearValidators();
-        productPiControl?.setValue('');
+        // Precio compra opcional para no importados, pero se conserva lo escrito
+        productPiControl?.setValidators([
+          Validators.pattern('^[0-9]+([.,][0-9]{1,2})?$')
+        ]);
       }
 
       productPiControl?.updateValueAndValidity();
@@ -127,9 +129,10 @@ export class AddProductComponent {
         const normalizedPvp = formData.productPvp.replace('.', ',');
         const normalizedMp = formData.productMp.replace('.', ',');
 
+        // Precio compra (costo): se envía siempre que esté lleno, sea o no importado
         let normalizedPi = '0';
-        if (formData.isImported && formData.productPi) {
-          normalizedPi = formData.productPi.replace('.', ',');
+        if (formData.productPi) {
+          normalizedPi = String(formData.productPi).replace('.', ',');
         }
 
         formDataToSend.append('Pvp', normalizedPvp);
@@ -180,12 +183,16 @@ export class AddProductComponent {
   onDragOver(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    this.isDragging = true;
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+    if (!this.isDragging) this.isDragging = true;
   }
 
   onDragLeave(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
+    // Ignorar el dragleave que se dispara al pasar sobre elementos hijos (overlay, imagen, texto)
+    const zone = event.currentTarget as HTMLElement;
+    if (zone.contains(event.relatedTarget as Node)) return;
     this.isDragging = false;
   }
 
