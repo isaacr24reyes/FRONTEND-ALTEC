@@ -180,12 +180,16 @@ export class AddProductComponent {
   onDragOver(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    this.isDragging = true;
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+    if (!this.isDragging) this.isDragging = true;
   }
 
   onDragLeave(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
+    // Ignorar el dragleave que se dispara al pasar sobre elementos hijos (overlay, imagen, texto)
+    const zone = event.currentTarget as HTMLElement;
+    if (zone.contains(event.relatedTarget as Node)) return;
     this.isDragging = false;
   }
 
