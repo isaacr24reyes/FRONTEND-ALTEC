@@ -92,7 +92,7 @@ export class QuotationHistoryComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.isLoading = false;
-        Notiflix.Notify.failure('No se pudo cargar el historial de cotizaciones.');
+        Notiflix.Notify.failure('No se pudo cargar el historial de importaciones.');
       }
     });
   }
@@ -164,7 +164,7 @@ export class QuotationHistoryComponent implements OnInit, OnDestroy {
     }
 
     this.selectedFile = file;
-    // Sugerir el nombre del archivo como nombre de la cotización si está vacío
+    // Sugerir el nombre del archivo como nombre de la importación si está vacío
     const nombreCtrl = this.uploadForm.get('nombre');
     if (!nombreCtrl?.value) {
       nombreCtrl?.setValue(file.name.replace(/\.xlsx$/i, ''));
@@ -189,14 +189,14 @@ export class QuotationHistoryComponent implements OnInit, OnDestroy {
     // Los Excel con fotos pesan varios MB: avisar que puede tardar
     const sizeMb = this.selectedFile.size / (1024 * 1024);
     Notiflix.Loading.standard(sizeMb > 5
-      ? `Guardando cotización (${sizeMb.toFixed(1)} MB)... puede tardar hasta un minuto`
-      : 'Guardando cotización...');
+      ? `Guardando importación (${sizeMb.toFixed(1)} MB)... puede tardar hasta un minuto`
+      : 'Guardando importación...');
 
     this.quotationHistoryService.upload(nombre.trim(), fecha, this.selectedFile, this.userName).subscribe({
       next: (res) => {
         this.isUploading = false;
         Notiflix.Loading.remove();
-        Notiflix.Notify.success(`Cotización "${res.nombre}" guardada: ${res.totalItems} productos.`);
+        Notiflix.Notify.success(`Importación "${res.nombre}" guardada: ${res.totalItems} productos.`);
         this.uploadForm.reset({ nombre: '', fecha: this.today() });
         this.removeFile();
         this.loadQuotations();
@@ -204,7 +204,7 @@ export class QuotationHistoryComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.isUploading = false;
         Notiflix.Loading.remove();
-        Notiflix.Notify.failure(err?.error?.error ?? 'No se pudo guardar la cotización.');
+        Notiflix.Notify.failure(err?.error?.error ?? 'No se pudo guardar la importación.');
       }
     });
   }
@@ -221,7 +221,7 @@ export class QuotationHistoryComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.loadingDetailId = null;
-        Notiflix.Notify.failure('No se pudo cargar el detalle de la cotización.');
+        Notiflix.Notify.failure('No se pudo cargar el detalle de la importación.');
       }
     });
   }
