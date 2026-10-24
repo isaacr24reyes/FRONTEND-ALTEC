@@ -511,133 +511,142 @@ export class ProductQuoteComponent implements OnInit {
     this.downloadMessage = 'Generando PDF...';
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    const container = document.createElement('div');
-    container.style.width = '100%';
-    container.style.padding = '20px';
-    container.style.backgroundColor = '#ffffff';
-    container.style.fontFamily = 'Arial, sans-serif';
+    try {
+      const container = document.createElement('div');
+      container.style.width = '100%';
+      container.style.padding = '20px';
+      container.style.backgroundColor = '#ffffff';
+      container.style.fontFamily = 'Arial, sans-serif';
 
-    const now = new Date();
-    const options: Intl.DateTimeFormatOptions = {
-      timeZone: 'America/Guayaquil', year: 'numeric', month: 'long', day: 'numeric',
-      hour: '2-digit', minute: '2-digit', hour12: true
-    };
-    const fechaHoraFormateada = new Intl.DateTimeFormat('es-EC', options).format(now);
-    const [fecha, hora] = fechaHoraFormateada.split(',');
+      // Fecha y hora se formatean por separado: Chrome cambió el formato combinado
+      // ("24 de octubre de 2026 a las 01:03 p. m.", sin coma) y separar por ',' rompía el PDF
+      const now = new Date();
+      const fecha = new Intl.DateTimeFormat('es-EC', {
+        timeZone: 'America/Guayaquil', year: 'numeric', month: 'long', day: 'numeric'
+      }).format(now);
+      const hora = new Intl.DateTimeFormat('es-EC', {
+        timeZone: 'America/Guayaquil', hour: '2-digit', minute: '2-digit', hour12: true
+      }).format(now);
 
-    const header = `
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #0C1E3A;">
-      <div style="flex: 0 0 auto;">
-        <img src="assets/images/Logo-completo.jpeg" alt="Logo ALTEC" style="max-height: 80px;">
-      </div>
-      <div style="flex: 1; text-align: center; padding: 0 20px;">
-        <h1 style="margin: 0 0 10px 0; font-size: 24px; font-weight: bold; color: #0C1E3A;">COTIZACIÓN</h1>
-        <div style="font-size: 11px; color: #555;">
-          <p style="margin: 3px 0;"><strong>Fecha:</strong> ${fecha.trim()} | <strong>Hora:</strong> ${hora.trim()}</p>
-          <p style="margin: 3px 0;"><strong>Ubicación:</strong> Quito, Villaflora, Rodrigo de Chávez</p>
-          <p style="margin: 3px 0;"><strong>WhatsApp:</strong> (099) 515-9078</p>
+      const header = `
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #0C1E3A;">
+        <div style="flex: 0 0 auto;">
+          <img src="assets/images/Logo-completo.jpeg" alt="Logo ALTEC" style="max-height: 80px;">
+        </div>
+        <div style="flex: 1; text-align: center; padding: 0 20px;">
+          <h1 style="margin: 0 0 10px 0; font-size: 24px; font-weight: bold; color: #0C1E3A;">COTIZACIÓN</h1>
+          <div style="font-size: 11px; color: #555;">
+            <p style="margin: 3px 0;"><strong>Fecha:</strong> ${fecha.trim()} | <strong>Hora:</strong> ${hora.trim()}</p>
+            <p style="margin: 3px 0;"><strong>Ubicación:</strong> Quito, Villaflora, Rodrigo de Chávez</p>
+            <p style="margin: 3px 0;"><strong>WhatsApp:</strong> (099) 515-9078</p>
+          </div>
+        </div>
+        <div style="flex: 0 0 auto; width: 80px;"></div>
+      </div>`;
+
+      let tableRows = '';
+      this.cotizacion.forEach((item, index) => {
+        const totalFormatted = new Intl.NumberFormat('es-EC', {style: 'currency', currency: 'USD'}).format(item.total);
+        const precioFormatted = new Intl.NumberFormat('es-EC', {
+          style: 'currency',
+          currency: 'USD'
+        }).format(item.precio || 0);
+        const bgColor = index % 2 === 0 ? '#f8f9fa' : '#ffffff';
+
+        tableRows += `
+        <tr style="background-color: ${bgColor};">
+          <td style="border: 1px solid #dee2e6; padding: 8px; font-size: 11px;">${item.descripcion}</td>
+          <td style="border: 1px solid #dee2e6; padding: 8px; text-align: center; font-size: 11px;">
+            ${item.fotoBase64 ? `<img src="${item.fotoBase64}" alt="Producto" style="max-height: 50px; max-width: 50px; object-fit: contain;">`
+          : item.foto ? `<img src="${item.foto}" alt="Producto" style="max-height: 50px; max-width: 50px; object-fit: contain;">`
+            : '—'}
+          </td>
+          <td style="border: 1px solid #dee2e6; padding: 8px; text-align: center; font-size: 11px; font-weight: bold;">${item.cantidad}</td>
+          <td style="border: 1px solid #dee2e6; padding: 8px; text-align: right; font-size: 11px;">${precioFormatted}</td>
+          <td style="border: 1px solid #dee2e6; padding: 8px; text-align: right; font-size: 11px; font-weight: bold; color: #0C1E3A;">${totalFormatted}</td>
+        </tr>`;
+      });
+
+      const table = `
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px;">
+        <thead>
+          <tr style="background: linear-gradient(135deg, #0C1E3A, #1a3a5c); color: white;">
+            <th style="padding: 10px; border: 1px solid #0C1E3A; text-align: left;">Producto</th>
+            <th style="padding: 10px; border: 1px solid #0C1E3A; width: 80px;">Imagen</th>
+            <th style="padding: 10px; border: 1px solid #0C1E3A; width: 80px;">Cantidad</th>
+            <th style="padding: 10px; border: 1px solid #0C1E3A; width: 100px; text-align: right;">Precio Unit.</th>
+            <th style="padding: 10px; border: 1px solid #0C1E3A; width: 100px; text-align: right;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows}
+        </tbody>
+        <tfoot>
+          <tr style="background: linear-gradient(135deg, #10B981, #059669); color: white;">
+            <td colspan="4" style="text-align: right; font-weight: bold; padding: 12px; border: 1px solid #059669; font-size: 13px;">TOTAL GENERAL:</td>
+            <td style="font-weight: bold; padding: 12px; border: 1px solid #059669; text-align: right; font-size: 15px;">
+              ${new Intl.NumberFormat('es-EC', {style: 'currency', currency: 'USD'}).format(this.totalCotizacion)}
+            </td>
+          </tr>
+        </tfoot>
+      </table>`;
+
+      const footer = `
+      <div style="margin-top: 25px; padding: 15px; border: 2px dashed #0C1E3A; border-radius: 8px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe);">
+        <h3 style="color: #0C1E3A; font-weight: bold; margin: 0 0 10px 0; font-size: 14px; text-align: center;">
+          INFORMACIÓN DE PAGO
+        </h3>
+        <div style="text-align: center; font-size: 11px; color: #333;">
+          <p style="margin: 5px 0; font-weight: bold; font-size: 13px;">ALTEC MECATRÓNICA</p>
+          <p style="margin: 5px 0;"><strong>Titular:</strong> JOSHUA ISAAC REYES HEREDIA</p>
+          <p style="margin: 5px 0;"><strong>CI:</strong> 1718068578</p>
+          <p style="margin: 5px 0;"><strong>Banco:</strong> PICHINCHA - Cuenta de Ahorros</p>
+          <p style="margin: 5px 0; font-size: 16px; font-weight: bold; color: #0C1E3A;">N° 2204742473</p>
         </div>
       </div>
-      <div style="flex: 0 0 auto; width: 80px;"></div>
-    </div>`;
 
-    let tableRows = '';
-    this.cotizacion.forEach((item, index) => {
-      const totalFormatted = new Intl.NumberFormat('es-EC', {style: 'currency', currency: 'USD'}).format(item.total);
-      const precioFormatted = new Intl.NumberFormat('es-EC', {
-        style: 'currency',
-        currency: 'USD'
-      }).format(item.precio || 0);
-      const bgColor = index % 2 === 0 ? '#f8f9fa' : '#ffffff';
+      <div style="margin-top: 15px; padding: 10px; text-align: center; font-size: 10px; color: #666; border-top: 1px solid #dee2e6;">
+        <p style="margin: 5px 0;">Gracias por su preferencia</p>
+        <p style="margin: 5px 0;">Cotización generada el ${fecha.trim()} a las ${hora.trim()}</p>
+        <p style="margin: 5px 0; font-weight: bold; color: #8B50FB;">Developed by SwiFt 2025</p>
+      </div>`;
 
-      tableRows += `
-      <tr style="background-color: ${bgColor};">
-        <td style="border: 1px solid #dee2e6; padding: 8px; font-size: 11px;">${item.descripcion}</td>
-        <td style="border: 1px solid #dee2e6; padding: 8px; text-align: center; font-size: 11px;">
-          ${item.fotoBase64 ? `<img src="${item.fotoBase64}" alt="Producto" style="max-height: 50px; max-width: 50px; object-fit: contain;">`
-        : item.foto ? `<img src="${item.foto}" alt="Producto" style="max-height: 50px; max-width: 50px; object-fit: contain;">`
-          : '—'}
-        </td>
-        <td style="border: 1px solid #dee2e6; padding: 8px; text-align: center; font-size: 11px; font-weight: bold;">${item.cantidad}</td>
-        <td style="border: 1px solid #dee2e6; padding: 8px; text-align: right; font-size: 11px;">${precioFormatted}</td>
-        <td style="border: 1px solid #dee2e6; padding: 8px; text-align: right; font-size: 11px; font-weight: bold; color: #0C1E3A;">${totalFormatted}</td>
-      </tr>`;
-    });
+      // Cotización ya guardada en BD — generar PDF con el número recibido
+      Notiflix.Notify.success(`Cotización N° ${quotationNumber} guardada exitosamente`);
 
-    const table = `
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px;">
-      <thead>
-        <tr style="background: linear-gradient(135deg, #0C1E3A, #1a3a5c); color: white;">
-          <th style="padding: 10px; border: 1px solid #0C1E3A; text-align: left;">Producto</th>
-          <th style="padding: 10px; border: 1px solid #0C1E3A; width: 80px;">Imagen</th>
-          <th style="padding: 10px; border: 1px solid #0C1E3A; width: 80px;">Cantidad</th>
-          <th style="padding: 10px; border: 1px solid #0C1E3A; width: 100px; text-align: right;">Precio Unit.</th>
-          <th style="padding: 10px; border: 1px solid #0C1E3A; width: 100px; text-align: right;">Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${tableRows}
-      </tbody>
-      <tfoot>
-        <tr style="background: linear-gradient(135deg, #10B981, #059669); color: white;">
-          <td colspan="4" style="text-align: right; font-weight: bold; padding: 12px; border: 1px solid #059669; font-size: 13px;">TOTAL GENERAL:</td>
-          <td style="font-weight: bold; padding: 12px; border: 1px solid #059669; text-align: right; font-size: 15px;">
-            ${new Intl.NumberFormat('es-EC', {style: 'currency', currency: 'USD'}).format(this.totalCotizacion)}
-          </td>
-        </tr>
-      </tfoot>
-    </table>`;
+      const pdfHeader = `
+      <div style="text-align: center; margin-bottom: 15px; padding: 10px; background: #f0f4ff; border-radius: 6px; border: 1px solid #0C1E3A;">
+        <h2 style="color: #0C1E3A; font-weight: bold; margin: 0; font-size: 18px;">N° DE COTIZACIÓN: ${quotationNumber}</h2>
+      </div>`;
 
-    const footer = `
-    <div style="margin-top: 25px; padding: 15px; border: 2px dashed #0C1E3A; border-radius: 8px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe);">
-      <h3 style="color: #0C1E3A; font-weight: bold; margin: 0 0 10px 0; font-size: 14px; text-align: center;">
-        INFORMACIÓN DE PAGO
-      </h3>
-      <div style="text-align: center; font-size: 11px; color: #333;">
-        <p style="margin: 5px 0; font-weight: bold; font-size: 13px;">ALTEC MECATRÓNICA</p>
-        <p style="margin: 5px 0;"><strong>Titular:</strong> JOSHUA ISAAC REYES HEREDIA</p>
-        <p style="margin: 5px 0;"><strong>CI:</strong> 1718068578</p>
-        <p style="margin: 5px 0;"><strong>Banco:</strong> PICHINCHA - Cuenta de Ahorros</p>
-        <p style="margin: 5px 0; font-size: 16px; font-weight: bold; color: #0C1E3A;">N° 2204742473</p>
-      </div>
-    </div>
+      container.innerHTML = pdfHeader + header + table + footer;
 
-    <div style="margin-top: 15px; padding: 10px; text-align: center; font-size: 10px; color: #666; border-top: 1px solid #dee2e6;">
-      <p style="margin: 5px 0;">Gracias por su preferencia</p>
-      <p style="margin: 5px 0;">Cotización generada el ${fecha.trim()} a las ${hora.trim()}</p>
-      <p style="margin: 5px 0; font-weight: bold; color: #8B50FB;">Developed by SwiFt 2025</p>
-    </div>`;
+      const opciones = {
+        margin: [10, 10, 10, 10],
+        filename: `ALTEC-Cotizacion-${quotationNumber}.pdf`,
+        image: {type: 'jpeg', quality: 0.98},
+        html2canvas: {
+          scale: 2,
+          logging: false,
+          useCORS: true,
+          letterRendering: true
+        },
+        jsPDF: {
+          unit: 'mm',
+          format: 'letter',
+          orientation: 'portrait'
+        },
+        pagebreak: {mode: ['avoid-all', 'css', 'legacy']}
+      };
 
-    // Cotización ya guardada en BD — generar PDF con el número recibido
-    Notiflix.Notify.success(`Cotización N° ${quotationNumber} guardada exitosamente`);
-
-    const pdfHeader = `
-    <div style="text-align: center; margin-bottom: 15px; padding: 10px; background: #f0f4ff; border-radius: 6px; border: 1px solid #0C1E3A;">
-      <h2 style="color: #0C1E3A; font-weight: bold; margin: 0; font-size: 18px;">N° DE COTIZACIÓN: ${quotationNumber}</h2>
-    </div>`;
-
-    container.innerHTML = pdfHeader + header + table + footer;
-
-    const opciones = {
-      margin: [10, 10, 10, 10],
-      filename: `ALTEC-Cotizacion-${quotationNumber}.pdf`,
-      image: {type: 'jpeg', quality: 0.98},
-      html2canvas: {
-        scale: 2,
-        logging: false,
-        useCORS: true,
-        letterRendering: true
-      },
-      jsPDF: {
-        unit: 'mm',
-        format: 'letter',
-        orientation: 'portrait'
-      },
-      pagebreak: {mode: ['avoid-all', 'css', 'legacy']}
-    };
-
-    html2pdf().from(container).set(opciones).save();
-    this.isDownloading = false;
+      await html2pdf().from(container).set(opciones).save();
+    } catch (error) {
+      console.error('Error al generar el PDF:', error);
+      Notiflix.Notify.failure('Error al generar el PDF. La cotización sí quedó guardada.');
+    } finally {
+      // Siempre cerrar el aviso "Generando PDF...", aunque falle la generación
+      this.isDownloading = false;
+    }
   }
 
   incluirExtra() {
