@@ -126,6 +126,14 @@
             <span>Altec-Puntos</span>
           </a>
         </li>
+
+        <!-- Historial de Cotizaciones (Solo admin) -->
+        <li class="nav-item" *ngIf="!isExternal && role !== 'Distribuidor' && role !== 'Cliente'">
+          <a class="nav-link" (click)="navigateToQuotationHistory()" routerLinkActive="active">
+            <i class="bi bi-file-earmark-spreadsheet-fill me-2"></i>
+            <span>Historial Cotizaciones</span>
+          </a>
+        </li>
       </ul>
 
       <!-- Acciones derecha -->

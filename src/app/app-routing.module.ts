@@ -8,7 +8,7 @@ import {
   R_DASHBOARD,
   R_PRODUCT_QUOTE, R_SALES_MODULE, R_HISTORIC_SALES,
   R_STORE, R_USER_ADMIN,
-  R_WAREHOUSE
+  R_WAREHOUSE, R_QUOTATION_HISTORY
 } from "./constants/route.constants";
 import { RoleGuard } from "./core/guard/role.guard";
 
@@ -73,6 +73,12 @@ const routes: Routes = [
     component: FullComponent,
     canActivate: [RoleGuard],
     loadChildren: () => import('./modules/historic-sales-module/historic-sales-module.module').then(mod => mod.HistoricSalesModuleModule)
+  },
+  {
+    path: R_QUOTATION_HISTORY,
+    component: FullComponent,
+    canActivate: [RoleGuard],
+    loadChildren: () => import('./modules/quotation-history/quotation-history.module').then(mod => mod.QuotationHistoryModule)
   }
 ];
 
