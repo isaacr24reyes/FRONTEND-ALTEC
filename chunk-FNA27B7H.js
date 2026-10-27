@@ -1,0 +1,1 @@
+var t="dashboard",o="authentication",s="404",e="login",r="register",R="warehouse",_="product-quote",c="store",n="altec-points",p="user-admin",E="sales-module",O="historic-sales",x="import-history",T="facturas";export{t as a,o as b,s as c,e as d,r as e,R as f,_ as g,c as h,n as i,p as j,E as k,O as l,x as m,T as n};
