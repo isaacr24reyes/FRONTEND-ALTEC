@@ -530,6 +530,15 @@
     box-shadow: 0 4px 12px rgba(108, 92, 231, .5);
   }
 }
+.btn-print {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #fff;
+  &:hover {
+    background: linear-gradient(135deg, #D97706, #B45309);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, .4);
+  }
+}
 .btn-pdf {
   background: linear-gradient(135deg, #EF4444, #DC2626);
   color: #fff;

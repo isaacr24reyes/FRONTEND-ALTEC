@@ -4,6 +4,13 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ProductService } from '../../warehouse/services/warehouse.service';
 import { SalesService, SaleDto } from '../../../services/sales.service';
+import {
+  ElectronicInvoiceService,
+  CreateElectronicInvoiceRequest,
+  ElectronicInvoiceResult,
+  InvoiceTicketData
+} from '../../../services/electronic-invoice.service';
+import { ThermalTicketService } from '../../../services/thermal-ticket.service';
 import { forkJoin } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
@@ -16,6 +23,17 @@ interface CartItem {
   priceType: string;
   cantidad: number;
   subtotal?: number;
+}
+
+/** Lo necesario para imprimir el recibo después de limpiar el carrito. */
+interface ReceiptSnapshot {
+  numero: string;
+  fecha: Date;
+  items: { descripcion: string; cantidad: number; precio: number; total: number }[];
+  total: number;
+  paymentMethod: string;
+  recibido: number;
+  cambio: number;
 }
 
 interface PaymentMethod {
@@ -78,10 +96,8 @@ export class SalesModuleComponent implements OnInit {
   ];
   selectedPaymentMethod: string = 'efectivo';
 
-  // 🔢 Cálculos
+  // 🔢 Cálculos (Negocio Popular RIMPE: IVA 0%, el total es igual al subtotal)
   subtotal: number = 0;
-  taxRate: number = 0.00; // IVA 15% ya incluido en el precio (no se suma)
-  taxAmount: number = 0;
   total: number = 0;
 
   // 💵 Calculadora de Cambio (para Efectivo)
@@ -89,20 +105,33 @@ export class SalesModuleComponent implements OnInit {
   cambio: number = 0;
   showCalculadoraCambio: boolean = false;
 
-  // 🧾 Factura
-  conFactura: boolean = false;
+  // 🧾 Comprobante: recibo (sin datos del cliente) o factura electrónica SRI
+  tipoComprobante: 'recibo' | 'factura' = 'recibo';
+
+  // 🧾 Resultado de la factura electrónica
+  showFacturaModal = false;
+  facturaProcesando = false;
+  facturaResultado: ElectronicInvoiceResult | null = null;
+  facturaError = '';
+  facturaEmailReenvio = '';
+  private facturaRequest: CreateElectronicInvoiceRequest | null = null;
+
+  // 🖨️ Ticket térmico: se imprime solo al terminar la venta (preferencia guardada en este equipo)
+  private readonly PRINT_PREF_KEY = 'altec.imprimirTicket';
+  imprimirTicketAuto = this.readPrintPref();
 
   // 📱 UI State
   showCart: boolean = true;
   cartCollapsed: boolean = false;
 
   private readonly MAX_RESULTS = 10;
-  private readonly TAX_RATE = 0.00; // IVA 15% ya incluido en precio
 
   constructor(
     private fb: FormBuilder,
     private productService: ProductService,
     private salesService: SalesService,
+    private invoiceService: ElectronicInvoiceService,
+    private ticket: ThermalTicketService,
     private http: HttpClient
   ) { }
 
@@ -110,11 +139,19 @@ export class SalesModuleComponent implements OnInit {
     this.formGroup = this.fb.group({
       searchControl: ['', [Validators.maxLength(100)]],
       clientName: ['', [Validators.minLength(2)]],
-      clientDocument: ['', [Validators.pattern(/^[0-9]{10,13}$/)]],
-      clientPhone: ['', [Validators.pattern(/^[0-9]{7,15}$/)]]
+      clientDocument: ['', [Validators.pattern(/^[A-Za-z0-9]{5,20}$/)]],
+      clientPhone: ['', [Validators.pattern(/^[0-9]{7,15}$/)]],
+      clientAddress: ['', [Validators.maxLength(300)]],
+      clientEmail: ['', [Validators.email]]
     });
 
     this.getAllProducts();
+
+    // Autocompleta los datos de un cliente ya facturado al escribir su cédula/RUC
+    this.formGroup.get('clientDocument')!
+      .valueChanges
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe(value => this.buscarClienteFactura(value));
 
     this.formGroup.get('searchControl')!
       .valueChanges
@@ -129,6 +166,14 @@ export class SalesModuleComponent implements OnInit {
     if (this.cartItems.length === 0) {
       Notiflix.Notify.warning('El carrito está vacío. Agrega productos antes de confirmar.');
       return;
+    }
+
+    if (this.tipoComprobante === 'factura') {
+      const error = this.validarDatosFactura();
+      if (error) {
+        Notiflix.Notify.warning(error);
+        return;
+      }
     }
 
     // 💵 Si es EFECTIVO, mostrar calculadora de cambio
@@ -182,13 +227,31 @@ export class SalesModuleComponent implements OnInit {
     // TODO: Ajustar employeeID real cuando exista autenticación
     const employeeID = null; // Enviar null si no hay ninguno.
 
+    // La factura se arma antes de limpiar el carrito y se emite después de guardar la venta
+    const facturaRequest = this.tipoComprobante === 'factura'
+      ? this.buildFacturaRequest(invoiceNumber, paymentMethod)
+      : null;
+
+    const recibo: ReceiptSnapshot | null = this.tipoComprobante === 'recibo'
+      ? {
+          numero: invoiceNumber,
+          fecha: new Date(),
+          items: this.cartItems.map(i => ({
+            descripcion: i.descripcion, cantidad: i.cantidad, precio: i.pvp, total: i.pvp * i.cantidad
+          })),
+          total: this.total,
+          paymentMethod,
+          recibido: paymentMethod === 'efectivo' ? this.montoRecibido : 0,
+          cambio: paymentMethod === 'efectivo' ? Math.max(this.montoRecibido - this.total, 0) : 0
+        }
+      : null;
+
     // Crear un arreglo de peticiones concurrentes para cada item del carrito
     const salesObservables = this.cartItems.map(item => {
       const product = this.allProducts.find(p => p.id === item.id);
       const precioImportacion = product?.precioImportacion || 0; // Obtener precioImportacion del producto
 
       const subtotalItem = item.pvp * item.cantidad;
-      const taxItem = this.conFactura ? subtotalItem - (subtotalItem / 1.15) : 0;
 
       // Calcular ganancia total (PVP - precioImportacion) * cantidad
       const profit = (item.pvp - precioImportacion) * item.cantidad;
@@ -201,7 +264,7 @@ export class SalesModuleComponent implements OnInit {
         profit: profit,
         quantity: item.cantidad,
         unitPrice: item.pvp,
-        taxAmount: taxItem,
+        taxAmount: 0,
         totalAmount: subtotalItem,
         paymentMethod: paymentMethod,
         status: 'Completed'
@@ -226,12 +289,16 @@ export class SalesModuleComponent implements OnInit {
             Notiflix.Notify.success('✓ Venta realizada con éxito');
             this.limpiarVenta();
             this.getAllProducts(); // refresca stock en tiempo real
+            if (facturaRequest) this.emitirFactura(facturaRequest);
+            if (recibo && this.imprimirTicketAuto) this.imprimirRecibo(recibo);
           },
           error: () => {
             Notiflix.Loading.remove();
             Notiflix.Notify.success('✓ Venta guardada, pero hubo un error al actualizar el stock.');
             this.limpiarVenta();
             this.getAllProducts(); // refresca de todas formas para mostrar estado real
+            if (facturaRequest) this.emitirFactura(facturaRequest);
+            if (recibo && this.imprimirTicketAuto) this.imprimirRecibo(recibo);
           }
         });
       },
@@ -247,6 +314,7 @@ export class SalesModuleComponent implements OnInit {
     this.cartItems = [];
     this.formGroup.reset();
     this.selectedPaymentMethod = 'efectivo';
+    this.tipoComprobante = 'recibo';
     this.recalculate();
     this.applyFilter('');
   }
@@ -506,15 +574,7 @@ export class SalesModuleComponent implements OnInit {
       0
     );
 
-    if (this.conFactura) {
-      // Desglose: el precio ya incluye IVA 15%, extraer base e impuesto
-      this.subtotal = rawTotal / 1.15;
-      this.taxAmount = rawTotal - this.subtotal;
-    } else {
-      this.subtotal = rawTotal;
-      this.taxAmount = 0;
-    }
-
+    this.subtotal = rawTotal;
     this.total = rawTotal;
 
     // Actualizar subtotal en items
@@ -538,6 +598,10 @@ export class SalesModuleComponent implements OnInit {
     if (methodId !== 'efectivo' && this.showCalculadoraCambio) {
       this.cerrarCalculadora();
     }
+  }
+
+  selectTipoComprobante(tipo: 'recibo' | 'factura'): void {
+    this.tipoComprobante = tipo;
   }
 
   // 💵 CALCULADORA DE CAMBIO
@@ -711,5 +775,332 @@ export class SalesModuleComponent implements OnInit {
     } else {
       Notiflix.Notify.warning('No se encontraron productos de la cotización en el inventario.');
     }
+  }
+
+  /* =========================
+     🧾 FACTURA ELECTRÓNICA SRI
+     ========================= */
+
+  private buscarClienteFactura(value: string): void {
+    const id = (value || '').trim();
+    if (!/^[0-9]{10}$|^[0-9]{13}$/.test(id)) return;
+
+    this.invoiceService.buscarCliente(id).subscribe({
+      next: (c) => {
+        // Solo si el usuario no cambió la identificación mientras se buscaba
+        if ((this.formGroup.get('clientDocument')?.value || '').trim() !== id) return;
+        this.formGroup.patchValue({
+          clientName: c.razonSocial,
+          clientAddress: c.direccion || '',
+          clientEmail: c.email || '',
+          clientPhone: c.telefono || ''
+        }, { emitEvent: false });
+        Notiflix.Notify.info('Cliente encontrado: datos cargados', { position: 'right-bottom', timeout: 1500 });
+      },
+      error: () => { /* cliente nuevo: se registra al emitir la factura */ }
+    });
+  }
+
+  /** Mismas reglas que el backend, para no guardar la venta con datos que el SRI rechazaría. */
+  private validarDatosFactura(): string | null {
+    const f = this.formGroup.value;
+    const id = (f.clientDocument || '').trim();
+    const nombre = (f.clientName || '').trim();
+    const email = (f.clientEmail || '').trim();
+
+    if (!id) return 'Para facturar ingresa la cédula o RUC del cliente.';
+    if (/^[0-9]{10}$/.test(id) && !this.cedulaValida(id)) return 'La cédula ingresada no es válida.';
+    if (/^[0-9]+$/.test(id) && id.length !== 10 && !(id.length === 13 && id.endsWith('001')))
+      return 'El RUC debe tener 13 dígitos y terminar en 001.';
+    if (!/^[A-Za-z0-9]{5,20}$/.test(id)) return 'La identificación del cliente no es válida.';
+    if (nombre.length < 2) return 'Para facturar ingresa el nombre o razón social del cliente.';
+    if (!(f.clientAddress || '').trim()) return 'Para facturar ingresa la dirección del cliente.';
+    if (email && this.formGroup.get('clientEmail')?.invalid) return 'El correo del cliente no es válido.';
+    if (this.formGroup.get('clientPhone')?.invalid) return 'El teléfono del cliente no es válido.';
+    return null;
+  }
+
+  /** Cédula ecuatoriana: provincia 01-24 (o 30), tercer dígito < 6 y verificador módulo 10. */
+  private cedulaValida(id: string): boolean {
+    const provincia = parseInt(id.substring(0, 2), 10);
+    if (((provincia < 1 || provincia > 24) && provincia !== 30) || parseInt(id[2], 10) >= 6) return false;
+
+    let suma = 0;
+    for (let i = 0; i < 9; i++) {
+      let v = parseInt(id[i], 10) * (i % 2 === 0 ? 2 : 1);
+      if (v > 9) v -= 9;
+      suma += v;
+    }
+    return (10 - (suma % 10)) % 10 === parseInt(id[9], 10);
+  }
+
+  private buildFacturaRequest(invoiceNumber: string, paymentMethod: string): CreateElectronicInvoiceRequest {
+    const f = this.formGroup.value;
+    const isGuid = (v?: string) => !!v && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+
+    return {
+      saleInvoiceNumber: invoiceNumber,
+      formaPago: paymentMethod === 'transferencia' ? '20' : '01',
+      cliente: {
+        identificacion: (f.clientDocument || '').trim(),
+        razonSocial: (f.clientName || '').trim(),
+        direccion: (f.clientAddress || '').trim() || null,
+        email: (f.clientEmail || '').trim() || null,
+        telefono: (f.clientPhone || '').trim() || null
+      },
+      items: this.cartItems.map(item => {
+        const product = this.allProducts.find(p => p.id === item.id);
+        return {
+          productId: isGuid(item.id) ? item.id : null,
+          codigo: product?.codigo || null,
+          descripcion: item.descripcion,
+          cantidad: item.cantidad,
+          precioUnitario: item.pvp,
+          descuento: 0
+        };
+      }),
+      createdBy: null
+    };
+  }
+
+  private emitirFactura(request: CreateElectronicInvoiceRequest): void {
+    this.facturaRequest = request;
+    this.facturaResultado = null;
+    this.facturaError = '';
+    this.facturaEmailReenvio = request.cliente.email || '';
+    this.showFacturaModal = true;
+    this.facturaProcesando = true;
+
+    this.invoiceService.emitir(request).subscribe({
+      next: (res) => this.onFacturaResultado(res),
+      error: (err) => {
+        this.facturaProcesando = false;
+        this.facturaError = err?.error?.error || 'No se pudo emitir la factura. La venta quedó guardada; puedes reintentar.';
+      }
+    });
+  }
+
+  private onFacturaResultado(res: ElectronicInvoiceResult): void {
+    this.facturaProcesando = false;
+    this.facturaResultado = res;
+    this.facturaError = '';
+    if (res.autorizada) {
+      this.facturaRequest = null;
+      Notiflix.Notify.success(`Factura ${res.numeroFactura} autorizada por el SRI`);
+      if (this.imprimirTicketAuto) this.imprimirTicketFactura();
+    }
+  }
+
+  /** Reintenta: si la factura ya existe consulta/envía de nuevo al SRI; si no se llegó a crear, la emite otra vez. */
+  reintentarFactura(): void {
+    if (this.facturaResultado) {
+      this.facturaProcesando = true;
+      this.facturaError = '';
+      this.invoiceService.reintentar(this.facturaResultado.id).subscribe({
+        next: (res) => this.onFacturaResultado(res),
+        error: (err) => {
+          this.facturaProcesando = false;
+          this.facturaError = err?.error?.error || 'No se pudo contactar al SRI. Intenta de nuevo en unos minutos.';
+        }
+      });
+    } else if (this.facturaRequest) {
+      this.emitirFactura(this.facturaRequest);
+    }
+  }
+
+  descargarFacturaPdf(): void {
+    const res = this.facturaResultado;
+    if (!res) return;
+    this.invoiceService.descargarPdf(res.id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Factura-${res.numeroFactura}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => Notiflix.Notify.failure('No se pudo descargar el PDF de la factura.')
+    });
+  }
+
+  reenviarFacturaEmail(): void {
+    const res = this.facturaResultado;
+    if (!res) return;
+    Notiflix.Loading.standard('Enviando correo...');
+    this.invoiceService.enviarEmail(res.id, this.facturaEmailReenvio.trim() || undefined).subscribe({
+      next: (r) => {
+        Notiflix.Loading.remove();
+        this.facturaResultado = r;
+        Notiflix.Notify.success('Factura enviada por correo');
+      },
+      error: (err) => {
+        Notiflix.Loading.remove();
+        Notiflix.Notify.failure(err?.error?.error || 'No se pudo enviar el correo.');
+      }
+    });
+  }
+
+  cerrarFacturaModal(): void {
+    if (this.facturaProcesando) return;
+    this.showFacturaModal = false;
+  }
+
+  /* =========================
+     🖨️ TICKET TÉRMICO (RECIBO / FACTURA)
+     ========================= */
+
+  private readPrintPref(): boolean {
+    try {
+      return localStorage.getItem(this.PRINT_PREF_KEY) !== 'no';
+    } catch {
+      return true;
+    }
+  }
+
+  onImprimirTicketAutoChange(): void {
+    try {
+      localStorage.setItem(this.PRINT_PREF_KEY, this.imprimirTicketAuto ? 'si' : 'no');
+    } catch { /* sin almacenamiento: solo dura esta sesión */ }
+  }
+
+  private async imprimirRecibo(r: ReceiptSnapshot): Promise<void> {
+    try {
+      const html = await this.ticket.buildDocument('Recibo ALTEC', this.buildReciboBody(r));
+      await this.ticket.print(html);
+    } catch (error) {
+      console.error('Error al imprimir el recibo:', error);
+      Notiflix.Notify.failure('No se pudo imprimir el recibo');
+    }
+  }
+
+  private buildReciboBody(r: ReceiptSnapshot): string {
+    const money = (v: number) => this.ticket.money(v);
+    const esc = (t: any) => this.ticket.esc(t);
+    const { fecha, hora } = this.ticket.fechaHora(r.fecha);
+    const unidades = r.items.reduce((sum, i) => sum + i.cantidad, 0);
+
+    const items = r.items.map(i => `
+      <div class="item">
+        <div class="desc">${esc(i.descripcion)}</div>
+        <div class="row">
+          <span>${i.cantidad} x ${money(i.precio)}</span>
+          <span class="bold">${money(i.total)}</span>
+        </div>
+      </div>`).join('');
+
+    const pago = r.paymentMethod === 'transferencia'
+      ? `<div class="row"><span>Forma de pago</span><span class="bold">Transferencia</span></div>`
+      : `<div class="row"><span>Forma de pago</span><span class="bold">Efectivo</span></div>
+         ${r.recibido > 0 ? `<div class="row"><span>Recibido</span><span>${money(r.recibido)}</span></div>
+         <div class="row"><span>Cambio</span><span>${money(r.cambio)}</span></div>` : ''}`;
+
+    return `
+  <div class="center brand">ALTEC MECATRÓNICA</div>
+  <div class="center small">Quito, Villaflora, Rodrigo de Chávez</div>
+  <div class="center small">WhatsApp: (099) 515-9078</div>
+  <div class="sep-strong"></div>
+  <div class="center title">RECIBO DE VENTA</div>
+  <div class="center small">N° ${esc(r.numero)}</div>
+  <div class="row small"><span>Fecha: ${fecha}</span><span>Hora: ${hora}</span></div>
+  <div class="sep"></div>
+  ${items}
+  <div class="sep"></div>
+  <div class="row small"><span>Productos: ${r.items.length}</span><span>Unidades: ${unidades}</span></div>
+  <div class="sep-strong"></div>
+  <div class="row total"><span>TOTAL</span><span>${money(r.total)}</span></div>
+  <div class="sep-strong"></div>
+  <div class="small">${pago}</div>
+  <div class="sep"></div>
+  <div class="center small">Precios en dólares (USD).</div>
+  <div class="center small">Este documento no es una factura.</div>
+  <div class="center bold" style="margin-top:2mm">¡Gracias por su compra!</div>
+  <div class="center small">altecmec.com</div>`;
+  }
+
+  /** Imprime la copia física de la factura (RIDE en 80 mm). */
+  imprimirTicketFactura(): void {
+    const res = this.facturaResultado;
+    if (!res) return;
+
+    this.invoiceService.getTicket(res.id).subscribe({
+      next: async (data) => {
+        try {
+          const html = await this.ticket.buildDocument(`Factura ${data.numeroFactura}`, this.buildFacturaTicketBody(data));
+          await this.ticket.print(html);
+        } catch (error) {
+          console.error('Error al imprimir la factura:', error);
+          Notiflix.Notify.failure('No se pudo imprimir el ticket de la factura');
+        }
+      },
+      error: () => Notiflix.Notify.failure('No se pudieron obtener los datos de la factura para imprimir')
+    });
+  }
+
+  private buildFacturaTicketBody(d: InvoiceTicketData): string {
+    const money = (v: number) => this.ticket.money(v);
+    const esc = (t: any) => this.ticket.esc(t);
+    // FechaEmision es una fecha local de Ecuador sin zona: se toma tal cual (aaaa-mm-dd)
+    const [y, m, dd] = (d.fechaEmision || '').substring(0, 10).split('-');
+    const emision = y ? `${dd}/${m}/${y}` : '';
+    const autorizacion = d.fechaAutorizacion ? this.ticket.fechaHora(new Date(d.fechaAutorizacion)) : null;
+    const formasPago: Record<string, string> = {
+      '01': 'SIN UTILIZACION DEL SISTEMA FINANCIERO',
+      '20': 'OTROS CON UTILIZACION DEL SISTEMA FINANCIERO'
+    };
+    const e = d.emisor;
+
+    const items = d.items.map(i => `
+      <div class="item">
+        <div class="desc">${esc(i.descripcion)}</div>
+        <div class="row">
+          <span>${i.cantidad} x ${money(i.precioUnitario)}${i.descuento > 0 ? ` - desc. ${money(i.descuento)}` : ''}</span>
+          <span class="bold">${money(i.total)}</span>
+        </div>
+      </div>`).join('');
+
+    const pagos = d.pagos.map(p => `
+      <div class="row tiny"><span>${p.formaPago} - ${esc(formasPago[p.formaPago] || '')}</span><span>${money(p.total)}</span></div>`).join('');
+
+    const comprador = d.comprador;
+    return `
+  <div class="center brand">${esc(e.nombreComercial || e.razonSocial)}</div>
+  <div class="center small bold">${esc(e.razonSocial)}</div>
+  <div class="center small">RUC: ${esc(e.ruc)}</div>
+  <div class="center tiny">Matriz: ${esc(e.dirMatriz)}</div>
+  ${e.dirEstablecimiento && e.dirEstablecimiento !== e.dirMatriz ? `<div class="center tiny">Sucursal: ${esc(e.dirEstablecimiento)}</div>` : ''}
+  <div class="center tiny">Obligado a llevar contabilidad: ${esc(e.obligadoContabilidad)}</div>
+  ${e.contribuyenteRimpe ? `<div class="center tiny bold">${esc(e.contribuyenteRimpe)}</div>` : ''}
+  <div class="sep-strong"></div>
+  <div class="center title">FACTURA</div>
+  <div class="center bold">No. ${esc(d.numeroFactura)}</div>
+  <div class="row small"><span>Ambiente:</span><span>${d.ambiente === 2 ? 'PRODUCCIÓN' : 'PRUEBAS'}</span></div>
+  <div class="row small"><span>Emisión:</span><span>NORMAL</span></div>
+  <div class="row small"><span>Fecha emisión:</span><span>${emision}</span></div>
+  ${autorizacion ? `<div class="row small"><span>Autorización:</span><span>${autorizacion.fecha} ${autorizacion.hora}</span></div>` : ''}
+  <div class="small" style="margin-top:1mm">${d.numeroAutorizacion ? 'N° autorización / clave de acceso:' : 'Clave de acceso:'}</div>
+  <div class="mono tiny">${esc(d.numeroAutorizacion || d.claveAcceso)}</div>
+  <div class="sep"></div>
+  <div class="small"><span class="bold">Cliente:</span> ${esc(comprador.razonSocial)}</div>
+  <div class="small"><span class="bold">CI/RUC:</span> ${esc(comprador.identificacion)}</div>
+  ${comprador.direccion ? `<div class="small"><span class="bold">Dirección:</span> ${esc(comprador.direccion)}</div>` : ''}
+  ${comprador.telefono ? `<div class="small"><span class="bold">Teléfono:</span> ${esc(comprador.telefono)}</div>` : ''}
+  ${comprador.email ? `<div class="small"><span class="bold">Email:</span> ${esc(comprador.email)}</div>` : ''}
+  <div class="sep"></div>
+  ${items}
+  <div class="sep"></div>
+  <div class="row small"><span>SUBTOTAL 0%</span><span>${money(d.totalSinImpuestos)}</span></div>
+  ${d.totalDescuento > 0 ? `<div class="row small"><span>DESCUENTO</span><span>${money(d.totalDescuento)}</span></div>` : ''}
+  <div class="row small"><span>IVA</span><span>${money(d.totalIva)}</span></div>
+  <div class="sep-strong"></div>
+  <div class="row total"><span>TOTAL</span><span>${money(d.importeTotal)}</span></div>
+  <div class="sep-strong"></div>
+  <div class="small bold">Forma de pago</div>
+  ${pagos}
+  <div class="sep"></div>
+  <div class="center tiny">Copia impresa de la factura electrónica.</div>
+  <div class="center tiny">El comprobante válido es el XML autorizado por el SRI${comprador.email ? ', enviado a su correo' : ''}.</div>
+  <div class="center bold" style="margin-top:2mm">¡Gracias por su compra!</div>
+  <div class="center small">altecmec.com</div>`;
   }
 }

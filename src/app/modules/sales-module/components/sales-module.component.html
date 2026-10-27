@@ -58,6 +58,9 @@
                   <h5>
                     <i class="bi bi-person-circle"></i> Datos del Cliente
                   </h5>
+                  <span class="badge factura-badge" *ngIf="tipoComprobante === 'factura'">
+                    <i class="bi bi-receipt"></i> Factura
+                  </span>
                 </div>
 
                 <div [formGroup]="formGroup">
@@ -90,13 +93,42 @@
                   <div class="mb-0">
                     <label class="form-label small fw-600">
                       <i class="bi bi-credit-card"></i> Cédula / RUC
+                      <span class="required-mark" *ngIf="tipoComprobante === 'factura'">*</span>
                     </label>
                     <input
                       type="text"
                       class="form-control form-control-sm"
                       placeholder="Ej: 1234567890"
                       formControlName="clientDocument"
-                      maxlength="13" />
+                      maxlength="20" />
+                  </div>
+
+                  <!-- ROW 3: Dirección y Email (solo para factura) -->
+                  <div class="row g-2 mt-1" *ngIf="tipoComprobante === 'factura'">
+                    <div class="col-12">
+                      <label class="form-label small fw-600">
+                        <i class="bi bi-geo-alt"></i> Dirección <span class="required-mark">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        class="form-control form-control-sm"
+                        placeholder="Ej: Quito, Villaflora"
+                        formControlName="clientAddress"
+                        maxlength="300" />
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label small fw-600">
+                        <i class="bi bi-envelope"></i> Email <small class="text-muted">(para enviarle la factura)</small>
+                      </label>
+                      <input
+                        type="email"
+                        class="form-control form-control-sm"
+                        placeholder="Ej: cliente@gmail.com"
+                        formControlName="clientEmail" />
+                    </div>
+                    <small class="factura-hint">
+                      <i class="bi bi-info-circle"></i> Nombre = nombre o razón social que irá en la factura.
+                    </small>
                   </div>
                 </div>
               </div>
@@ -369,26 +401,43 @@
               </div>
             </div>
 
-            <!-- 🧾 CHECKBOX FACTURA -->
-            <div class="factura-toggle" *ngIf="cartItems.length > 0">
-              <label class="factura-label">
+            <!-- 🧾 TIPO DE COMPROBANTE: RECIBO / FACTURA -->
+            <div class="comprobante-toggle" *ngIf="cartItems.length > 0">
+              <label class="small fw-600 d-block mb-2">Comprobante</label>
+              <div class="comprobante-buttons">
+                <button
+                  type="button"
+                  class="comprobante-btn"
+                  [class.active]="tipoComprobante === 'recibo'"
+                  (click)="selectTipoComprobante('recibo')">
+                  <i class="bi bi-file-earmark-text"></i>
+                  <span>Recibo</span>
+                </button>
+                <button
+                  type="button"
+                  class="comprobante-btn factura"
+                  [class.active]="tipoComprobante === 'factura'"
+                  (click)="selectTipoComprobante('factura')">
+                  <i class="bi bi-receipt"></i>
+                  <span>Factura SRI</span>
+                </button>
+              </div>
+              <small class="comprobante-hint" *ngIf="tipoComprobante === 'factura'">
+                Completa los datos del cliente (cédula/RUC, nombre y dirección).
+              </small>
+              <label class="print-toggle">
                 <input type="checkbox" class="form-check-input"
-                  [(ngModel)]="conFactura" (change)="recalculate()">
-                <i class="bi bi-receipt"></i>
-                <span>Requiere Factura</span>
+                  [(ngModel)]="imprimirTicketAuto" (change)="onImprimirTicketAutoChange()">
+                <i class="bi bi-printer"></i>
+                <span>Imprimir ticket al finalizar</span>
               </label>
             </div>
 
             <!-- 💳 RESUMEN DE COMPRA -->
             <div class="cart-summary" *ngIf="cartItems.length > 0">
               <div class="summary-row">
-                <span class="summary-label">{{ conFactura ? 'Subtotal (sin IVA)' : 'Subtotal' }}</span>
+                <span class="summary-label">Subtotal</span>
                 <span class="summary-value">${{ subtotal | number: '1.2-2' }}</span>
-              </div>
-
-              <div class="summary-row tax-row" *ngIf="conFactura">
-                <span class="summary-label">IVA (15%)</span>
-                <span class="summary-value">${{ taxAmount | number: '1.2-2' }}</span>
               </div>
 
               <div class="summary-row total-row">
@@ -500,7 +549,8 @@
                 class="btn btn-success btn-lg w-100"
                 (click)="confirmVenta()"
                 [disabled]="cartItems.length === 0">
-                <i class="bi bi-check-circle"></i> Finalizar Venta
+                <i class="bi bi-check-circle"></i>
+                {{ tipoComprobante === 'factura' ? 'Finalizar y Facturar' : 'Finalizar Venta' }}
               </button>
             </div>
           </div>
@@ -508,6 +558,89 @@
       </div>
     </div>
   </main>
+
+  <!-- 🧾 MODAL RESULTADO FACTURA ELECTRÓNICA -->
+  <div class="resistor-overlay" *ngIf="showFacturaModal" (click)="cerrarFacturaModal()">
+    <div class="resistor-box factura-box" (click)="$event.stopPropagation()">
+      <div class="resistor-header">
+        <h5><i class="bi bi-receipt me-2"></i>Factura electrónica</h5>
+        <button class="resistor-close" (click)="cerrarFacturaModal()" [disabled]="facturaProcesando">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="resistor-body">
+        <!-- Procesando -->
+        <div class="factura-status procesando" *ngIf="facturaProcesando">
+          <span class="spinner-border spinner-border-sm"></span>
+          <span>Enviando al SRI y esperando la autorización...</span>
+        </div>
+
+        <!-- Error antes de crear la factura (validación o red) -->
+        <div class="factura-status error" *ngIf="!facturaProcesando && facturaError">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <span>{{ facturaError }}</span>
+        </div>
+
+        <ng-container *ngIf="facturaResultado as f">
+          <div class="factura-status"
+               [class.ok]="f.autorizada"
+               [class.pendiente]="!f.autorizada"
+               *ngIf="!facturaProcesando">
+            <i class="bi" [class.bi-check-circle-fill]="f.autorizada" [class.bi-hourglass-split]="!f.autorizada"></i>
+            <span>{{ f.autorizada ? 'AUTORIZADA por el SRI' : 'Estado: ' + f.estado }}</span>
+          </div>
+
+          <div class="factura-datos">
+            <div><span>N° Factura</span><strong>{{ f.numeroFactura }}</strong></div>
+            <div><span>Cliente</span><strong>{{ f.razonSocialComprador }}</strong></div>
+            <div><span>Total</span><strong>${{ f.importeTotal | number: '1.2-2' }}</strong></div>
+            <div *ngIf="f.ambiente !== 2"><span>Ambiente</span><strong class="text-warning">PRUEBAS</strong></div>
+            <div *ngIf="f.autorizada">
+              <span>Correo</span>
+              <strong>{{ f.emailEnviado ? 'Enviado' : 'No enviado' }}</strong>
+            </div>
+          </div>
+
+          <ul class="factura-mensajes" *ngIf="!f.autorizada && f.mensajes?.length">
+            <li *ngFor="let m of f.mensajes">
+              <strong *ngIf="m.identificador">[{{ m.identificador }}]</strong> {{ m.mensaje }}
+              <small *ngIf="m.informacionAdicional">— {{ m.informacionAdicional }}</small>
+            </li>
+          </ul>
+
+          <div class="factura-email" *ngIf="f.autorizada">
+            <label class="resistor-label">Enviar / reenviar por correo a:</label>
+            <div class="input-group input-group-sm">
+              <input type="email" class="form-control" placeholder="correo@cliente.com"
+                     [(ngModel)]="facturaEmailReenvio" />
+              <button class="btn btn-outline-light" type="button" (click)="reenviarFacturaEmail()">
+                <i class="bi bi-envelope"></i> Enviar
+              </button>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="resistor-footer">
+        <button class="btn-resistor-cancel" (click)="reintentarFactura()"
+                *ngIf="!facturaProcesando && (facturaError || (facturaResultado && !facturaResultado.autorizada))">
+          <i class="bi bi-arrow-repeat me-1"></i>Reintentar
+        </button>
+        <button class="btn-resistor-cancel" (click)="imprimirTicketFactura()"
+                *ngIf="!facturaProcesando && facturaResultado?.autorizada">
+          <i class="bi bi-printer me-1"></i>Imprimir ticket
+        </button>
+        <button class="btn-resistor-confirm" (click)="descargarFacturaPdf()"
+                *ngIf="!facturaProcesando && facturaResultado?.autorizada">
+          <i class="bi bi-file-earmark-pdf me-1"></i>Descargar PDF
+        </button>
+        <button class="btn-resistor-cancel" (click)="cerrarFacturaModal()" [disabled]="facturaProcesando">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ⚡ MODAL SELECCIÓN RESISTENCIAS (1/4W y 1/2W) -->
   <div class="resistor-overlay" *ngIf="showResistorModal" (click)="showResistorModal = false">
