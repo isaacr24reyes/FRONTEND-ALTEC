@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
@@ -54,7 +54,48 @@ export interface ElectronicInvoiceResult {
   importeTotal: number;
   emailComprador?: string;
   emailEnviado: boolean;
+  fechaAnulacion?: string;
+  motivoAnulacion?: string;
   mensajes: SriMessage[];
+}
+
+/** Fila del histórico de facturas. */
+export interface ElectronicInvoiceListItem {
+  id: string;
+  numeroFactura: string;
+  claveAcceso: string;
+  ambiente: number;
+  fechaEmision: string;
+  fechaAutorizacion?: string;
+  identificacionComprador: string;
+  razonSocialComprador: string;
+  emailComprador?: string;
+  importeTotal: number;
+  estado: string;
+  emailEnviado: boolean;
+  saleInvoiceNumber?: string;
+  fechaAnulacion?: string;
+  motivoAnulacion?: string;
+  createdAt: string;
+}
+
+export interface ElectronicInvoicePage {
+  items: ElectronicInvoiceListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  /** Facturas pendientes de autorizar (para el aviso de la pantalla). */
+  pendientes: number;
+}
+
+export interface ElectronicInvoiceFilter {
+  desde?: string;    // aaaa-mm-dd
+  hasta?: string;    // aaaa-mm-dd
+  /** AUTORIZADO, PENDIENTE, ANULADA, RECHAZADA o vacío (todas). */
+  estado?: string;
+  buscar?: string;
+  page: number;
+  pageSize: number;
 }
 
 /** Datos para imprimir la factura en la térmica de 80 mm. */
@@ -106,6 +147,24 @@ export class ElectronicInvoiceService {
 
   descargarPdf(id: string): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/facturas/${id}/pdf`, { responseType: 'blob' });
+  }
+
+  listar(filter: ElectronicInvoiceFilter): Observable<ElectronicInvoicePage> {
+    let params = new HttpParams().set('page', filter.page).set('pageSize', filter.pageSize);
+    if (filter.desde) params = params.set('desde', filter.desde);
+    if (filter.hasta) params = params.set('hasta', filter.hasta);
+    if (filter.estado) params = params.set('estado', filter.estado);
+    if (filter.buscar?.trim()) params = params.set('buscar', filter.buscar.trim());
+    return this.http.get<ElectronicInvoicePage>(`${this.apiUrl}/facturas`, { params });
+  }
+
+  /** Registra la anulación hecha en SRI en línea; cancelarVenta devuelve también el stock. */
+  anular(id: string, motivo: string, cancelarVenta: boolean): Observable<ElectronicInvoiceResult> {
+    return this.http.post<ElectronicInvoiceResult>(`${this.apiUrl}/facturas/${id}/anular`, { motivo, cancelarVenta });
+  }
+
+  descargarXml(id: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/facturas/${id}/xml`, { responseType: 'blob' });
   }
 
   getTicket(id: string): Observable<InvoiceTicketData> {

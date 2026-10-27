@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { InvoiceTicketData } from './electronic-invoice.service';
 
 /**
  * Tickets para la impresora térmica de 80 mm (área imprimible 72 mm).
@@ -59,6 +60,74 @@ export class ThermalTicketService {
   ${logo ? `<img class="logo" src="${logo}" alt="ALTEC">` : ''}
   ${body}
 </body></html>`;
+  }
+
+  /** Copia física de la factura electrónica (RIDE en 80 mm). */
+  buildInvoiceTicketBody(d: InvoiceTicketData): string {
+    const money = (v: number) => this.money(v);
+    const esc = (t: any) => this.esc(t);
+    // FechaEmision es una fecha local de Ecuador sin zona: se toma tal cual (aaaa-mm-dd)
+    const [y, m, dd] = (d.fechaEmision || '').substring(0, 10).split('-');
+    const emision = y ? `${dd}/${m}/${y}` : '';
+    const autorizacion = d.fechaAutorizacion ? this.fechaHora(new Date(d.fechaAutorizacion)) : null;
+    const formasPago: Record<string, string> = {
+      '01': 'SIN UTILIZACION DEL SISTEMA FINANCIERO',
+      '20': 'OTROS CON UTILIZACION DEL SISTEMA FINANCIERO'
+    };
+    const e = d.emisor;
+
+    const items = d.items.map(i => `
+      <div class="item">
+        <div class="desc">${esc(i.descripcion)}</div>
+        <div class="row">
+          <span>${i.cantidad} x ${money(i.precioUnitario)}${i.descuento > 0 ? ` - desc. ${money(i.descuento)}` : ''}</span>
+          <span class="bold">${money(i.total)}</span>
+        </div>
+      </div>`).join('');
+
+    const pagos = d.pagos.map(p => `
+      <div class="row tiny"><span>${p.formaPago} - ${esc(formasPago[p.formaPago] || '')}</span><span>${money(p.total)}</span></div>`).join('');
+
+    const comprador = d.comprador;
+    return `
+  <div class="center brand">${esc(e.nombreComercial || e.razonSocial)}</div>
+  <div class="center small bold">${esc(e.razonSocial)}</div>
+  <div class="center small">RUC: ${esc(e.ruc)}</div>
+  <div class="center tiny">Matriz: ${esc(e.dirMatriz)}</div>
+  ${e.dirEstablecimiento && e.dirEstablecimiento !== e.dirMatriz ? `<div class="center tiny">Sucursal: ${esc(e.dirEstablecimiento)}</div>` : ''}
+  <div class="center tiny">Obligado a llevar contabilidad: ${esc(e.obligadoContabilidad)}</div>
+  ${e.contribuyenteRimpe ? `<div class="center tiny bold">${esc(e.contribuyenteRimpe)}</div>` : ''}
+  <div class="sep-strong"></div>
+  <div class="center title">FACTURA</div>
+  <div class="center bold">No. ${esc(d.numeroFactura)}</div>
+  <div class="row small"><span>Ambiente:</span><span>${d.ambiente === 2 ? 'PRODUCCIÓN' : 'PRUEBAS'}</span></div>
+  <div class="row small"><span>Emisión:</span><span>NORMAL</span></div>
+  <div class="row small"><span>Fecha emisión:</span><span>${emision}</span></div>
+  ${autorizacion ? `<div class="row small"><span>Autorización:</span><span>${autorizacion.fecha} ${autorizacion.hora}</span></div>` : ''}
+  <div class="small" style="margin-top:1mm">${d.numeroAutorizacion ? 'N° autorización / clave de acceso:' : 'Clave de acceso:'}</div>
+  <div class="mono tiny">${esc(d.numeroAutorizacion || d.claveAcceso)}</div>
+  <div class="sep"></div>
+  <div class="small"><span class="bold">Cliente:</span> ${esc(comprador.razonSocial)}</div>
+  <div class="small"><span class="bold">CI/RUC:</span> ${esc(comprador.identificacion)}</div>
+  ${comprador.direccion ? `<div class="small"><span class="bold">Dirección:</span> ${esc(comprador.direccion)}</div>` : ''}
+  ${comprador.telefono ? `<div class="small"><span class="bold">Teléfono:</span> ${esc(comprador.telefono)}</div>` : ''}
+  ${comprador.email ? `<div class="small"><span class="bold">Email:</span> ${esc(comprador.email)}</div>` : ''}
+  <div class="sep"></div>
+  ${items}
+  <div class="sep"></div>
+  <div class="row small"><span>SUBTOTAL 0%</span><span>${money(d.totalSinImpuestos)}</span></div>
+  ${d.totalDescuento > 0 ? `<div class="row small"><span>DESCUENTO</span><span>${money(d.totalDescuento)}</span></div>` : ''}
+  <div class="row small"><span>IVA</span><span>${money(d.totalIva)}</span></div>
+  <div class="sep-strong"></div>
+  <div class="row total"><span>TOTAL</span><span>${money(d.importeTotal)}</span></div>
+  <div class="sep-strong"></div>
+  <div class="small bold">Forma de pago</div>
+  ${pagos}
+  <div class="sep"></div>
+  <div class="center tiny">Copia impresa de la factura electrónica.</div>
+  <div class="center tiny">El comprobante válido es el XML autorizado por el SRI${comprador.email ? ', enviado a su correo' : ''}.</div>
+  <div class="center bold" style="margin-top:2mm">¡Gracias por su compra!</div>
+  <div class="center small">altecmec.com</div>`;
   }
 
   /** Logo de la barra (letras blancas) convertido a negro y recortado, para papel térmico. */

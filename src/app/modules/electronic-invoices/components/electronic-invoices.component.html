@@ -1,0 +1,190 @@
+<div class="einv-container">
+  <header class="einv-header">
+    <div class="container-fluid">
+      <h1 class="einv-title"><i class="bi bi-file-earmark-check"></i> FACTURAS ELECTRÓNICAS</h1>
+      <p class="einv-subtitle">Histórico de facturas emitidas al SRI</p>
+    </div>
+  </header>
+
+  <main class="container-fluid">
+
+    <!-- ⏳ Aviso de pendientes -->
+    <div class="einv-alert" *ngIf="pendientes > 0">
+      <i class="bi bi-hourglass-split"></i>
+      <span>
+        <strong>{{ pendientes }}</strong> factura(s) pendiente(s) de autorización. El sistema las reintenta
+        automáticamente cada pocos minutos; también puedes reintentarlas a mano.
+      </span>
+      <button type="button" class="btn btn-sm btn-warning" (click)="verPendientes()">Ver pendientes</button>
+    </div>
+
+    <!-- 🔎 Filtros -->
+    <section class="einv-card einv-filters">
+      <div class="filter">
+        <label>Desde</label>
+        <input type="date" class="form-control form-control-sm" [(ngModel)]="desde" (change)="aplicarFiltros()">
+      </div>
+      <div class="filter">
+        <label>Hasta</label>
+        <input type="date" class="form-control form-control-sm" [(ngModel)]="hasta" (change)="aplicarFiltros()">
+      </div>
+      <div class="filter">
+        <label>Estado</label>
+        <select class="form-select form-select-sm" [(ngModel)]="estado" (change)="aplicarFiltros()">
+          <option value="">Todas</option>
+          <option value="AUTORIZADO">Autorizadas</option>
+          <option value="PENDIENTE">Pendientes</option>
+          <option value="ANULADA">Anuladas</option>
+          <option value="RECHAZADA">Rechazadas</option>
+        </select>
+      </div>
+      <div class="filter grow">
+        <label>Buscar</label>
+        <input type="text" class="form-control form-control-sm" placeholder="Cliente, cédula/RUC o N° de factura"
+               [(ngModel)]="buscar" (ngModelChange)="onBuscarChange($event)">
+      </div>
+      <button type="button" class="btn btn-sm btn-outline-light" (click)="limpiarFiltros()">
+        <i class="bi bi-x-circle"></i> Limpiar
+      </button>
+    </section>
+
+    <!-- 📋 Tabla -->
+    <section class="einv-card">
+      <div class="einv-summary">
+        <span>{{ total }} factura(s)</span>
+        <span *ngIf="cargando" class="spinner-border spinner-border-sm"></span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="einv-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>N° Factura</th>
+              <th>Cliente</th>
+              <th class="num">Total</th>
+              <th>Estado</th>
+              <th>Correo</th>
+              <th class="actions-col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="!cargando && facturas.length === 0">
+              <td colspan="7" class="empty">No hay facturas con estos filtros.</td>
+            </tr>
+            <tr *ngFor="let f of facturas" [class.row-anulada]="f.estado === 'ANULADA'">
+              <td>{{ fecha(f.fechaEmision) }}</td>
+              <td>
+                <div class="bold">{{ f.numeroFactura }}</div>
+                <small class="muted" *ngIf="f.ambiente !== 2">PRUEBAS</small>
+                <small class="muted" *ngIf="f.saleInvoiceNumber">Venta {{ f.saleInvoiceNumber }}</small>
+              </td>
+              <td>
+                <div>{{ f.razonSocialComprador }}</div>
+                <small class="muted">{{ f.identificacionComprador }}</small>
+              </td>
+              <td class="num bold">${{ f.importeTotal | number: '1.2-2' }}</td>
+              <td>
+                <span class="estado" [ngClass]="estadoInfo(f.estado).css">
+                  <i class="bi" [ngClass]="estadoInfo(f.estado).icon"></i> {{ estadoInfo(f.estado).label }}
+                </span>
+                <small class="muted d-block" *ngIf="f.estado === 'ANULADA' && f.motivoAnulacion">{{ f.motivoAnulacion }}</small>
+              </td>
+              <td>
+                <span *ngIf="f.emailEnviado" class="mail ok" [title]="f.emailComprador || ''"><i class="bi bi-envelope-check"></i> Enviado</span>
+                <span *ngIf="!f.emailEnviado" class="mail"><i class="bi bi-envelope"></i> No</span>
+              </td>
+              <td class="actions">
+                <button type="button" class="act" title="Descargar PDF" (click)="descargarPdf(f)"><i class="bi bi-file-earmark-pdf"></i></button>
+                <button type="button" class="act" title="Descargar XML" (click)="descargarXml(f)"><i class="bi bi-filetype-xml"></i></button>
+                <button type="button" class="act" title="Imprimir ticket" (click)="imprimirTicket(f)"><i class="bi bi-printer"></i></button>
+                <button type="button" class="act" title="Enviar por correo" *ngIf="f.estado === 'AUTORIZADO'" (click)="abrirEmail(f)"><i class="bi bi-envelope-arrow-up"></i></button>
+                <button type="button" class="act warn" title="Reintentar con el SRI" *ngIf="esPendiente(f)"
+                        [disabled]="procesandoId === f.id" (click)="reintentar(f)">
+                  <span *ngIf="procesandoId === f.id" class="spinner-border spinner-border-sm"></span>
+                  <i *ngIf="procesandoId !== f.id" class="bi bi-arrow-repeat"></i>
+                </button>
+                <button type="button" class="act danger" title="Anular" *ngIf="f.estado === 'AUTORIZADO'" (click)="abrirAnular(f)"><i class="bi bi-x-octagon"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="einv-pager" *ngIf="totalPaginas > 1">
+        <button type="button" class="btn btn-sm btn-outline-light" [disabled]="page === 1" (click)="irAPagina(page - 1)">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <span>Página {{ page }} de {{ totalPaginas }}</span>
+        <button type="button" class="btn btn-sm btn-outline-light" [disabled]="page === totalPaginas" (click)="irAPagina(page + 1)">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ✉️ MODAL REENVIAR CORREO -->
+  <div class="einv-overlay" *ngIf="emailFactura" (click)="emailFactura = null">
+    <div class="einv-modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h5><i class="bi bi-envelope me-2"></i>Enviar factura {{ emailFactura.numeroFactura }}</h5>
+        <button class="close" (click)="emailFactura = null"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="modal-body-einv">
+        <label>Correo del destinatario</label>
+        <input type="email" class="form-control" placeholder="correo@cliente.com" [(ngModel)]="emailDestino">
+        <small class="muted">Se envía el PDF y el XML, con copia al correo del negocio.</small>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-ghost" (click)="emailFactura = null">Cancelar</button>
+        <button class="btn-main" (click)="enviarEmail()"><i class="bi bi-send me-1"></i>Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🚫 MODAL ANULACIÓN ASISTIDA -->
+  <div class="einv-overlay" *ngIf="anularFactura" (click)="anularFactura = null">
+    <div class="einv-modal wide" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h5><i class="bi bi-x-octagon me-2"></i>Anular factura {{ anularFactura.numeroFactura }}</h5>
+        <button class="close" (click)="anularFactura = null"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="modal-body-einv">
+        <p class="note">
+          La anulación se pide en el portal del SRI (no se puede hacer desde un sistema propio).
+          Después regístrala aquí para que la factura quede como <strong>ANULADA</strong>.
+        </p>
+        <ol class="steps">
+          <li>Entra a <a [href]="SRI_EN_LINEA_URL" target="_blank" rel="noopener">SRI en línea</a> →
+            <strong>Facturación Electrónica</strong> → <strong>Anulación de comprobantes electrónicos</strong>.</li>
+          <li>Ingresa la clave de acceso:
+            <div class="clave">
+              <code>{{ anularFactura.claveAcceso }}</code>
+              <button type="button" class="act" title="Copiar" (click)="copiarClave()"><i class="bi bi-clipboard"></i></button>
+            </div>
+          </li>
+          <li>El comprador (<strong>{{ anularFactura.razonSocialComprador }}</strong>) debe aceptar la anulación en su SRI en línea.</li>
+        </ol>
+
+        <label>Motivo (opcional)</label>
+        <input type="text" class="form-control" maxlength="300" placeholder="Ej: error en los datos del cliente" [(ngModel)]="anularMotivo">
+
+        <label class="check" *ngIf="anularFactura.saleInvoiceNumber">
+          <input type="checkbox" class="form-check-input" [(ngModel)]="anularCancelarVenta">
+          <span>Cancelar también la venta <strong>{{ anularFactura.saleInvoiceNumber }}</strong> y devolver el stock</span>
+        </label>
+
+        <label class="check confirm">
+          <input type="checkbox" class="form-check-input" [(ngModel)]="anularConfirmado">
+          <span>Ya solicité la anulación en SRI en línea</span>
+        </label>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-ghost" (click)="anularFactura = null">Cancelar</button>
+        <button class="btn-danger-einv" [disabled]="!anularConfirmado" (click)="confirmarAnulacion()">
+          <i class="bi bi-x-octagon me-1"></i>Registrar anulación
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

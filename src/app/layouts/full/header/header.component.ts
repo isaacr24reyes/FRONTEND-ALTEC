@@ -7,7 +7,8 @@ import {
   R_WAREHOUSE,
   R_SALES_MODULE,
   R_HISTORIC_SALES,
-  R_QUOTATION_HISTORY
+  R_QUOTATION_HISTORY,
+  R_ELECTRONIC_INVOICES
 } from "../../../constants/route.constants";
 import {Router} from "@angular/router";
 import {UserSessionService} from "../../../modules/authentication/services/user-session.service";
@@ -87,6 +88,9 @@ export class HeaderComponent implements OnInit {
 
   navigateToHistoricSales(): void {
     this._router.navigate([`/${R_HISTORIC_SALES}`]);
+  }
+  navigateToElectronicInvoices(): void {
+    this._router.navigate([`/${R_ELECTRONIC_INVOICES}`]);
   }
   navigateToCart(): void {
     const cart = this.cartService.getCart();
