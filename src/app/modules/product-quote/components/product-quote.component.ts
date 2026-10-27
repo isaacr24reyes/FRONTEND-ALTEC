@@ -9,6 +9,7 @@ import ExcelJS from 'exceljs/dist/exceljs.min.js';
 import { saveAs } from 'file-saver';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+import { ThermalTicketService } from 'src/app/services/thermal-ticket.service';
 
 
 
@@ -105,7 +106,8 @@ export class ProductQuoteComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private fb: UntypedFormBuilder,
-    private http: HttpClient
+    private http: HttpClient,
+    private ticket: ThermalTicketService
   ) {
   }
 
@@ -647,6 +649,65 @@ export class ProductQuoteComponent implements OnInit {
       // Siempre cerrar el aviso "Generando PDF...", aunque falle la generación
       this.isDownloading = false;
     }
+  }
+
+  /** ---------- Ticket térmico 80 mm ---------- */
+
+  /** Imprime la cotización como ticket de 80 mm (impresora térmica). No guarda nada en la BD. */
+  async imprimirTicket(): Promise<void> {
+    if (!this.cotizacion.length) {
+      Notiflix.Notify.warning('Agrega productos a la cotización antes de imprimir');
+      return;
+    }
+
+    Notiflix.Loading.standard('Preparando ticket...');
+    try {
+      const html = await this.ticket.buildDocument('Cotizacion ALTEC', this.buildTicketBody());
+      Notiflix.Loading.remove();
+      await this.ticket.print(html);
+    } catch (error) {
+      Notiflix.Loading.remove();
+      console.error('Error al imprimir el ticket:', error);
+      Notiflix.Notify.failure('No se pudo preparar el ticket para imprimir');
+    }
+  }
+
+  private buildTicketBody(): string {
+    const money = (v: number) => this.ticket.money(v);
+    const esc = (t: any) => this.ticket.esc(t);
+    const { fecha, hora } = this.ticket.fechaHora();
+
+    const items = this.cotizacion.map(item => `
+      <div class="item">
+        <div class="desc">${esc(item.descripcion)}</div>
+        <div class="row">
+          <span>${item.cantidad} x ${money(item.precio)}</span>
+          <span class="bold">${money(item.total)}</span>
+        </div>
+      </div>`).join('');
+
+    const unidades = this.cotizacion.reduce((sum, i) => sum + (Number(i.cantidad) || 0), 0);
+    const numero = this.cotizacionCargadaNumero ? ` N° ${esc(this.cotizacionCargadaNumero)}` : '';
+
+    return `
+  <div class="center brand">ALTEC MECATRÓNICA</div>
+  <div class="center small">Quito, Villaflora, Rodrigo de Chávez</div>
+  <div class="center small">WhatsApp: (099) 515-9078</div>
+  <div class="sep-strong"></div>
+  <div class="center title">COTIZACIÓN${numero}</div>
+  <div class="row small"><span>Fecha: ${fecha}</span><span>Hora: ${hora}</span></div>
+  <div class="sep"></div>
+  ${items}
+  <div class="sep"></div>
+  <div class="row small"><span>Productos: ${this.cotizacion.length}</span><span>Unidades: ${unidades}</span></div>
+  <div class="sep-strong"></div>
+  <div class="row total"><span>TOTAL</span><span>${money(this.totalCotizacion)}</span></div>
+  <div class="sep-strong"></div>
+  <div class="center small">Precios en dólares (USD).</div>
+  <div class="center small">Cotización referencial, sujeta a disponibilidad de stock.</div>
+  <div class="center bold" style="margin-top:1mm">Vigencia de esta proforma: 72 horas.</div>
+  <div class="center bold" style="margin-top:2mm">¡Gracias por su preferencia!</div>
+  <div class="center small">altecmec.com</div>`;
   }
 
   incluirExtra() {
