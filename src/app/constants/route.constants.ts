@@ -11,3 +11,4 @@ export const R_USER_ADMIN: string = 'user-admin'
 export const R_SALES_MODULE: string = 'sales-module';
 export const R_HISTORIC_SALES: string = 'historic-sales';
 export const R_QUOTATION_HISTORY: string = 'import-history';
+export const R_ELECTRONIC_INVOICES: string = 'facturas';
