@@ -49,9 +49,10 @@ export class HistoricSalesModuleComponent implements OnInit {
     tipoFiltro: '' | 'factura' | 'recibo' = '';
     margen: number = 0;
 
-    // Pagination
+    // Se cargan TODAS las ventas: filtros, búsqueda, KPIs y gráfica se calculan en el navegador.
+    // (Con 100 se quedaban fuera las ventas más recientes al pasar de 100 ventas.)
     currentPage: number = 1;
-    pageSize: number = 100;
+    pageSize: number = 100000;
 
     // Search
     startDate: string = '';
